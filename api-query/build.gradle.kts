@@ -5,7 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "private.hc"
+group = "internal.hc"
 version = "0.0.1-SNAPSHOT"
 description = "SpringWebFlux QuerySideServer"
 
