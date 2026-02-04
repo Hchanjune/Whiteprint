@@ -1,3 +1,9 @@
 spring:
   application:
     name: api-command
+
+  kafka:
+    bootstrap-servers:
+
+  datasource:
+    driver-class-name :
