@@ -23,13 +23,13 @@ repositories {
 
 dependencies {
 
-	implementation("com.github.Hchanjune.operation-manager-kit:core:0.1.4")
-	implementation("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.1.4")
+	implementation("com.github.Hchanjune.operation-manager-kit:core:0.2.5")
+	implementation("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.2.5")
 
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-data-redis")
-	implementation("org.springframework.boot:spring-boot-starter-kafka")
+	//implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	//implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	//implementation("org.springframework.boot:spring-boot-starter-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 

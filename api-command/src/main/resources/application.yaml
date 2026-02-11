@@ -2,13 +2,25 @@ spring:
   application:
     name: api-command
 
-  kafka:
-    bootstrap-servers:
+  docker:
+    compose:
+      enabled: false
 
-  datasource:
-    driver-class-name :
+#  kafka:
+#    bootstrap-servers: ""
+#
+#  datasource:
+#    driver-class-name :
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
 
 operation-manager:
   webmvc:
     mdc-service-aspect:
+      enabled: true
+    micrometer:
       enabled: true

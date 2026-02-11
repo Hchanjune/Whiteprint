@@ -1,6 +1,9 @@
 package internal.hc.apicommand
 
+import io.github.hchanjune.operationresult.core.providers.MetricsEnricher
+import io.github.hchanjune.operationresult.core.providers.MetricsRecorder
 import io.github.hchanjune.operationresult.webmvc.aop.OperationServiceAspect
+import io.micrometer.core.instrument.MeterRegistry
 import org.junit.jupiter.api.Test
 import org.springframework.aop.support.AopUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,7 +11,9 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.ApplicationContext
+import kotlin.jvm.java
 
 @SpringBootTest
 @ImportAutoConfiguration(
@@ -33,6 +38,7 @@ class Test {
     fun test() {
         val result = testService.test()
         result.context.issuer
+        println(result.metrics.toString())
         println(result)
     }
 
@@ -40,7 +46,10 @@ class Test {
 
     @Test
     fun aspectBeanPresence() {
-        println("OperationServiceAspect beans = " + ctx.getBeanNamesForType(OperationServiceAspect::class.java).toList())
+//        println(ctx.getBeansOfType(MetricsRecorder::class.java).keys)
+//        println(ctx.getBeansOfType(MeterRegistry::class.java).keys)
+//        println(ctx.getBeansOfType(MetricsEnricher::class.java).keys)
+        println(ctx.getBeansOfType(FilterRegistrationBean::class.java).keys)
     }
 
 
