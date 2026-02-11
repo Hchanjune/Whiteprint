@@ -27,6 +27,7 @@ dependencies {
 	implementation("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.2.5")
 
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("io.micrometer:micrometer-registry-prometheus")
 	//implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	//implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	//implementation("org.springframework.boot:spring-boot-starter-kafka")

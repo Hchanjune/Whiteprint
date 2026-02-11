@@ -17,6 +17,9 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus
+    endpoint:
+      prometheus:
+        enabled: true
 
 operation-manager:
   webmvc:
