@@ -27,3 +27,9 @@ operation-manager:
       enabled: true
     micrometer:
       enabled: true
+    logging:
+      enabled: true
+      pretty: false
+      json: true
+      success-level: INFO
+      failure-level: ERROR

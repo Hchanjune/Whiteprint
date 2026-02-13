@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.ThreadLocalRandom
 
 @Service
-@OperationManaged
+@OperationManaged(
+    operation = "TestService",
+)
 class TestService {
 
+    @OperationManaged(event = "TestEvent")
     fun test() = Operations {
         if (ThreadLocalRandom.current().nextInt(10) == 0) { // 10% 확률
             throw IllegalStateException("random failure")
@@ -16,6 +19,7 @@ class TestService {
         "OK"
     }
 
+    @OperationManaged(event = "TestEvent2")
     fun test2() = Operations {
         if (ThreadLocalRandom.current().nextInt(10) == 0) { // 10% 확률
             throw IllegalStateException("random failure")

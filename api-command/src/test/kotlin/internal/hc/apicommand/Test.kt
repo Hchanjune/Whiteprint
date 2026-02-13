@@ -2,7 +2,9 @@ package internal.hc.apicommand
 
 import io.github.hchanjune.operationresult.core.providers.MetricsEnricher
 import io.github.hchanjune.operationresult.core.providers.MetricsRecorder
+import io.github.hchanjune.operationresult.core.providers.OperationListener
 import io.github.hchanjune.operationresult.webmvc.aop.OperationServiceAspect
+import io.github.hchanjune.operationresult.webmvc.defaultListeners.OperationLoggingListener
 import io.micrometer.core.instrument.MeterRegistry
 import org.junit.jupiter.api.Test
 import org.springframework.aop.support.AopUtils
@@ -38,8 +40,6 @@ class Test {
     fun test() {
         val result = testService.test()
         result.context.issuer
-        println(result.metrics.toString())
-        println(result)
     }
 
     @Autowired lateinit var ctx: ApplicationContext
@@ -49,7 +49,7 @@ class Test {
 //        println(ctx.getBeansOfType(MetricsRecorder::class.java).keys)
 //        println(ctx.getBeansOfType(MeterRegistry::class.java).keys)
 //        println(ctx.getBeansOfType(MetricsEnricher::class.java).keys)
-        println(ctx.getBeansOfType(FilterRegistrationBean::class.java).keys)
+        println(ctx.getBeansOfType(OperationListener::class.java).keys)
     }
 
 
