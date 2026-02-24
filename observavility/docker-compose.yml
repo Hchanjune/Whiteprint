@@ -99,3 +99,20 @@ services:
 #      retries: 3
 #      start_period: 30s
     restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.9.1
+    container_name: tempo
+    command: -config.file=/etc/tempo/tempo-config-local.yaml
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./tempo/tempo-config-local.yaml:/etc/tempo/tempo-config-local.yaml:ro
+      - ./tempo/data:/var/tempo
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
