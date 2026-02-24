@@ -1,0 +1,101 @@
+services:
+
+  grafana:
+    image: grafana/grafana-oss:12.3.3-ubuntu
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - loki
+      - prometheus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.6.6
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config-local.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config-local.yaml:/etc/loki/loki-config-local.yaml:ro
+      - ./loki/data:/loki
+    healthcheck:
+      test: ["CMD", "loki", "-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.6.6
+    container_name: promtail
+    command: -config.file=/etc/promtail/promtail-config-local.yaml
+    volumes:
+      - ./promtail/promtail-config-local.yaml:/etc/promtail/promtail-config-local.yaml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+    healthcheck:
+      test: ["CMD", "pidof", "promtail"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus-config-local.yaml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./prometheus/prometheus-config-local.yaml:/etc/prometheus/prometheus-config-local.yaml:ro
+      - ./prometheus/data:/prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.146.1
+    container_name: otel-collector
+    command: --config=/etc/otel/otel-config-local.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8888:8888" # Collector Metrics (Prometheus scrape)
+    volumes:
+      - ./otel/otel-config-local.yaml:/etc/otel/otel-config-local.yaml:ro
+    depends_on:
+      - prometheus
+      - loki
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:13133"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 30s
+    restart: unless-stopped
