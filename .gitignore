@@ -15,3 +15,13 @@ Thumbs.db
 
 ### Spring ###
 **/out/
+
+### infra - mongo ###
+./infra/mongo/config/
+./infra/mongo/data/
+
+### infra - postgres ###
+./infra/postgres/data/
+
+### infra - redis ###
+./infra/redis/data/
