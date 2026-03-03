@@ -1,1 +1,0 @@
-rootProject.name = "user-command-api"

@@ -1,12 +1,12 @@
 plugins {
-	kotlin("jvm") version "2.2.21"
+	kotlin("jvm")
 	kotlin("plugin.spring") version "2.2.21"
 	id("org.springframework.boot") version "4.0.2"
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "2.2.21"
 }
 
-group = "internal.hc"
+group = "com.hc.user.command"
 version = "0.0.1-SNAPSHOT"
 description = "SpringMVC CommandSideServer"
 
@@ -22,12 +22,14 @@ repositories {
 }
 
 dependencies {
+	implementation(project(":core"))
+	implementation(project(":core-jpa"))
 
 	implementation("com.github.Hchanjune.operation-manager-kit:core:0.3.6")
 	implementation("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.3.6")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("io.micrometer:micrometer-registry-prometheus")
-	//implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	//implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	//implementation("org.springframework.boot:spring-boot-starter-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
