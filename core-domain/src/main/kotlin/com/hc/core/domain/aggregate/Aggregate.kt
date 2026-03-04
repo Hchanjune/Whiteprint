@@ -1,23 +1,29 @@
 package com.hc.core.domain.aggregate
 
+import com.hc.core.domain.contract.Auditable
 import com.hc.core.event.DomainEvent
+import com.hc.core.event.EventHolder
 import java.io.Serializable
 
-abstract class Aggregate {
+abstract class Aggregate<ROOT: Any>:
+    Auditable,
+    EventHolder<DomainEvent> {
 
     abstract val id: Serializable
+    abstract val root: ROOT
+    val aggregateType: String = root::class.simpleName?: "UNKNOWN"
 
-    private val domainEvents: MutableList<DomainEvent> = mutableListOf()
+    private val events: MutableList<DomainEvent> = mutableListOf()
 
-    protected fun record(domainEvent: DomainEvent) {
-        domainEvents.add(domainEvent)
+    override fun record(event: DomainEvent) {
+        events.add(event)
     }
 
-    fun pullEvents(): List<DomainEvent> {
-        if (domainEvents.isEmpty()) return emptyList()
-        val events = domainEvents.toList()
-        domainEvents.clear()
-        return events
+    override fun pullEvents(): List<DomainEvent> {
+        if (events.isEmpty()) return emptyList()
+        val readOnly = events.toList()
+        events.clear()
+        return readOnly
     }
 
 }
