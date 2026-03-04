@@ -27,9 +27,6 @@ Thumbs.db
 ### Kotlin ###
 .kotlin
 
-### Spring ###
-**/out/
-
 ### infra - mongo ###
 ./infra/mongo/config/
 ./infra/mongo/data/
