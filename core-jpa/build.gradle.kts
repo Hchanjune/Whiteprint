@@ -1,12 +1,15 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.jpa") version "2.2.21"
+    kotlin("plugin.jpa")
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
     `maven-publish`
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    implementation(project(":core-domain"))
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation(kotlin("test"))
 }
 

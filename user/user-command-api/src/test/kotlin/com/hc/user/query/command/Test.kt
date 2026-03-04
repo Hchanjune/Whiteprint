@@ -1,6 +1,6 @@
 package com.hc.user.query.command
 
-import com.hc.user.command.TestService
+import com.hc.user.command.application.service.TestService
 import io.github.hchanjune.operationresult.core.providers.OperationListener
 import org.junit.jupiter.api.Test
 import org.springframework.aop.support.AopUtils

@@ -2,33 +2,15 @@ package com.hc.user.command.domain.aggregate
 
 import com.hc.user.command.domain.model.User
 import com.hc.user.command.domain.model.UserCredential
+import com.hc.user.command.domain.model.UserOauthIdentity
 import com.hc.user.command.domain.model.UserProfile
 
-class UserAggregate(
-    private val user: User,
-    private val credential: UserCredential,
-    private val profile: UserProfile,
+data class UserAggregate(
+    val user: User,
+    val credential: UserCredential,
+    val profile: UserProfile,
+    val oauthIdentities: List<UserOauthIdentity>
 ) {
-
-    val id get() = user.id.toString()
-    val idL get() = user.id
-    val email get() = user.email
-    val lastLogin get() = user.lastLogin
-    val isAccountLocked get() = user.isAccountLocked
-    val isAccountAvailable get() = user.isAccountAvailable
-
-    val credentialId get() = credential.id.toString()
-    val credentialIdL get() = credential.id
-    val passwordHash get() = credential.passwordHash
-
-    val profileId get() = profile.id.toString()
-    val profileIdL get() = profile.id
-    val username get() = profile.username
-    val locale get() = profile.locale
-    val timeZone get() = profile.timeZone
-    val gender get() = profile.gender
-    val phone get() = profile.phone
-    val birthDate get() = profile.birthDate
 
     val insertedAt get() = user.insertedAt
     val updatedAt get() = user.updatedAt
@@ -45,7 +27,8 @@ class UserAggregate(
         ) = UserAggregate(
             user = user,
             credential = credential,
-            profile = profile
+            profile = profile,
+            oauthIdentities = emptyList()
         )
     }
 

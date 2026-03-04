@@ -1,20 +1,16 @@
 package com.hc.core.jpa.entity
 
-import com.hc.core.domain.entity.Identifiable
-import com.hc.core.domain.identifier.TsidGenerator
+import com.hc.core.jpa.entity.contract.AuditableEntity
 import jakarta.persistence.Column
-import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Version
+import java.io.Serializable
 import java.time.Instant
 
 @MappedSuperclass
-abstract class RootEntity: Identifiable<Long>, AuditableEntity, VersionedEntity {
+abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity {
 
-    @Id
-    @Column(name = "id")
-    override val id: Long = TsidGenerator.generate()
     @Column(name = "inserted_at", nullable = false)
     override var insertedAt: Instant = Instant.now()
         protected set
