@@ -1,17 +1,41 @@
 package com.hc.user.command.domain.model.user
 
 import com.hc.core.domain.aggregate.Aggregate
+import com.hc.core.domain.identifier.TsidGenerator
 import java.io.Serializable
+import java.time.Instant
+import java.time.LocalDate
 
-data class UserAggregate(
-    val user: User,
-    val credential: UserCredential,
-    val profile: UserProfile,
-    val oauthIdentities: List<UserOauthIdentity>,
+class UserAggregate private constructor(
+    private val user: User,
+    private val credential: UserCredential,
+    private val profile: UserProfile,
+    private val _oauthIdentities: List<UserOauthIdentity>,
 ): Aggregate<User>() {
 
-    override val id: Serializable = user.id
+    override val id: Serializable = user.id.toString()
+    val idL get() = user.id
     override val root = user
+
+    val email get() = user.email
+    val lastLogin get() = user.lastLogin
+    val isAccountLocked get() = user.isAccountLocked
+    val isAccountAvailable get() = user.isAccountAvailable
+
+    val credentialId get() = credential.id.toString()
+    val credentialIdL get() = credential.id
+     val passwordHash get() = credential.passwordHash
+
+    val profileId get() = profile.id.toString()
+    val profileIdL get() = profile.id
+    val username get() = profile.username
+    val locale get() = profile.locale
+    val timeZone get() = profile.timeZone
+    val gender get() = profile.gender
+    val phone get() = profile.phone
+    val birthDate get() = profile.birthDate
+
+    val oauthIdentities get() = _oauthIdentities.toList()
 
     override val insertedAt get() = user.insertedAt
     override val updatedAt get() = user.updatedAt
@@ -20,15 +44,60 @@ data class UserAggregate(
     override val version get() = user.version
 
     companion object {
+
+        fun signup(
+            email: String,
+            password: String,
+            username: String,
+            locale: String?,
+            timeZone: String?,
+            gender: String?,
+            phone: String?,
+            birthDate: LocalDate?,
+        ): UserAggregate {
+            val user = User(
+                id = TsidGenerator.generate(),
+                email = email,
+                lastLogin = null,
+                isAccountLocked = true,
+                isAccountAvailable = false,
+                insertedAt = Instant.now(),
+                updatedAt = Instant.now(),
+                isDeleted = false,
+                deletedAt = null,
+                version = 0
+            )
+            val credential = UserCredential(
+                id = TsidGenerator.generate(),
+                passwordHash = password // Temporary Raw Password (Sample)
+            )
+            val profile = UserProfile(
+                id = TsidGenerator.generate(),
+                username = username,
+                locale = locale,
+                timeZone = timeZone,
+                gender = gender,
+                phone = phone,
+                birthDate = birthDate,
+            )
+            return UserAggregate(
+                user = user,
+                credential = credential,
+                profile = profile,
+                _oauthIdentities = emptyList()
+            )
+        }
+
         fun create(
             user: User,
             credential: UserCredential,
             profile: UserProfile,
+            oauthIdentities: List<UserOauthIdentity>,
         ) = UserAggregate(
             user = user,
             credential = credential,
             profile = profile,
-            oauthIdentities = emptyList()
+            _oauthIdentities = oauthIdentities
         )
     }
 

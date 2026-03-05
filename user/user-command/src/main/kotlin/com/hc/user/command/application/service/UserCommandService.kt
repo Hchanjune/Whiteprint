@@ -22,24 +22,9 @@ class UserCommandService(
     @OperationManaged(useCase = "Signup.General")
     @Transactional
     override fun handle(command: SignupCommand.General) = Operations {
-        val user = User(
-            id = TsidGenerator.generate(),
+        UserAggregate.signup(
             email = command.email,
-            lastLogin = null,
-            isAccountLocked = true,
-            isAccountAvailable = false,
-            insertedAt = Instant.now(),
-            updatedAt = Instant.now(),
-            isDeleted = false,
-            deletedAt = null,
-            version = 0
-        )
-        val credential = UserCredential(
-            id = TsidGenerator.generate(),
-            passwordHash = command.password // Temporary Raw Password (Sample)
-        )
-        val profile = UserProfile(
-            id = TsidGenerator.generate(),
+            password = command.password,
             username = command.username,
             locale = command.locale,
             timeZone = command.timeZone,
@@ -47,12 +32,6 @@ class UserCommandService(
             phone = command.phone,
             birthDate = command.birthDate,
         )
-        val aggregate = UserAggregate.create(
-            user = user,
-            credential = credential,
-            profile = profile
-        )
-        aggregate
     }
 
     @OperationManaged(useCase = "Signup.Oauth")

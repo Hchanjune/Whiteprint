@@ -14,25 +14,25 @@ import com.hc.user.command.domain.model.user.UserProfile
 
 fun UserAggregate.createEntity(): UserEntity {
     val userEntity = UserEntity(
-        email = this.user.email,
-        lastLogin = this.user.lastLogin,
-        isAccountLocked = this.user.isAccountLocked,
-        isAccountAvailable = this.user.isAccountAvailable,
-    ).withId(this.user.id)
+        email = this.email,
+        lastLogin = this.lastLogin,
+        isAccountLocked = this.isAccountLocked,
+        isAccountAvailable = this.isAccountAvailable,
+    ).withId(this.idL)
     userEntity.applyProfile(
         UserProfileEntity(
-            username = this.profile.username,
-            locale = this.profile.locale,
-            timeZone = this.profile.timeZone,
-            gender = this.profile.gender,
-            phone = this.profile.phone,
-            birthDate = this.profile.birthDate,
-        ).withId(this.profile.id)
+            username = this.username,
+            locale = this.locale,
+            timeZone = this.timeZone,
+            gender = this.gender,
+            phone = this.phone,
+            birthDate = this.birthDate,
+        ).withId(this.profileIdL)
     )
     userEntity.applyCredential(
         UserCredentialEntity(
-            passwordHash = this.credential.passwordHash,
-        ).withId(this.credential.id)
+            passwordHash = this.passwordHash,
+        ).withId(this.credentialIdL)
     )
     this.oauthIdentities.forEach { oauthIdentity ->
         val identityEntity = UserOauthIdentityEntity(
@@ -48,19 +48,19 @@ fun UserAggregate.createEntity(): UserEntity {
 }
 
 fun UserAggregate.updateEntity(userEntity: UserEntity) {
-    userEntity.email = this.user.email
-    userEntity.lastLogin = this.user.lastLogin
-    userEntity.isAccountLocked = this.user.isAccountLocked
-    userEntity.isAccountAvailable = this.user.isAccountAvailable
+    userEntity.email = this.email
+    userEntity.lastLogin = this.lastLogin
+    userEntity.isAccountLocked = this.isAccountLocked
+    userEntity.isAccountAvailable = this.isAccountAvailable
     val credentialEntity = userEntity.credential.ensureExists(userEntity.id)
-    credentialEntity.passwordHash = this.credential.passwordHash
+    credentialEntity.passwordHash = this.passwordHash
     val profileEntity = userEntity.profile.ensureExists(userEntity.id)
-    profileEntity.username = this.profile.username
-    profileEntity.locale = this.profile.locale
-    profileEntity.timeZone = this.profile.timeZone
-    profileEntity.gender = this.profile.gender
-    profileEntity.phone = this.profile.phone
-    profileEntity.birthDate = this.profile.birthDate
+    profileEntity.username = this.username
+    profileEntity.locale = this.locale
+    profileEntity.timeZone = this.timeZone
+    profileEntity.gender = this.gender
+    profileEntity.phone = this.phone
+    profileEntity.birthDate = this.birthDate
     val existingIdentities = userEntity.oauthIdentities
     val domainIdentities = this.oauthIdentities
     existingIdentities.removeIf { existingEntity ->
@@ -133,7 +133,7 @@ fun UserOauthIdentityEntity.toDomain(): UserOauthIdentity {
 }
 
 fun UserEntity.toAggregate(): UserAggregate {
-    return UserAggregate(
+    return UserAggregate.create(
         user = this.toDomain(),
         credential = this.credential.ensureExists(this.id).toDomain(),
         profile = this.profile.ensureExists(this.id).toDomain(),
