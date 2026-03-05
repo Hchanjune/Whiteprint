@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core-domain"))
+    implementation(project(":core-kernel"))
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation(kotlin("test"))
 }

@@ -1,8 +1,8 @@
 rootProject.name = "CQRS"
 
 include(
-    "core-domain",
+    "core-kernel",
     "core-jpa",
-    "user:user-command-api",
-    "user:user-query-api"
+    "user:user-command",
+    "user:user-query"
 )
