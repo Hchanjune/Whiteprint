@@ -24,7 +24,7 @@ class UserAggregate private constructor(
 
     val credentialId get() = credential.id.toString()
     val credentialIdL get() = credential.id
-     val passwordHash get() = credential.passwordHash
+    val passwordHash get() = credential.passwordHash
 
     val profileId get() = profile.id.toString()
     val profileIdL get() = profile.id
@@ -42,6 +42,7 @@ class UserAggregate private constructor(
     override val isDeleted get() = user.isDeleted
     override val deletedAt get() = user.deletedAt
     override val version get() = user.version
+
 
     companion object {
 
@@ -88,7 +89,65 @@ class UserAggregate private constructor(
             )
         }
 
-        fun create(
+        fun signupOauth(
+            email: String,
+            provider: String,
+            providerSubject: String,
+            isEmailVerified: Boolean,
+            username: String,
+            locale: String?,
+            timeZone: String?,
+            gender: String?,
+            phone: String?,
+            birthDate: LocalDate?,
+        ): UserAggregate {
+            val user = User(
+                id = TsidGenerator.generate(),
+                email = email,
+                lastLogin = null,
+                isAccountLocked = true,
+                isAccountAvailable = false,
+                insertedAt = Instant.now(),
+                updatedAt = Instant.now(),
+                isDeleted = false,
+                deletedAt = null,
+                version = 0
+            )
+            val credential = UserCredential(
+                id = TsidGenerator.generate(),
+                passwordHash = "OAUTH"
+            )
+            val profile = UserProfile(
+                id = TsidGenerator.generate(),
+                username = username,
+                locale = locale,
+                timeZone = timeZone,
+                gender = gender,
+                phone = phone,
+                birthDate = birthDate,
+            )
+            val oauthIdentity =  UserOauthIdentity (
+                id = TsidGenerator.generate(),
+                provider = provider,
+                providerSubject = providerSubject,
+                email = email,
+                isEmailVerified = isEmailVerified,
+                linkedAt = Instant.now(),
+                insertedAt = Instant.now(),
+                updatedAt = Instant.now(),
+                isDeleted = false,
+                deletedAt = null,
+                version = 0
+            )
+            return UserAggregate(
+                user = user,
+                credential = credential,
+                profile = profile,
+                _oauthIdentities = mutableListOf(oauthIdentity)
+            )
+        }
+
+        fun restore(
             user: User,
             credential: UserCredential,
             profile: UserProfile,
@@ -100,5 +159,10 @@ class UserAggregate private constructor(
             _oauthIdentities = oauthIdentities
         )
     }
+
+    override fun toString(): String {
+        return "UserAggregate(user=$user, profile=$profile, oauthIdentities=$_oauthIdentities)"
+    }
+
 
 }

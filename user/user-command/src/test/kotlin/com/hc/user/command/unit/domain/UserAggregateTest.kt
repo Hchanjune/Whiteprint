@@ -52,7 +52,7 @@ class UserAggregateTest {
             birthDate = LocalDate.parse(birthDate),
         )
         // Then
-        val aggregate = UserAggregate.create(
+        val aggregate = UserAggregate.restore(
             user = user,
             credential = credential,
             profile = profile

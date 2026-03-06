@@ -1,22 +1,18 @@
 package com.hc.user.command.application.service
 
-import com.hc.core.domain.identifier.TsidGenerator
 import com.hc.user.command.application.port.`in`.SignupCommand
 import com.hc.user.command.application.port.`in`.SignupUseCase
-import com.hc.user.command.domain.model.user.User
+import com.hc.user.command.application.port.out.UserRepository
 import com.hc.user.command.domain.model.user.UserAggregate
-import com.hc.user.command.domain.model.user.UserCredential
-import com.hc.user.command.domain.model.user.UserProfile
 import io.github.hchanjune.operationresult.core.Operations
 import io.github.hchanjune.operationresult.core.annotations.OperationManaged
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 @Service
 @OperationManaged(operation = "UserCommand")
 class UserCommandService(
-
+    private val userRepository: UserRepository,
 ): SignupUseCase {
 
     @OperationManaged(useCase = "Signup.General")
@@ -31,43 +27,28 @@ class UserCommandService(
             gender = command.gender,
             phone = command.phone,
             birthDate = command.birthDate,
-        )
+        ).also { aggregate ->
+            userRepository.create(aggregate)
+        }
     }
 
     @OperationManaged(useCase = "Signup.Oauth")
     @Transactional
     override fun handle(command: SignupCommand.Oauth) = Operations {
-        val user = User(
-            id = TsidGenerator.generate(),
+        UserAggregate.signupOauth(
             email = command.email,
-            lastLogin = null,
-            isAccountLocked = true,
-            isAccountAvailable = false,
-            insertedAt = Instant.now(),
-            updatedAt = Instant.now(),
-            isDeleted = false,
-            deletedAt = null,
-            version = 0
-        )
-        val credential = UserCredential(
-            id = TsidGenerator.generate(),
-            passwordHash = "OAUTH"
-        )
-        val profile = UserProfile(
-            id = TsidGenerator.generate(),
+            provider = command.provider,
+            providerSubject = command.providerSubject,
+            isEmailVerified = true,
             username = command.username,
             locale = command.locale,
             timeZone = command.timeZone,
             gender = command.gender,
             phone = command.phone,
             birthDate = command.birthDate,
-        )
-        val aggregate = UserAggregate.create(
-            user = user,
-            credential = credential,
-            profile = profile
-        )
-        aggregate
+        ).also { aggregate ->
+            userRepository.create(aggregate)
+        }
     }
 
 

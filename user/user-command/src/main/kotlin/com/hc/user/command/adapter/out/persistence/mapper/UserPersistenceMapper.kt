@@ -47,7 +47,7 @@ fun UserAggregate.createEntity(): UserEntity {
     return userEntity
 }
 
-fun UserAggregate.updateEntity(userEntity: UserEntity) {
+fun UserAggregate.updateEntity(userEntity: UserEntity): UserEntity {
     userEntity.email = this.email
     userEntity.lastLogin = this.lastLogin
     userEntity.isAccountLocked = this.isAccountLocked
@@ -86,6 +86,7 @@ fun UserAggregate.updateEntity(userEntity: UserEntity) {
             )
         }
     }
+    return userEntity
 }
 
 fun UserEntity.toDomain() = User(
@@ -116,8 +117,7 @@ fun UserProfileEntity.toDomain() = UserProfile(
     birthDate = this.birthDate
 )
 
-fun UserOauthIdentityEntity.toDomain(): UserOauthIdentity {
-    return UserOauthIdentity(
+fun UserOauthIdentityEntity.toDomain() = UserOauthIdentity(
         id = this.id,
         provider = this.provider,
         providerSubject = this.providerSubject,
@@ -129,11 +129,10 @@ fun UserOauthIdentityEntity.toDomain(): UserOauthIdentity {
         isDeleted = this.isDeleted,
         deletedAt = this.deletedAt,
         version = this.version
-        )
-}
+)
 
 fun UserEntity.toAggregate(): UserAggregate {
-    return UserAggregate.create(
+    return UserAggregate.restore(
         user = this.toDomain(),
         credential = this.credential.ensureExists(this.id).toDomain(),
         profile = this.profile.ensureExists(this.id).toDomain(),
