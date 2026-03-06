@@ -2,6 +2,7 @@ package com.hc.user.command.application.service
 
 import com.hc.user.command.application.port.`in`.SignupCommand
 import com.hc.user.command.application.port.`in`.SignupUseCase
+import com.hc.user.command.application.port.out.UserEventPublisher
 import com.hc.user.command.application.port.out.UserRepository
 import com.hc.user.command.domain.model.user.UserAggregate
 import io.github.hchanjune.operationresult.core.Operations
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @OperationManaged(operation = "UserCommand")
 class UserCommandService(
     private val userRepository: UserRepository,
+    private val userEventPublisher: UserEventPublisher
 ): SignupUseCase {
 
     @OperationManaged(useCase = "Signup.General")
@@ -29,6 +31,7 @@ class UserCommandService(
             birthDate = command.birthDate,
         ).also { aggregate ->
             userRepository.create(aggregate)
+            userEventPublisher.publish(aggregate)
         }
     }
 
@@ -48,6 +51,7 @@ class UserCommandService(
             birthDate = command.birthDate,
         ).also { aggregate ->
             userRepository.create(aggregate)
+            userEventPublisher.publish(aggregate)
         }
     }
 

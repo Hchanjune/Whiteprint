@@ -2,6 +2,10 @@ package com.hc.user.command.domain.model.user
 
 import com.hc.core.domain.aggregate.Aggregate
 import com.hc.core.domain.identifier.TsidGenerator
+import com.hc.user.command.domain.event.UserCreatedEvent
+import com.hc.user.command.domain.event.UserDeletedEvent
+import com.hc.user.command.domain.event.UserProjectionEvent
+import com.hc.user.command.domain.event.UserUpdatedEvent
 import java.io.Serializable
 import java.time.Instant
 import java.time.LocalDate
@@ -13,6 +17,7 @@ class UserAggregate private constructor(
     private val _oauthIdentities: List<UserOauthIdentity>,
 ): Aggregate<User>() {
 
+    override val schemaVersion = "ALPHA"
     override val id: Serializable = user.id.toString()
     val idL get() = user.id
     override val root = user
@@ -42,6 +47,21 @@ class UserAggregate private constructor(
     override val isDeleted get() = user.isDeleted
     override val deletedAt get() = user.deletedAt
     override val version get() = user.version
+
+    override fun onCreate() {
+        //record(UserCreatedEvent())
+        //record(UserProjectionEvent())
+    }
+
+    override fun onUpdate() {
+        //record(UserUpdatedEvent())
+        //record(UserProjectionEvent())
+    }
+
+    override fun onDelete() {
+        //record(UserDeletedEvent())
+        //record(UserProjectionEvent())
+    }
 
 
     companion object {

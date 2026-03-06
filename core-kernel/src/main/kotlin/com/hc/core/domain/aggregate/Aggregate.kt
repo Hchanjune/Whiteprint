@@ -5,28 +5,29 @@ import com.hc.core.domain.contract.Identifiable
 import com.hc.core.domain.contract.LifeCycle
 import com.hc.core.domain.contract.Recordable
 import com.hc.core.event.DomainEvent
+import com.hc.core.event.Event
 import com.hc.core.event.EventHolder
 import java.io.Serializable
 
 abstract class Aggregate<ROOT: Any>:
     Identifiable<Serializable>,
     Auditable,
-    EventHolder<DomainEvent>,
-    Recordable<DomainEvent>,
+    EventHolder<Event>,
+    Recordable<Event>,
     LifeCycle {
-
+    abstract val schemaVersion: String
     abstract override val id: Serializable
     abstract val root: ROOT
     val aggregateType: String by lazy { root::class.simpleName ?: "UNKNOWN" }
 
-    private val _events: MutableList<DomainEvent> = mutableListOf()
-    override val events: List<DomainEvent> get() = _events.toList()
+    private val _events: MutableList<Event> = mutableListOf()
+    override val events: List<Event> get() = _events.toList()
 
-    override fun record(event: DomainEvent) {
+    override fun record(event: Event) {
         _events.add(event)
     }
 
-    override fun pullEvents(): List<DomainEvent> {
+    override fun pullEvents(): List<Event> {
         return _events.toList().also { _events.clear() }
     }
 
