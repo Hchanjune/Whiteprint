@@ -6,3 +6,5 @@ include(
     "user:user-command",
     "user:user-query"
 )
+include("core-jwt")
+include("core-jwt")
