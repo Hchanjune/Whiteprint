@@ -20,6 +20,10 @@ management:
     endpoint:
       prometheus:
         enabled: true
+  observations:
+    key-values:
+      application: ${spring.application.name}
+
 
 operation-manager:
   webmvc:
