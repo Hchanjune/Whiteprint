@@ -8,8 +8,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core-kernel"))
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    api(project(":core-kernel"))
+    api("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation(kotlin("test"))
 }
 
