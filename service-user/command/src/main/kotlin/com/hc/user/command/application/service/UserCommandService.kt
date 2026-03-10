@@ -5,8 +5,8 @@ import com.hc.user.command.application.port.`in`.SignupUseCase
 import com.hc.user.command.application.port.out.UserEventPublisher
 import com.hc.user.command.application.port.out.UserRepository
 import com.hc.user.command.domain.model.user.UserAggregate
-import io.github.hchanjune.omk.core.Operations
 import io.github.hchanjune.omk.core.annotations.OperationManaged
+import io.github.hchanjune.omk.webmvc.Operations
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

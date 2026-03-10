@@ -13,9 +13,17 @@ class TestController(
     @GetMapping("/test")
     fun test(): ResponseEntity<ApiResponse<String>> {
         val op = testService.operations()
-        println(op.operation)
-        println(op.metrics)
-        println(op.telemetry)
+        println(op.context.traceId)
+        println(op.context.operation)
+        println(op.context.message)
+        println(op.context.method)
+        println(op.context.uri)
+        println(op.context.useCase)
+        println(op.context.operation)
+        println(op.context.issuer)
+        println(op.context.type)
+        println(op.context.protocol)
+
         return ResponseEntityGenerator.generateFromOperation(op)
     }
 
