@@ -5,19 +5,20 @@ import com.hc.user.command.application.port.`in`.SignupUseCase
 import com.hc.user.command.application.port.out.UserEventPublisher
 import com.hc.user.command.application.port.out.UserRepository
 import com.hc.user.command.domain.model.user.UserAggregate
-import io.github.hchanjune.omk.core.annotations.OperationManaged
+import io.github.hchanjune.omk.core.annotations.ManagedOperation
+import io.github.hchanjune.omk.core.annotations.ManagedService
 import io.github.hchanjune.omk.webmvc.Operations
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@OperationManaged(operation = "UserCommand")
+@ManagedService
 class UserCommandService(
     private val userRepository: UserRepository,
     private val userEventPublisher: UserEventPublisher
 ): SignupUseCase {
 
-    @OperationManaged(useCase = "Signup.General")
+    @ManagedOperation(useCase = "Signup.General")
     @Transactional
     override fun handle(command: SignupCommand.General) = Operations {
         UserAggregate.signup(
@@ -35,7 +36,7 @@ class UserCommandService(
         }
     }
 
-    @OperationManaged(useCase = "Signup.Oauth")
+    @ManagedOperation(useCase = "Signup.Oauth")
     @Transactional
     override fun handle(command: SignupCommand.Oauth) = Operations {
         UserAggregate.signupOauth(

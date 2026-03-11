@@ -1,5 +1,6 @@
 package com.hc.web.servlet.configuration
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -12,7 +13,7 @@ import org.springframework.context.annotation.Primary
 class JacksonConfig {
     @Bean
     @Primary
-    fun objectMapper(): JsonMapper {
+    fun objectMapper(): ObjectMapper {
         return JsonMapper.builder()
             .addModule(kotlinModule())
             .addModule(JavaTimeModule())

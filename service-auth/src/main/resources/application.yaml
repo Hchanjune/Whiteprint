@@ -1,0 +1,10 @@
+security:
+  entry-point:
+    rules:
+      - path: /api/v1/auth/login
+        method: POST
+        decision: PERMIT
+
+      - path: /api/v1/auth/refresh
+        method: POST
+        decision: PERMIT

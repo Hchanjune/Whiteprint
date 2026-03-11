@@ -33,7 +33,7 @@ operation-manager:
       enabled: true
     logging:
       enabled: true
-      pretty: false
+      pretty: true
       json: true
       success-level: INFO
       failure-level: ERROR

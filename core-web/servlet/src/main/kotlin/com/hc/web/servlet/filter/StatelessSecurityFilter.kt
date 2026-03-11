@@ -12,20 +12,21 @@ import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
-@Component
 class StatelessSecurityFilter(
     private val objectMapper: ObjectMapper,
     private val accessTokenVerifier: AccessTokenVerifier
 ): OncePerRequestFilter() {
+
+    override fun shouldNotFilterErrorDispatch(): Boolean = true
 
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        println("activated")
         try {
             val token = extractToken(request)
             if (token != null) {

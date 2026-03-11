@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
     api(project(":core-kernel"))
-    api("org.springframework.boot:spring-boot-starter-data-jpa")
+    compileOnly("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation(kotlin("test"))
 }
 

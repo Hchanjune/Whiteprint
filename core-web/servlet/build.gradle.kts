@@ -19,8 +19,7 @@ dependencies {
     api(project(":core-jwt"))
 
     //OperationManagerKit
-    api("com.github.Hchanjune.operation-manager-kit:core:0.4.4")
-    api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.4.4")
+    api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.5.5")
 
     // Spring WebMVC
     api("org.springframework.boot:spring-boot-starter-web")

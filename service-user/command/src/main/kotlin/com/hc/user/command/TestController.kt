@@ -2,11 +2,13 @@ package com.hc.user.command
 
 import com.hc.core.api.ApiResponse
 import com.hc.web.servlet.omk.ResponseEntityGenerator
+import io.github.hchanjune.omk.core.annotations.ManagedController
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@ManagedController
 class TestController(
     private val testService: TestService
 ) {
