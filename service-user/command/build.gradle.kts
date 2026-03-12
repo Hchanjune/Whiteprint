@@ -6,7 +6,7 @@ plugins {
 	id("io.spring.dependency-management")
 }
 
-group = "com.hc.user.command"
+group = "com.hc.service"
 version = "0.0.1-SNAPSHOT"
 description = "SpringMVC CommandSideServer"
 
@@ -22,8 +22,9 @@ repositories {
 }
 
 dependencies {
-	implementation(project(":core-jpa"))
-	implementation(project(":core-web:servlet"))
+	implementation(project(":core-exception"))
+	implementation(project(":infra-jpa"))
+	implementation(project(":infra-web:servlet"))
 
 	//implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	//implementation("org.springframework.boot:spring-boot-starter-kafka")
