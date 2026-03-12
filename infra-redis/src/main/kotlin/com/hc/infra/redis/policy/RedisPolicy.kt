@@ -8,12 +8,7 @@ enum class RedisPolicy(
     override val message: String,
 ): Policy {
 
-    /**
-     * RequiredAttributes
-     * - [key]
-     */
     REQUIRED_KEY_NOT_FOUND(404, "REDIS_REQUIRED_KEY_NOT_FOUND", "Required cache data for [[key]] is missing"),
-
     /**
      * Require Stacktrace
      */
