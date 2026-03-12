@@ -3,6 +3,6 @@ package com.hc.service.user.command.domain.policy.user
 import com.hc.core.exception.DomainPolicyException
 
 class UserPolicyException(
-    errorCode: UserPolicies,
+    errorCode: UserPolicy,
     attributes: Map<String, Any> = emptyMap(),
 ): DomainPolicyException(errorCode, attributes)

@@ -19,7 +19,7 @@ dependencies {
     api(project(":core-kernel"))
 
     // Infra
-    api(project(":infra-security"))
+    api(project(":infra-security:verifier"))
 
     //OperationManagerKit
     api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.5.5")

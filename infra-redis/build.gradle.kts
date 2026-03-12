@@ -1,22 +1,26 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.jpa")
-    kotlin("plugin.spring")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
-    `maven-publish`
 }
 
-group = "com.hc.infra"
+group = "com.hc"
 version = "0.0.1-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
     api(project(":core-exception"))
-    api(project(":core-kernel"))
 
-    api("org.springframework.boot:spring-boot-starter-data-jpa")
+    api("org.springframework.boot:spring-boot-starter-data-redis")
 
     testImplementation(kotlin("test"))
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 tasks.test {

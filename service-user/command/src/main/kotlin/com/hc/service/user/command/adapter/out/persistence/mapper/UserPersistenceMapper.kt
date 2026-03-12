@@ -1,6 +1,6 @@
 package com.hc.service.user.command.adapter.out.persistence.mapper
 
-import com.hc.infra.jpa.entity.ensureExists
+import com.hc.infra.jpa.entity.ensureExistsOrThrow
 import com.hc.infra.jpa.entity.withId
 import com.hc.user.command.adapter.out.persistence.entity.UserCredentialEntity
 import com.hc.user.command.adapter.out.persistence.entity.UserEntity
@@ -52,9 +52,9 @@ fun UserAggregate.updateEntity(userEntity: UserEntity): UserEntity {
     userEntity.lastLogin = this.lastLogin
     userEntity.isAccountLocked = this.isAccountLocked
     userEntity.isAccountAvailable = this.isAccountAvailable
-    val credentialEntity = userEntity.credential.ensureExists(userEntity.id)
+    val credentialEntity = userEntity.credential.ensureExistsOrThrow(userEntity.id)
     credentialEntity.passwordHash = this.passwordHash
-    val profileEntity = userEntity.profile.ensureExists(userEntity.id)
+    val profileEntity = userEntity.profile.ensureExistsOrThrow(userEntity.id)
     profileEntity.username = this.username
     profileEntity.locale = this.locale
     profileEntity.timeZone = this.timeZone
@@ -134,8 +134,8 @@ fun UserOauthIdentityEntity.toDomain() = UserOauthIdentity(
 fun UserEntity.toAggregate(): UserAggregate {
     return UserAggregate.restore(
         user = this.toDomain(),
-        credential = this.credential.ensureExists(this.id).toDomain(),
-        profile = this.profile.ensureExists(this.id).toDomain(),
+        credential = this.credential.ensureExistsOrThrow(this.id).toDomain(),
+        profile = this.profile.ensureExistsOrThrow(this.id).toDomain(),
         oauthIdentities = this.oauthIdentities.map { it.toDomain() }
     )
 }

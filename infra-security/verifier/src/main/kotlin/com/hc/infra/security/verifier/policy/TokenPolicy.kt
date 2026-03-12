@@ -1,12 +1,12 @@
 package com.hc.infra.security.verifier.policy
 
-import com.hc.core.exception.ErrorCode
+import com.hc.core.exception.Policy
 
-enum class JwtPolicies(
+enum class TokenPolicy(
     override val status: Int,
     override val code: String,
     override val message: String,
-) : ErrorCode {
+) : Policy {
 
     TOKEN_KEY_ID_MISSING(
         401,

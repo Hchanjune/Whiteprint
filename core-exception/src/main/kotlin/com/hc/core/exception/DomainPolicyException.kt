@@ -1,7 +1,7 @@
 package com.hc.core.exception
 
 abstract class DomainPolicyException(
-    errorCode: ErrorCode,
+    policy: Policy,
     attributes: Map<String, Any> = emptyMap(),
     cause: Throwable? = null
-): DomainException(errorCode, attributes, cause)
+): DomainException(policy, attributes, cause)

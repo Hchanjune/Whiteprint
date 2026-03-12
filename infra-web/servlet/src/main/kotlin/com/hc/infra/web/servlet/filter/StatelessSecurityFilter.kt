@@ -2,10 +2,10 @@ package com.hc.infra.web.servlet.filter
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hc.core.api.ApiResponse
-import com.hc.core.jwt.policy.JwtException
-import com.hc.core.jwt.model.AccessToken
-import com.hc.core.jwt.policy.JwtPolicies
-import com.hc.core.jwt.verifier.AccessTokenVerifier
+import com.hc.infra.security.verifier.model.AccessToken
+import com.hc.infra.security.verifier.policy.JwtException
+import com.hc.infra.security.verifier.policy.TokenPolicy
+import com.hc.infra.security.verifier.service.AccessTokenVerifier
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -33,7 +33,7 @@ class StatelessSecurityFilter(
             if (token != null) {
                 val claims = accessTokenVerifier.verifyOrThrow(AccessToken(token))
                 val authentication = UsernamePasswordAuthenticationToken(
-                    claims.userId,
+                    claims.subject,
                     null,
                     claims.authorities.map { SimpleGrantedAuthority(it) }
                 )
@@ -43,7 +43,7 @@ class StatelessSecurityFilter(
         } catch (exception: JwtException) {
             returnErrorResponse(response, exception)
         } catch (exception: Exception) {
-            returnErrorResponse(response, JwtException(JwtPolicies.TOKEN_VERIFICATION_INTERNAL_ERROR))
+            returnErrorResponse(response, JwtException(TokenPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR))
         }
     }
 

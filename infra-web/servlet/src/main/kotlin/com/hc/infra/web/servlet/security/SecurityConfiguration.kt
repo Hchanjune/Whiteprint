@@ -1,13 +1,11 @@
 package com.hc.infra.web.servlet.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hc.core.jwt.model.AccessTokenKey
-import com.hc.core.jwt.policy.DefaultAccessTokenPolicy
-import com.hc.core.jwt.verifier.AccessTokenVerifier
-import com.hc.core.jwt.verifier.DefaultAccessTokenVerifier
-import com.hc.core.jwt.verifier.RevocationChecker
+import com.hc.infra.security.verifier.policy.AccessTokenVerificationKeyResolver
+import com.hc.infra.security.verifier.policy.RevocationChecker
+import com.hc.infra.security.verifier.service.AccessTokenVerifier
+import com.hc.infra.security.verifier.service.DefaultAccessTokenVerifier
 import com.hc.infra.web.servlet.filter.StatelessSecurityFilter
-import io.jsonwebtoken.Jwts
 import jakarta.servlet.DispatcherType
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -35,7 +33,6 @@ class SecurityConfiguration {
     ): SecurityEntryPointProvider =
         SecurityEntryPointProvider(props)
 
-
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
@@ -43,16 +40,20 @@ class SecurityConfiguration {
 
     @Bean
     fun revocationChecker(): RevocationChecker
-        = CommonTokenRevocationChecker()
+        = RevocationCheckerImpl()
+
+    @Bean
+    fun accessTokenKeyResolver(): AccessTokenVerificationKeyResolver
+        = AccessTokenKeyResolverImpl()
 
     @Bean
     fun accessTokenVerifier(
+        accessTokenKeyResolver: AccessTokenVerificationKeyResolver,
         revocationChecker: RevocationChecker
     ): AccessTokenVerifier
         = DefaultAccessTokenVerifier(
-            accessTokenPolicy = DefaultAccessTokenPolicy(),
-            accessTokenKey = AccessTokenKey(Jwts.SIG.HS256.key().build()),
-            revocationChecker = revocationChecker
+            keyResolver = accessTokenKeyResolver,
+            revocationChecker = revocationChecker,
         )
 
     @Bean

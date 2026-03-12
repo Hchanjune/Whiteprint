@@ -1,9 +1,9 @@
 package com.hc.infra.web.servlet.security
 
-import com.hc.core.jwt.verifier.RevocationChecker
+import com.hc.infra.security.verifier.policy.RevocationChecker
 import java.time.Instant
 
-class CommonTokenRevocationChecker: RevocationChecker {
+class RevocationCheckerImpl: RevocationChecker {
     override fun getLastRevokedAt(identifier: String): Instant? {
         TODO("Not yet implemented")
     }

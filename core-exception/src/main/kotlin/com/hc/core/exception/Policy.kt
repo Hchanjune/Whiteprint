@@ -1,6 +1,6 @@
 package com.hc.core.exception
 
-interface ErrorCode {
+interface Policy {
     val status: Int
     val code: String
     val message: String

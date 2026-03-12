@@ -8,7 +8,7 @@ import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.SignatureException
 
 class JwtException (
-    errorCode: JwtPolicies,
+    errorCode: TokenPolicy,
     attributes: Map<String, Any> = emptyMap(),
     cause: Throwable? = null
 ): StandardException(errorCode, attributes, cause) {
@@ -18,16 +18,16 @@ class JwtException (
             return when (exception) {
                 is JwtException -> exception
                 is ExpiredJwtException ->
-                    JwtException(JwtPolicies.TOKEN_EXPIRED)
+                    JwtException(TokenPolicy.TOKEN_EXPIRED)
                 is SignatureException ->
-                    JwtException(JwtPolicies.TOKEN_SIGNATURE_INVALID)
+                    JwtException(TokenPolicy.TOKEN_SIGNATURE_INVALID)
                 is MalformedJwtException ->
-                    JwtException(JwtPolicies.TOKEN_INVALID)
+                    JwtException(TokenPolicy.TOKEN_INVALID)
                 is UnsupportedJwtException ->
-                    JwtException(JwtPolicies.TOKEN_UNSUPPORTED)
+                    JwtException(TokenPolicy.TOKEN_UNSUPPORTED)
                 is IncorrectClaimException ->
-                    JwtException(JwtPolicies.TOKEN_CLAIM_INVALID)
-                else -> JwtException(JwtPolicies.TOKEN_VERIFICATION_INTERNAL_ERROR)
+                    JwtException(TokenPolicy.TOKEN_CLAIM_INVALID)
+                else -> JwtException(TokenPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR)
             }
         }
     }

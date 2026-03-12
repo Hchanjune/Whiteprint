@@ -14,3 +14,4 @@ include("service-auth")
 
 include("service-user:command")
 include("service-user:query")
+include("infra-redis")

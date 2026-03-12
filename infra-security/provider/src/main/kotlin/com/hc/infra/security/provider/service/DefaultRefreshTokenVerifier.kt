@@ -4,7 +4,7 @@ import com.hc.infra.security.provider.model.RefreshToken
 import com.hc.infra.security.provider.model.RefreshTokenClaims
 import com.hc.infra.security.provider.policy.RefreshTokenKeyResolver
 import com.hc.infra.security.verifier.policy.JwtException
-import com.hc.infra.security.verifier.policy.JwtPolicies
+import com.hc.infra.security.verifier.policy.TokenPolicy
 import com.hc.infra.security.verifier.policy.RevocationChecker
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Header
@@ -20,7 +20,7 @@ class DefaultRefreshTokenVerifier (
             val claims = Jwts.parser()
                 .keyLocator { header: Header ->
                     val kid = header["kid"] as? String
-                        ?: throw JwtException(JwtPolicies.TOKEN_KEY_ID_MISSING)
+                        ?: throw JwtException(TokenPolicy.TOKEN_KEY_ID_MISSING)
                     keyResolver.resolve(kid).secretKey
                 }
                 .build()
@@ -44,7 +44,7 @@ class DefaultRefreshTokenVerifier (
     private fun checkRevocation(claims: Claims) {
         val lastRevokedAt = revocationChecker.getLastRevokedAt(claims.subject) ?: return
         if (claims.issuedAt.toInstant().isBefore(lastRevokedAt)) {
-            throw JwtException(JwtPolicies.TOKEN_NEEDS_UPDATE)
+            throw JwtException(TokenPolicy.TOKEN_NEEDS_UPDATE)
         }
     }
 
