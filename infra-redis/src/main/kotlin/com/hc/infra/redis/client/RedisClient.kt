@@ -1,38 +1,32 @@
 package com.hc.infra.redis.client
 
-import com.hc.infra.redis.policy.RedisException
-import com.hc.infra.redis.policy.RedisPolicy
-import org.springframework.data.redis.core.RedisTemplate
+import com.hc.infra.redis.model.RedisKey
+import org.springframework.data.redis.core.script.DefaultRedisScript
 import java.time.Duration
 
-class RedisClient(
-    private val redisTemplate: RedisTemplate<String, Any>
-) {
+interface RedisClient {
 
-    fun raw(key: String): Any? =
-        redisTemplate.opsForValue().get(key)
+    fun raw(key: RedisKey): Any?
 
-    inline fun <reified T> get(key: String): T? = this.raw(key) as? T
+    fun set(key: RedisKey, value: Any)
 
-    inline fun <reified T> require(key: String): T = this.raw(key) as? T
-        ?: throw RedisException(
-            policy = RedisPolicy.REQUIRED_KEY_NOT_FOUND,
-            attributes = mapOf(
-                "key" to key,
-            )
-        )
+    fun setWithTtl(key: RedisKey, value: Any, ttl: Duration)
 
-    fun set(key: String, value: Any, ttl: Duration? = null) {
-        if (ttl != null) {
-            redisTemplate.opsForValue().set(key, value, ttl)
-        } else {
-            redisTemplate.opsForValue().set(key, value)
-        }
-    }
+    fun setIfAbsent(key: RedisKey, value: Any): Boolean
 
-    fun setIfAbsent(key: String, value: Any, ttl: Duration): Boolean {
-        return redisTemplate.opsForValue()
-            .setIfAbsent(key, value, ttl) ?: false
-    }
+    fun setIfAbsentWithTtl(key: RedisKey, value: Any, ttl: Duration): Boolean
 
+    fun delete(key: RedisKey): Boolean
+
+    fun exists(key: RedisKey): Boolean
+
+    fun expire(key: RedisKey, ttl: Duration): Boolean
+
+    fun <T : Any> executeScript(
+        script: DefaultRedisScript<T>,
+        keys: List<RedisKey>,
+        vararg args: Any
+    ): T?
+
+    fun validateTtlOrThrow(ttl: Duration)
 }
