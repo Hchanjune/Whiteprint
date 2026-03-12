@@ -9,16 +9,16 @@ enum class UserPolicy(
 ): Policy {
 
     /**
-     * Require Attributes
+     * RequireAttributes
      * - [userId]
      * - [username]
      */
-    USER_NOT_FOUND(404, "USER_NOT_FOUND", "Such user not found: id-[userId] / username-[username]"),
+    USER_NOT_FOUND(404, "USER_NOT_FOUND", "Such user not found: id-[[userId]] / username-[[username]]"),
 
     /**
-     * Require Attributes
+     * RequireAttributes
      * - [email]
      */
-    USER_EMAIL_INVALID(400, "USER_EMAIL_INVALID", "User email invalid: [email]"),
+    USER_EMAIL_INVALID(400, "USER_EMAIL_INVALID", "User email invalid: [[email]]"),
 
 }

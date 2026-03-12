@@ -9,10 +9,10 @@ enum class RedisPolicy(
 ): Policy {
 
     /**
-     * Required Attributes
+     * RequiredAttributes
      * - [key]
      */
-    REQUIRED_KEY_NOT_FOUND(404, "REDIS_REQUIRED_KEY_NOT_FOUND", "Required cache data for [key] is missing"),
+    REQUIRED_KEY_NOT_FOUND(404, "REDIS_REQUIRED_KEY_NOT_FOUND", "Required cache data for [[key]] is missing"),
 
     /**
      * Require Stacktrace

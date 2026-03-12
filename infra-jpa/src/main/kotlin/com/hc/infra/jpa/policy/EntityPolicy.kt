@@ -8,9 +8,9 @@ enum class EntityPolicy(
     override val message: String
 ): Policy {
     /**
-     * Require Attributes
+     * RequireAttributes
      * - [targetName]
      * - [rootId]
      */
-    INTEGRITY_VIOLATION(400, "INTEGRITY_VIOLATION", "[targetName] not found for [rootId]"),
+    INTEGRITY_VIOLATION(400, "INTEGRITY_VIOLATION", "[[targetName]] not found for [[rootId]]"),
 }
