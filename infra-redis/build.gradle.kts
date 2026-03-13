@@ -17,7 +17,7 @@ dependencies {
     api(project(":core-cache"))
 
     api("org.springframework.boot:spring-boot-starter-data-redis")
-    compileOnly("org.springframework.boot:spring-boot-autoconfigure")
+    implementation("org.springframework.boot:spring-boot-autoconfigure")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
 

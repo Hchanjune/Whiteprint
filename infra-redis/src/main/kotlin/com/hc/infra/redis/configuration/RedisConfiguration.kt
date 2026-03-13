@@ -7,14 +7,15 @@ import com.hc.core.cache.operation.ListOperations
 import com.hc.core.cache.operation.SetOperations
 import com.hc.core.cache.operation.ValueOperations
 import com.hc.core.cache.provider.CacheProvider
+import com.hc.core.cache.provider.DistributedLockOwnerProvider
 import com.hc.infra.redis.operation.RedisAtomicOperations
 import com.hc.infra.redis.operation.RedisBatchOperations
 import com.hc.infra.redis.operation.RedisDistributedLockOperations
 import com.hc.infra.redis.operation.RedisListOperations
 import com.hc.infra.redis.operation.RedisSetOperations
 import com.hc.infra.redis.operation.RedisValueOperations
+import com.hc.infra.redis.provider.DefaultDistributedLockOwnerProvider
 import com.hc.infra.redis.provider.RedisCacheProvider
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,14 +26,12 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializer
-import org.springframework.data.redis.support.collections.RedisProperties
 import java.time.Duration
-import java.util.UUID
 
 @Configuration
-@EnableConfigurationProperties(RedisProperties::class)
+@EnableConfigurationProperties(RedisConfigurationProperties::class)
 class RedisConfiguration(
-    private val redisProperties: RedisProperties,
+    private val redisProperties: RedisConfigurationProperties,
 ) {
 
     @Bean
@@ -45,8 +44,8 @@ class RedisConfiguration(
         }
 
         val clientConfig = LettuceClientConfiguration.builder()
-            .commandTimeout(Duration.ofSeconds(2)) // 명령어 실행 타임아웃
-            .shutdownTimeout(Duration.ZERO)
+            .commandTimeout(Duration.ofMillis(2000))
+            .shutdownTimeout(Duration.ofMillis(100))
             .build()
 
         return LettuceConnectionFactory(serverConfig, clientConfig)
@@ -63,6 +62,10 @@ class RedisConfiguration(
             afterPropertiesSet()
         }
     }
+
+    @Bean
+    fun distributedLockOwnerProvider(): DistributedLockOwnerProvider =
+        DefaultDistributedLockOwnerProvider()
 
     @Bean
     fun valueOperations(
@@ -92,8 +95,8 @@ class RedisConfiguration(
     @Bean
     fun distributedLockOperations(
         redisTemplate: RedisTemplate<String, Any>,
-        owner: String = UUID.randomUUID().toString()
-    ): DistributedLockOperations = RedisDistributedLockOperations(redisTemplate, owner)
+        distributedLockOwnerProvider: DistributedLockOwnerProvider,
+    ): DistributedLockOperations = RedisDistributedLockOperations(redisTemplate, distributedLockOwnerProvider.provideOwner())
 
     @Bean
     fun cacheProvider(
