@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    kotlin("plugin.spring")
 }
 
 group = "com.hc"
@@ -16,8 +17,12 @@ dependencies {
     api(project(":core-cache"))
 
     api("org.springframework.boot:spring-boot-starter-data-redis")
+    compileOnly("org.springframework.boot:spring-boot-autoconfigure")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
 
     testImplementation(kotlin("test"))
+    implementation(kotlin("stdlib"))
 }
 
 kotlin {

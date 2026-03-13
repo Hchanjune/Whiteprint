@@ -1,32 +1,36 @@
 package com.hc.infra.redis.operation
 
 import com.hc.core.cache.model.CacheKey
+import com.hc.core.cache.model.CacheValidator
 import com.hc.core.cache.operation.BatchOperations
-import com.hc.infra.redis.client.RedisClient
+import org.springframework.data.redis.core.RedisTemplate
 import java.time.Duration
 
 class RedisBatchOperations(
-    private val client: RedisClient,
+    private val redisTemplate: RedisTemplate<String, Any>,
 ): BatchOperations {
 
     override fun multiGetRaw(keys: List<CacheKey>): List<Any?> {
-        return client.multiGetRaw(keys)
+        if (keys.isEmpty()) return emptyList()
+        return redisTemplate.opsForValue().multiGet(keys.map { it.value }) ?: keys.map { null }
     }
 
     override fun <T : Any> multiSet(map: Map<CacheKey, T>) {
-        client.multiSet(map)
+        if (map.isEmpty()) return
+        redisTemplate.opsForValue().multiSet(map.mapKeys { it.key.value })
     }
 
     override fun multiDelete(keys: List<CacheKey>) {
-        client.multiDelete(keys)
+        if (keys.isEmpty()) return
+        redisTemplate.delete(keys.map { it.value })
     }
 
     override fun multiExpire(keys: List<CacheKey>, ttl: Duration) {
         if (keys.isEmpty()) return
-        client.validateTtlOrThrow(ttl)
-        client.executePipelined {
+        CacheValidator.validateTtlOrThrow(ttl)
+        redisTemplate.executePipelined {
             keys.forEach { key ->
-                client.expire(key, ttl)
+                redisTemplate.expire(key.value, ttl)
             }
         }
     }
@@ -36,11 +40,12 @@ class RedisBatchOperations(
         ttl: Duration
     ) {
         if (map.isEmpty()) return
-        client.validateTtlOrThrow(ttl)
-        client.executePipelined {
+        CacheValidator.validateTtlOrThrow(ttl)
+        redisTemplate.executePipelined {
             map.forEach { (key, value) ->
-                client.set(key, value)
+                redisTemplate.opsForValue().set(key.value, value, ttl)
             }
+            null
         }
     }
 

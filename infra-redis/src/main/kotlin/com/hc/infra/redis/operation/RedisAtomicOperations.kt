@@ -1,15 +1,16 @@
 package com.hc.infra.redis.operation
 
-import com.hc.core.cache.client.CacheClient
 import com.hc.core.cache.model.CacheKey
+import com.hc.core.cache.model.CacheValidator
 import com.hc.core.cache.operation.AtomicOperations
 import com.hc.core.cache.policy.CacheException
 import com.hc.core.cache.policy.CachePolicy
 import com.hc.infra.redis.model.LuaScript
+import org.springframework.data.redis.core.RedisTemplate
 import java.time.Duration
 
 class RedisAtomicOperations(
-    private val client: CacheClient,
+    private val redisTemplate: RedisTemplate<String, Any>
 ) : AtomicOperations {
 
     companion object {
@@ -131,14 +132,21 @@ class RedisAtomicOperations(
     }
 
     override fun incrementOrThrow(key: CacheKey, delta: Long): Long {
-        return client.incrementOrThrow(key, delta)
+        return redisTemplate.opsForValue().increment(key.value, delta)?:
+        throw CacheException(
+            policy = CachePolicy.INCREMENT_FAILED,
+            attributes = mapOf(
+                "key" to key.value,
+                "delta" to delta
+            )
+        )
     }
 
     override fun incrementAndExpireOrThrow(key: CacheKey, ttl: Duration, delta: Long): Long {
-        client.validateTtlOrThrow(ttl)
-        return client.executeScript(
-            script = incrementAndExpireScript,
-            keys = listOf(key),
+        CacheValidator.validateTtlOrThrow(ttl)
+        return redisTemplate.execute(
+            incrementAndExpireScript.redisScript,
+            listOf(key.value),
             delta,
             ttl.toMillis()
         ) ?:
@@ -152,20 +160,20 @@ class RedisAtomicOperations(
     }
 
     override fun incrementWithLimitOrThrow(key: CacheKey, delta: Long, limit: Long): Long {
-        val result = client.executeScript(
-            script = incrementWithLimitScript,
-            keys = listOf(key),
+        val result = redisTemplate.execute(
+            incrementWithLimitScript.redisScript,
+            listOf(key.value),
             delta,
-            limit
+            limit,
         )
         return handleLimitResult(result, key, delta, limit, isIncrement = true)
     }
 
     override fun incrementWithLimitAndExpireOrThrow(key: CacheKey, delta: Long, limit: Long, ttl: Duration): Long {
-        client.validateTtlOrThrow(ttl)
-        val result = client.executeScript(
-            script = incrementWithLimitAndExpireScript,
-            keys = listOf(key),
+        CacheValidator.validateTtlOrThrow(ttl)
+        val result = redisTemplate.execute(
+            incrementWithLimitAndExpireScript.redisScript,
+            listOf(key.value),
             delta,
             limit,
             ttl.toMillis()
@@ -174,14 +182,21 @@ class RedisAtomicOperations(
     }
 
     override fun decrementOrThrow(key: CacheKey, delta: Long): Long {
-        return client.decrementOrThrow(key, delta)
+        return redisTemplate.opsForValue().increment(key.value, delta)?:
+        throw CacheException(
+            policy = CachePolicy.DECREMENT_FAILED,
+            attributes = mapOf(
+                "key" to key.value,
+                "delta" to delta
+            )
+        )
     }
 
     override fun decrementAndExpireOrThrow(key: CacheKey, ttl: Duration, delta: Long): Long {
-        client.validateTtlOrThrow(ttl)
-        return client.executeScript(
-            script = decrementAndExpireScript,
-            keys = listOf(key),
+        CacheValidator.validateTtlOrThrow(ttl)
+        return redisTemplate.execute(
+            decrementAndExpireScript.redisScript,
+            listOf(key.value),
             delta,
             ttl.toMillis()
         ) ?:
@@ -195,20 +210,20 @@ class RedisAtomicOperations(
     }
 
     override fun decrementWithLimitOrThrow(key: CacheKey, delta: Long, limit: Long): Long {
-        val result = client.executeScript(
-            script = decrementWithLimitScript,
-            keys = listOf(key),
+        val result = redisTemplate.execute(
+            decrementWithLimitScript.redisScript,
+            listOf(key.value),
             delta,
-            limit
+            limit,
         )
         return handleLimitResult(result, key, delta, limit, isIncrement = false)
     }
 
     override fun decrementWithLimitAndExpireOrThrow(key: CacheKey, delta: Long, limit: Long, ttl: Duration): Long {
-        client.validateTtlOrThrow(ttl)
-        val result = client.executeScript(
-            script = decrementWithLimitAndExpireScript,
-            keys = listOf(key),
+        CacheValidator.validateTtlOrThrow(ttl)
+        val result = redisTemplate.execute(
+            decrementWithLimitAndExpireScript.redisScript,
+            listOf(key.value),
             delta,
             limit,
             ttl.toMillis()

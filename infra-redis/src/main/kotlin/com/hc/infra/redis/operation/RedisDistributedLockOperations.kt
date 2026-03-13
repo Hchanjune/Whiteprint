@@ -2,15 +2,15 @@ package com.hc.infra.redis.operation
 
 import com.hc.core.cache.model.CacheKey
 import com.hc.core.cache.model.CacheLockHandle
+import com.hc.core.cache.model.CacheValidator
 import com.hc.core.cache.operation.DistributedLockOperations
-import com.hc.infra.redis.client.RedisClient
-import com.hc.infra.redis.client.executeScript
 import com.hc.infra.redis.model.FencingKey
-import org.springframework.data.redis.core.script.DefaultRedisScript
+import com.hc.infra.redis.model.LuaScript
+import org.springframework.data.redis.core.RedisTemplate
 import java.time.Duration
 
 class RedisDistributedLockOperations(
-    private val client: RedisClient,
+    private val redisTemplate: RedisTemplate<String, Any>,
     private val owner: String
 ): DistributedLockOperations {
 
@@ -57,20 +57,19 @@ class RedisDistributedLockOperations(
             end
         """
 
-        private val acquireLockWithTokenScript = DefaultRedisScript<Long>().apply {
-            setScriptText(ACQUIRE_LOCK_SCRIPT)
-            resultType = Long::class.java
-        }
+        private val acquireLockWithTokenScript = LuaScript(
+            script = ACQUIRE_LOCK_SCRIPT,
+            resultType = Long::class.java,
+        )
+        private val releaseLockScript = LuaScript(
+            script = RELEASE_LOCK_SCRIPT,
+            resultType = Long::class.java,
+        )
 
-        private val releaseLockScript = DefaultRedisScript<Long>().apply {
-            setScriptText(RELEASE_LOCK_SCRIPT)
-            resultType = Long::class.java
-        }
-
-        private val extendLockScript = DefaultRedisScript<Long>().apply {
-            setScriptText(EXTEND_LOCK_SCRIPT)
-            resultType = Long::class.java
-        }
+        private val extendLockScript = LuaScript(
+            script = EXTEND_LOCK_SCRIPT,
+            resultType = Long::class.java,
+        )
 
     }
 
@@ -79,13 +78,13 @@ class RedisDistributedLockOperations(
         ttl: Duration
     ): CacheLockHandle? {
 
-        client.validateTtlOrThrow(ttl)
+        CacheValidator.validateTtlOrThrow(ttl)
 
         val fencingKey = FencingKey("${key.value}$FENCING_TOKEN_SUFFIX")
 
-        val token = client.executeScript(
-            script = acquireLockWithTokenScript,
-            keys = listOf(key, fencingKey),
+        val token = redisTemplate.execute(
+            acquireLockWithTokenScript.redisScript,
+            listOf(key.value, fencingKey.value),
             owner,
             ttl.toMillis()
         )
@@ -101,10 +100,10 @@ class RedisDistributedLockOperations(
 
     override fun releaseLock(lock: CacheLockHandle): Boolean {
 
-        val result = client.executeScript(
-            script = releaseLockScript,
-            keys = listOf(lock.key),
-            lock.owner
+        val result = redisTemplate.execute(
+            releaseLockScript.redisScript,
+            listOf(lock.key.value),
+            lock.owner,
         )
 
         return result == 1L
@@ -112,11 +111,11 @@ class RedisDistributedLockOperations(
 
     override fun extendLock(lock: CacheLockHandle, ttl: Duration): Boolean {
 
-        client.validateTtlOrThrow(ttl)
+        CacheValidator.validateTtlOrThrow(ttl)
 
-        val result = client.executeScript(
-            script = extendLockScript,
-            keys = listOf(lock.key),
+        val result = redisTemplate.execute(
+            extendLockScript.redisScript,
+            listOf(lock.key.value),
             lock.owner,
             ttl.toMillis()
         )
