@@ -1,17 +1,27 @@
 package com.hc.infra.redis.operation
 
-import com.hc.infra.redis.client.RedisClientImpl
-import com.hc.infra.redis.model.RedisKey
-import com.hc.infra.redis.model.RedisLockHandle
+import com.hc.core.cache.model.CacheKey
+import com.hc.core.cache.model.CacheLockHandle
+import com.hc.core.cache.operation.DistributedLockOperations
+import com.hc.infra.redis.client.RedisClient
+import com.hc.infra.redis.client.executeScript
+import com.hc.infra.redis.model.FencingKey
 import org.springframework.data.redis.core.script.DefaultRedisScript
 import java.time.Duration
 
-class RedisLockOperations(
-    private val client: RedisClientImpl,
+class RedisDistributedLockOperations(
+    private val client: RedisClient,
     private val owner: String
-) {
+): DistributedLockOperations {
 
     companion object {
+
+        private const val FENCING_TOKEN_SUFFIX = ":fencing"
+
+        /**
+         * - ARGV[1]: owner
+         * - ARGV[2]: ttlMillis
+         */
         private const val ACQUIRE_LOCK_SCRIPT = """
             if redis.call("set", KEYS[1], ARGV[1], "NX", "PX", ARGV[2]) then
                 return redis.call("incr", KEYS[2])
@@ -20,6 +30,10 @@ class RedisLockOperations(
             end
         """
 
+        /**
+         * - KEYS[1]: lockKey
+         * - ARGV[1]: owner
+         */
         private const val RELEASE_LOCK_SCRIPT = """
             if redis.call("get", KEYS[1]) == ARGV[1]
             then
@@ -29,6 +43,11 @@ class RedisLockOperations(
             end
         """
 
+        /**
+         * - KEYS[1]: lockKey
+         * - ARGV[1]: owner
+         * - ARGV[2]: ttlMillis
+         */
         private const val EXTEND_LOCK_SCRIPT = """
             if redis.call("get", KEYS[1]) == ARGV[1]
             then
@@ -55,16 +74,14 @@ class RedisLockOperations(
 
     }
 
-
-
-    fun acquireLock(
-        key: RedisKey,
+    override fun acquireLock(
+        key: CacheKey,
         ttl: Duration
-    ): RedisLockHandle? {
+    ): CacheLockHandle? {
 
         client.validateTtlOrThrow(ttl)
 
-        val fencingKey = RedisKey("$key:fencing")
+        val fencingKey = FencingKey("${key.value}$FENCING_TOKEN_SUFFIX")
 
         val token = client.executeScript(
             script = acquireLockWithTokenScript,
@@ -75,14 +92,14 @@ class RedisLockOperations(
 
         if (token == null || token <= 0) return null
 
-        return RedisLockHandle(
+        return CacheLockHandle(
             key = key,
             owner = owner,
             fencingToken = token
         )
     }
 
-    fun releaseLock(lock: RedisLockHandle): Boolean {
+    override fun releaseLock(lock: CacheLockHandle): Boolean {
 
         val result = client.executeScript(
             script = releaseLockScript,
@@ -93,7 +110,7 @@ class RedisLockOperations(
         return result == 1L
     }
 
-    fun extendLock(lock: RedisLockHandle, ttl: Duration): Boolean {
+    override fun extendLock(lock: CacheLockHandle, ttl: Duration): Boolean {
 
         client.validateTtlOrThrow(ttl)
 
