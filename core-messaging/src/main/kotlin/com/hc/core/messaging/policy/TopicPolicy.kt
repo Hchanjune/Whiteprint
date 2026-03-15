@@ -1,4 +1,4 @@
-package com.hc.core.messaging
+package com.hc.core.messaging.policy
 
 interface TopicPolicy {
 

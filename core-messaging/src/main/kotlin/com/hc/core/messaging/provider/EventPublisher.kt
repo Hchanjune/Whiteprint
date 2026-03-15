@@ -1,6 +1,7 @@
-package com.hc.core.messaging
+package com.hc.core.messaging.provider
 
-import com.hc.core.messaging.model.Event
+import com.hc.core.messaging.model.EventRecorder
+import com.hc.core.messaging.model.event.Event
 
 interface EventPublisher {
 

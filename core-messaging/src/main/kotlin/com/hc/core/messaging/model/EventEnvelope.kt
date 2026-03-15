@@ -1,6 +1,6 @@
-package com.hc.core.messaging
+package com.hc.core.messaging.model
 
-import com.hc.core.messaging.model.Event
+import com.hc.core.messaging.model.event.Event
 import java.time.Instant
 
 interface EventEnvelope<E: Event> {
