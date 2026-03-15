@@ -1,4 +1,4 @@
-package com.hc.core.domain.event
+package com.hc.core.messaging.model
 
 interface IntegrationEvent: Event {
     val spanId: String

@@ -1,5 +1,4 @@
-package com.hc.core.domain.event
-
+package com.hc.core.messaging.model
 
 interface DomainEvent: Event {
     val aggregateId: String

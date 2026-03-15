@@ -1,7 +1,7 @@
 package com.hc.infra.web.servlet.filter
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hc.core.domain.api.ApiResponse
+import com.hc.core.kernel.model.ApiResponse
 import com.hc.infra.security.verifier.model.AccessToken
 import com.hc.infra.security.verifier.policy.JwtException
 import com.hc.infra.security.verifier.policy.TokenPolicy

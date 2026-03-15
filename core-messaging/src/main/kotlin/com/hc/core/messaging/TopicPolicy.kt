@@ -1,6 +1,4 @@
-package com.hc.core.domain.event.contract
-
-import com.hc.core.domain.event.IntegrationEvent
+package com.hc.core.messaging
 
 interface TopicPolicy {
 

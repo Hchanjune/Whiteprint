@@ -1,4 +1,4 @@
-package com.hc.core.domain.api
+package com.hc.core.kernel.model
 
 import java.time.Instant
 
