@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":core-exception"))
+    implementation(project(":core-kernel"))
     testImplementation(kotlin("test"))
 }
 

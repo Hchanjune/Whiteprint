@@ -1,6 +1,6 @@
 package com.hc.infra.web.servlet.omk
 
-import com.hc.core.api.ApiResponse
+import com.hc.core.domain.api.ApiResponse
 import io.github.hchanjune.omk.core.OperationResult
 import org.springframework.http.ResponseEntity
 

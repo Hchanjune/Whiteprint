@@ -1,6 +1,6 @@
 package com.hc.infra.jpa.policy
 
-import com.hc.core.exception.Policy
+import com.hc.core.kernel.policy.Policy
 
 enum class EntityPolicy(
     override val status: Int,

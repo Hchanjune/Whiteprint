@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":core-exception"))
+    api(project(":core-kernel"))
     api(project(":core-cache"))
 
     api("org.springframework.boot:spring-boot-starter-data-redis")

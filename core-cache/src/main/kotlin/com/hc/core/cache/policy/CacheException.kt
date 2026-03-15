@@ -1,6 +1,6 @@
 package com.hc.core.cache.policy
 
-import com.hc.core.exception.StandardException
+import com.hc.core.kernel.policy.exception.StandardException
 
 class CacheException(
     policy: CachePolicy,

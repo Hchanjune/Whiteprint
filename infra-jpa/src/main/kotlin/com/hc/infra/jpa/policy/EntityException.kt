@@ -1,7 +1,7 @@
 package com.hc.infra.jpa.policy
 
-import com.hc.core.exception.Policy
-import com.hc.core.exception.StandardException
+import com.hc.core.kernel.policy.Policy
+import com.hc.core.kernel.policy.exception.StandardException
 
 open class EntityException(
     policy: Policy,

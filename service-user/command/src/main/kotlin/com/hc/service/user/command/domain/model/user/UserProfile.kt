@@ -1,6 +1,6 @@
 package com.hc.service.user.command.domain.model.user
 
-import com.hc.core.domain.contract.Identifiable
+import com.hc.core.domain.model.contract.Identifiable
 import java.time.LocalDate
 
 data class UserProfile(

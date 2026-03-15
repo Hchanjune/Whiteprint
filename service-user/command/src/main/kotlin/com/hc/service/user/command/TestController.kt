@@ -1,6 +1,6 @@
 package com.hc.service.user.command
 
-import com.hc.core.api.ApiResponse
+import com.hc.core.domain.api.ApiResponse
 import com.hc.infra.web.servlet.omk.ResponseEntityGenerator
 import io.github.hchanjune.omk.core.annotations.ManagedController
 import org.springframework.http.ResponseEntity

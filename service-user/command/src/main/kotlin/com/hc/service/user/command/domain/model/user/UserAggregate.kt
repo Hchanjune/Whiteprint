@@ -1,11 +1,7 @@
 package com.hc.service.user.command.domain.model.user
 
-import com.hc.core.domain.aggregate.Aggregate
-import com.hc.core.domain.identifier.TsidGenerator
-import com.hc.user.command.domain.event.UserCreatedEvent
-import com.hc.user.command.domain.event.UserDeletedEvent
-import com.hc.user.command.domain.event.UserProjectionEvent
-import com.hc.user.command.domain.event.UserUpdatedEvent
+import com.hc.core.domain.model.aggregate.Aggregate
+import com.hc.core.domain.model.identifier.TsidGenerator
 import java.io.Serializable
 import java.time.Instant
 import java.time.LocalDate

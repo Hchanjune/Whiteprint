@@ -11,8 +11,8 @@ group = "com.hc.infra"
 version = "0.0.1-SNAPSHOT"
 
 dependencies {
-    api(project(":core-exception"))
     api(project(":core-kernel"))
+    api(project(":core-domain"))
 
     api("org.springframework.boot:spring-boot-starter-data-jpa")
     compileOnly("org.springframework.boot:spring-boot-autoconfigure")

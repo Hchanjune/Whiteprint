@@ -1,6 +1,6 @@
 package com.hc.infra.security.verifier.policy
 
-import com.hc.core.exception.StandardException
+import com.hc.core.kernel.policy.exception.StandardException
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.IncorrectClaimException
 import io.jsonwebtoken.MalformedJwtException

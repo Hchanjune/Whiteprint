@@ -1,6 +1,6 @@
 package com.hc.service.user.command.domain.policy.user
 
-import com.hc.core.exception.Policy
+import com.hc.core.kernel.policy.Policy
 
 enum class UserPolicy(
     override val status: Int,

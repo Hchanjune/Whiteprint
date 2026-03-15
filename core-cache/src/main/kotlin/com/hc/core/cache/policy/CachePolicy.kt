@@ -1,6 +1,6 @@
 package com.hc.core.cache.policy
 
-import com.hc.core.exception.Policy
+import com.hc.core.kernel.policy.Policy
 
 enum class CachePolicy(
     override val status: Int,

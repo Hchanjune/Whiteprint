@@ -15,8 +15,8 @@ repositories {
 
 dependencies {
     // Cores
-    api(project(":core-exception"))
     api(project(":core-kernel"))
+    api(project(":core-domain"))
 
     // Infra
     api(project(":infra-security:verifier"))

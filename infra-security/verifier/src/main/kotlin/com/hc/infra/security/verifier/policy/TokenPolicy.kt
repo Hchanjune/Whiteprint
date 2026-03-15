@@ -1,6 +1,6 @@
 package com.hc.infra.security.verifier.policy
 
-import com.hc.core.exception.Policy
+import com.hc.core.kernel.policy.Policy
 
 enum class TokenPolicy(
     override val status: Int,

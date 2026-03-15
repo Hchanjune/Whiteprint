@@ -1,7 +1,7 @@
 rootProject.name = "CQRS"
 
 include("core-kernel")
-include("core-exception")
+include("core-domain")
 include("core-cache")
 include("core-messaging")
 

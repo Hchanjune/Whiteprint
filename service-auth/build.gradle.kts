@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":core-exception"))
+    implementation(project(":core-kernel"))
     implementation(project(":infra-jpa"))
     implementation(project(":infra-web:servlet"))
     testImplementation(kotlin("test"))

@@ -1,7 +1,7 @@
 package com.hc.service.user.command.domain.model.user
 
-import com.hc.core.domain.contract.Auditable
-import com.hc.core.domain.contract.Identifiable
+import com.hc.core.domain.model.contract.Auditable
+import com.hc.core.domain.model.contract.Identifiable
 import java.time.Instant
 
 data class UserOauthIdentity(

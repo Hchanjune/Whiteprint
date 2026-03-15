@@ -1,6 +1,6 @@
 package com.hc.service.user.command.domain.policy.user
 
-import com.hc.core.exception.DomainPolicyException
+import com.hc.core.kernel.policy.exception.DomainPolicyException
 
 class UserPolicyException(
     errorCode: UserPolicy,
