@@ -1,6 +1,6 @@
 package com.hc.infra.web.servlet.security
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.hc.core.kernel.serializer.JsonSerializer
 import com.hc.infra.security.verifier.policy.AccessTokenVerificationKeyResolver
 import com.hc.infra.security.verifier.policy.RevocationChecker
 import com.hc.infra.security.verifier.service.AccessTokenVerifier
@@ -21,11 +21,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityConfigurationProperties::class)
 class SecurityConfiguration {
+
+    @Bean
+    fun securityObjectMapper(): ObjectMapper = JsonSerializer.default
 
     @Bean
     fun securityEntryPointProvider(

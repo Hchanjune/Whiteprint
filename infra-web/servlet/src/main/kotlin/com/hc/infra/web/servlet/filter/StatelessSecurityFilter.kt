@@ -1,6 +1,5 @@
 package com.hc.infra.web.servlet.filter
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.hc.core.kernel.model.ApiResponse
 import com.hc.infra.security.verifier.model.AccessToken
 import com.hc.infra.security.verifier.policy.JwtException
@@ -14,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
+import tools.jackson.databind.ObjectMapper
 
 class StatelessSecurityFilter(
     private val objectMapper: ObjectMapper,

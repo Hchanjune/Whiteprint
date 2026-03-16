@@ -4,6 +4,8 @@ plugins {
     kotlin("jvm") version "2.2.21" apply false
     kotlin("plugin.jpa") version "2.2.21" apply false
     kotlin("plugin.spring") version "2.3.0"
+
+    id("com.google.protobuf") version "0.9.4" apply false
 }
 
 
