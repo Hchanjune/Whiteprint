@@ -5,9 +5,13 @@ include("core-domain")
 include("core-cache")
 include("core-messaging")
 
-include("infra-jpa")
-include("infra-redis")
-include("infra-kafka")
+include("infra-jpa:core")
+include("infra-jpa:messaging")
+
+include("infra-redis:core")
+
+include("infra-kafka:core")
+
 include("infra-security:provider")
 include("infra-security:verifier")
 

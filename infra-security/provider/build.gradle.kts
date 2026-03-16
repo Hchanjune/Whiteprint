@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "com.hc.infra"
+group = "com.hc.infra.security"
 version = "0.0.1-SNAPSHOT"
 
 repositories {
@@ -11,7 +11,6 @@ repositories {
 
 dependencies {
     api(project(":infra-security:verifier"))
-    testImplementation(kotlin("test"))
 }
 
 kotlin {

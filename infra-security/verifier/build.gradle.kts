@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "com.hc.infra"
+group = "com.hc.infra.security"
 version = "0.0.1-SNAPSHOT"
 
 repositories {
@@ -15,8 +15,6 @@ dependencies {
     api("io.jsonwebtoken:jjwt-api:0.13.0")
     api("io.jsonwebtoken:jjwt-impl:0.13.0")
     api("io.jsonwebtoken:jjwt-jackson:0.13.0")
-
-    testImplementation(kotlin("test"))
 }
 
 kotlin {

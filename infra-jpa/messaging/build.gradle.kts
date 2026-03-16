@@ -1,25 +1,20 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring")
     kotlin("plugin.jpa")
+    kotlin("plugin.spring")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
 }
 
-group = "com.hc.service"
+group = "com.hc.infra.jpa"
 version = "0.0.1-SNAPSHOT"
-description = "AuthServer"
 
 repositories {
     mavenCentral()
-    maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation(project(":core-kernel"))
     implementation(project(":infra-jpa:core"))
-    implementation(project(":infra-web:servlet"))
-    testImplementation(kotlin("test"))
 }
 
 kotlin {

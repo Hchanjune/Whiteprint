@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
 	implementation(project(":core-kernel"))
-	implementation(project(":infra-jpa"))
+	implementation(project(":infra-jpa:core"))
 	implementation(project(":infra-web:servlet"))
 
 	//implementation("org.springframework.boot:spring-boot-starter-data-redis")
