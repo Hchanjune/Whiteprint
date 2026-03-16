@@ -24,7 +24,7 @@ repositories {
 dependencies {
 	implementation(project(":core-kernel"))
 	implementation(project(":infra-jpa:core"))
-	implementation(project(":infra-web:servlet"))
+	implementation(project(":infra-spring:servlet"))
 
 	//implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	//implementation("org.springframework.boot:spring-boot-starter-kafka")

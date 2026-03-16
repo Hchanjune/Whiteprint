@@ -18,7 +18,7 @@ repositories {
 dependencies {
     implementation(project(":core-kernel"))
     implementation(project(":infra-jpa:core"))
-    implementation(project(":infra-web:servlet"))
+    implementation(project(":infra-spring:servlet"))
     testImplementation(kotlin("test"))
 }
 

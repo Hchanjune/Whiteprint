@@ -15,8 +15,8 @@ include("infra-kafka:core")
 include("infra-security:provider")
 include("infra-security:verifier")
 
-include("infra-web:servlet")
-include("infra-web:reactive")
+include("infra-spring:servlet")
+include("infra-spring:reactive")
 
 include("service-auth")
 
