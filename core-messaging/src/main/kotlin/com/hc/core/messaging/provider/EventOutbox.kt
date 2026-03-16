@@ -1,6 +1,6 @@
 package com.hc.core.messaging.provider
 
-import com.hc.core.messaging.model.EventEnvelope
+import com.hc.core.messaging.policy.EventEnvelope
 
 interface EventOutbox {
 

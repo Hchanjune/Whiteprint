@@ -6,5 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class RedisConfigurationProperties (
     var host: String = "",
     var port: Int = 6379,
-    var password: String = ""
+    var password: String = "",
+    var commandTimeoutMillis: Long = 2000,
+    var shutdownTimeoutMillis: Long = 100,
 )

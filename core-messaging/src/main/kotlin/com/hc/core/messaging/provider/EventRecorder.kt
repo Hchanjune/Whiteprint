@@ -1,6 +1,6 @@
-package com.hc.core.messaging.model
+package com.hc.core.messaging.provider
 
-import com.hc.core.messaging.model.event.Event
+import com.hc.core.messaging.model.Event
 
 interface EventRecorder {
     val events: List<Event>

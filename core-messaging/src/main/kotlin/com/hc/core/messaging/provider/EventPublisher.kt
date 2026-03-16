@@ -1,12 +1,11 @@
 package com.hc.core.messaging.provider
 
-import com.hc.core.messaging.model.EventRecorder
-import com.hc.core.messaging.model.event.Event
+import com.hc.core.messaging.model.Event
 
 interface EventPublisher {
 
-    fun publishAllFrom(provider: EventRecorder) {
-        this.publishAll(provider.pullEvents())
+    fun publishAllFrom(recorder: EventRecorder) {
+        this.publishAll(recorder.pullEvents())
     }
 
     fun <E: Event> publish(event: E)

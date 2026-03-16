@@ -1,14 +1,11 @@
 package com.hc.core.messaging.policy
 
-import com.hc.core.messaging.model.EventEnvelope
-import com.hc.core.messaging.model.event.Event
+import com.hc.core.messaging.model.Event
 
-interface EventSerializer<E: Event> {
+interface EventSerializer {
 
-    fun serialize(envelope: EventEnvelope<E>): String
+    fun<E: Event> serialize(event: E): String
 
-    fun deserialize(data: String): EventEnvelope<E>
-
-    fun deserializeEvent(event: Event): E
+    fun<E: Event> deserializeRaw(raw: String, type: Class<E>): E
 
 }
