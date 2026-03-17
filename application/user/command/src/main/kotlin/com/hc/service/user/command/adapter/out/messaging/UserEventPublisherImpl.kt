@@ -1,8 +1,8 @@
 package com.hc.service.user.command.adapter.out.messaging
 
-import com.hc.core.domain.model.aggregate.Aggregate
-import com.hc.core.domain.event.DomainEvent
-import com.hc.core.domain.event.IntegrationEvent
+import org.whiteprint.platform.core.domain.model.aggregate.Aggregate
+import com.hc.core.platform.event.DomainEvent
+import com.hc.core.platform.event.IntegrationEvent
 import com.hc.user.command.application.port.out.UserEventPublisher
 import org.springframework.stereotype.Component
 

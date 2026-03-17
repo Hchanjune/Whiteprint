@@ -1,7 +1,7 @@
 package com.hc.service.user.command
 
-import com.hc.core.kernel.model.ApiResponse
-import com.hc.infra.web.servlet.omk.ResponseEntityGenerator
+import org.whiteprint.platform.core.kernel.model.ApiResponse
+import org.whiteprint.platform.adapter.web.servlet.omk.ResponseEntityGenerator
 import io.github.hchanjune.omk.core.annotations.ManagedController
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,7 +26,7 @@ class TestController(
         println(op.context.type)
         println(op.context.protocol)
 
-        return ResponseEntityGenerator.generateFromOperation(op)
+        return _root_ide_package_.org.whiteprint.platform.adapter.web.servlet.omk.ResponseEntityGenerator.generateFromOperation(op)
     }
 
 

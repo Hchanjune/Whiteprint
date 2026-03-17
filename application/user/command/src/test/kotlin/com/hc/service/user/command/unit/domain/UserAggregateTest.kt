@@ -1,6 +1,6 @@
 package com.hc.service.user.command.unit.domain
 
-import com.hc.core.kernel.identifier.TsidGenerator
+import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import com.hc.user.command.domain.model.user.User
 import com.hc.user.command.domain.model.user.UserAggregate
 import com.hc.user.command.domain.model.user.UserCredential

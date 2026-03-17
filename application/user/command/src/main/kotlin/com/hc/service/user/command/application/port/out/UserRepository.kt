@@ -1,6 +1,6 @@
 package com.hc.service.user.command.application.port.out
 
-import com.hc.core.domain.repository.AggregateRepository
+import org.whiteprint.platform.core.domain.repository.AggregateRepository
 import com.hc.service.user.command.domain.model.user.UserAggregate
 
 

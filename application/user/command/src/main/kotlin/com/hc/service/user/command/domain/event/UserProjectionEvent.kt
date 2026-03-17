@@ -1,6 +1,6 @@
 package com.hc.service.user.command.domain.event
 
-import com.hc.core.domain.event.IntegrationEvent
+import com.hc.core.platform.event.IntegrationEvent
 import java.time.Instant
 
 data class UserProjectionEvent(

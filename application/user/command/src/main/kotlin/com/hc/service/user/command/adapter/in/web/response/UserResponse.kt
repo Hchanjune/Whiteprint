@@ -1,7 +1,7 @@
 package com.hc.service.user.command.adapter.`in`.web.response
 
-import com.hc.core.domain.model.contract.Auditable
-import com.hc.core.domain.model.contract.Identifiable
+import org.whiteprint.platform.core.domain.model.contract.Auditable
+import org.whiteprint.platform.core.domain.model.contract.Identifiable
 import java.time.Instant
 import java.time.LocalDate
 

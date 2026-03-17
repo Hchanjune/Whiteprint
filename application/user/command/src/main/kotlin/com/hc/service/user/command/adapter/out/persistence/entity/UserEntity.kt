@@ -1,6 +1,6 @@
 package com.hc.service.user.command.adapter.out.persistence.entity
 
-import com.hc.infra.persistence.jpa.entity.RootEntity
+import org.whiteprint.platform.infra.persistence.jpa.entity.RootEntity
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -25,7 +25,7 @@ class UserEntity(
     @Column(name = "is_account_available", nullable = false)
     var isAccountAvailable: Boolean,
 
-): RootEntity<Long>() {
+): org.whiteprint.platform.infra.persistence.jpa.entity.RootEntity<Long>() {
 
     override val useSoftDelete = true
 

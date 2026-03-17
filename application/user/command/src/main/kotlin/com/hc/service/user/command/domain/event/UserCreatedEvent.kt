@@ -1,6 +1,6 @@
 package com.hc.service.user.command.domain.event
 
-import com.hc.core.domain.event.DomainEvent
+import com.hc.core.platform.event.DomainEvent
 import java.time.Instant
 
 data class UserCreatedEvent(

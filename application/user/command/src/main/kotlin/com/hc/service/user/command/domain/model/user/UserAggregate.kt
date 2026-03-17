@@ -1,7 +1,7 @@
 package com.hc.service.user.command.domain.model.user
 
-import com.hc.core.domain.model.aggregate.Aggregate
-import com.hc.core.kernel.identifier.TsidGenerator
+import org.whiteprint.platform.core.domain.model.aggregate.Aggregate
+import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import java.io.Serializable
 import java.time.Instant
 import java.time.LocalDate
