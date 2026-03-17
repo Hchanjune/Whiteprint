@@ -7,13 +7,15 @@ import org.whiteprint.platform.adapter.security.verifier.policy.RevocationChecke
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Header
 import io.jsonwebtoken.Jwts
+import org.whiteprint.platform.adapter.security.provider.model.RefreshToken
+import org.whiteprint.platform.adapter.security.provider.policy.RefreshTokenKeyResolver
 
 class DefaultRefreshTokenVerifier (
-    private val keyResolver: org.whiteprint.platform.adapter.security.provider.policy.RefreshTokenKeyResolver,
+    private val keyResolver: RefreshTokenKeyResolver,
     private val revocationChecker: RevocationChecker
-): org.whiteprint.platform.adapter.security.provider.service.RefreshTokenVerifier {
+): RefreshTokenVerifier {
 
-    override fun verifyOrThrow(token: org.whiteprint.platform.adapter.security.provider.model.RefreshToken): org.whiteprint.platform.adapter.security.provider.model.RefreshTokenClaims {
+    override fun verifyOrThrow(token: RefreshToken): RefreshTokenClaims {
         return try {
             val claims = Jwts.parser()
                 .keyLocator { header: Header ->

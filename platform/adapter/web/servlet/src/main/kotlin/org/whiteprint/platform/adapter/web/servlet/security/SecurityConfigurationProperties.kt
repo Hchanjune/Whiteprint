@@ -10,6 +10,6 @@ data class SecurityConfigurationProperties(
     data class Rule(
         var path: String,
         var method: HttpMethod,
-        var decision: org.whiteprint.platform.adapter.web.servlet.security.SecurityDecision,
+        var decision: SecurityDecision,
     )
 }

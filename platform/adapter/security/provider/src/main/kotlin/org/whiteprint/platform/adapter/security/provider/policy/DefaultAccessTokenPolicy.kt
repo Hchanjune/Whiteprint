@@ -9,4 +9,4 @@ class DefaultAccessTokenPolicy(
         "user"
     ),
     override val ttl: Duration = Duration.ofMinutes(15),
-): org.whiteprint.platform.adapter.security.provider.policy.AccessTokenPolicy
+): AccessTokenPolicy

@@ -25,7 +25,7 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties(_root_ide_package_.org.whiteprint.platform.adapter.web.servlet.security.SecurityConfigurationProperties::class)
+@EnableConfigurationProperties(SecurityConfigurationProperties::class)
 class SecurityConfiguration {
 
     @Bean
@@ -33,9 +33,9 @@ class SecurityConfiguration {
 
     @Bean
     fun securityEntryPointProvider(
-        props: org.whiteprint.platform.adapter.web.servlet.security.SecurityConfigurationProperties,
-    ): org.whiteprint.platform.adapter.web.servlet.security.SecurityEntryPointProvider =
-        _root_ide_package_.org.whiteprint.platform.adapter.web.servlet.security.SecurityEntryPointProvider(props)
+        props: SecurityConfigurationProperties,
+    ): SecurityEntryPointProvider =
+        SecurityEntryPointProvider(props)
 
     @Bean
     fun passwordEncoder(): PasswordEncoder {
@@ -44,11 +44,11 @@ class SecurityConfiguration {
 
     @Bean
     fun revocationChecker(): RevocationChecker
-        = _root_ide_package_.org.whiteprint.platform.adapter.web.servlet.security.RevocationCheckerImpl()
+        = RevocationCheckerImpl()
 
     @Bean
     fun accessTokenKeyResolver(): AccessTokenVerificationKeyResolver
-        = _root_ide_package_.org.whiteprint.platform.adapter.web.servlet.security.AccessTokenKeyResolverImpl()
+        = AccessTokenKeyResolverImpl()
 
     @Bean
     fun accessTokenVerifier(
@@ -64,8 +64,8 @@ class SecurityConfiguration {
     fun statelessSecurityFilter(
         objectMapper: ObjectMapper,
         accessTokenVerifier: AccessTokenVerifier
-    ): org.whiteprint.platform.adapter.web.servlet.filter.StatelessSecurityFilter =
-        _root_ide_package_.org.whiteprint.platform.adapter.web.servlet.filter.StatelessSecurityFilter(
+    ): StatelessSecurityFilter =
+        StatelessSecurityFilter(
             objectMapper = objectMapper,
             accessTokenVerifier = accessTokenVerifier
         )
@@ -73,8 +73,8 @@ class SecurityConfiguration {
     @Bean
     fun statelessFilterChain(
         http: HttpSecurity,
-        statelessSecurityFilter: org.whiteprint.platform.adapter.web.servlet.filter.StatelessSecurityFilter,
-        securityEntryPointProvider: org.whiteprint.platform.adapter.web.servlet.security.SecurityEntryPointProvider,
+        statelessSecurityFilter: StatelessSecurityFilter,
+        securityEntryPointProvider: SecurityEntryPointProvider,
         corsConfigurationSource: CorsConfigurationSource
     ): SecurityFilterChain {
         return http

@@ -18,7 +18,7 @@ import tools.jackson.databind.ObjectMapper
 class StatelessSecurityFilter(
     private val objectMapper: ObjectMapper,
     private val accessTokenVerifier: AccessTokenVerifier
-): org.springframework.web.filter.OncePerRequestFilter() {
+): OncePerRequestFilter() {
 
     override fun shouldNotFilterErrorDispatch(): Boolean = true
 
@@ -27,7 +27,6 @@ class StatelessSecurityFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        println("activated")
         try {
             val token = extractToken(request)
             if (token != null) {

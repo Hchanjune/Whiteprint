@@ -1,9 +1,9 @@
 package org.whiteprint.platform.adapter.security.provider.service
 
-import com.hc.infra.security.provider.model.AccessTokenSigningKey
-import com.hc.infra.security.provider.model.RefreshToken
-import com.hc.infra.security.provider.model.RefreshTokenClaims
-import com.hc.infra.security.provider.model.RefreshTokenKey
+import org.whiteprint.platform.adapter.security.provider.model.AccessTokenSigningKey
+import org.whiteprint.platform.adapter.security.provider.model.RefreshToken
+import org.whiteprint.platform.adapter.security.provider.model.RefreshTokenClaims
+import org.whiteprint.platform.adapter.security.provider.model.RefreshTokenKey
 import org.whiteprint.platform.adapter.security.verifier.model.AccessToken
 import org.whiteprint.platform.adapter.security.verifier.model.AccessTokenClaims
 

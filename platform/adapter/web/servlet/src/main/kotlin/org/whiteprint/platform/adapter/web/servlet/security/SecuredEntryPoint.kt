@@ -5,5 +5,5 @@ import org.springframework.http.HttpMethod
 data class SecuredEntryPoint(
     val path: String,
     val method: HttpMethod,
-    val decision: org.whiteprint.platform.adapter.web.servlet.security.SecurityDecision,
+    val decision: SecurityDecision,
 )

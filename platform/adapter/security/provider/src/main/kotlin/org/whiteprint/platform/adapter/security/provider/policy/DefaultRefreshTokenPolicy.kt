@@ -10,4 +10,4 @@ class DefaultRefreshTokenPolicy(
     override val ttl: Duration = Duration.ofDays(30),
     override val rotationInterval: Duration,
     override val overlapPeriod: Duration
-): org.whiteprint.platform.adapter.security.provider.policy.RefreshTokenPolicy
+): RefreshTokenPolicy
