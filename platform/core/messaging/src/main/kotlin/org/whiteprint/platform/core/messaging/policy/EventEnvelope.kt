@@ -1,10 +1,9 @@
 package org.whiteprint.platform.core.messaging.policy
 
-import org.whiteprint.platform.core.messaging.model.Event
 import org.whiteprint.platform.core.messaging.model.EventType
 import java.time.Instant
 
-interface EventEnvelope<E: org.whiteprint.platform.core.messaging.model.Event> {
+interface EventEnvelope {
     val eventId: Long
     val traceId: String
     val causationId: String
@@ -13,9 +12,8 @@ interface EventEnvelope<E: org.whiteprint.platform.core.messaging.model.Event> {
     val producer: String
     val schemaVersion: String
     val partitionKey: Long
-    val eventType: org.whiteprint.platform.core.messaging.model.EventType
+    val eventType: EventType
     val eventName: String
-        get() = this.event.name
-    val event: E
+    val event: String
     val metadata: Map<String, String>
 }

@@ -6,11 +6,11 @@ import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import org.apache.kafka.common.serialization.Deserializer
 
-class KafkaEventDeserializer: Deserializer<org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>> {
+class KafkaEventDeserializer: Deserializer<EventEnvelope<*>> {
 
     private val serializer = JsonSerializer.default
 
-    override fun deserialize(topic: String, data: ByteArray): org.whiteprint.platform.core.messaging.policy.EventEnvelope<*> {
+    override fun deserialize(topic: String, data: ByteArray): EventEnvelope<*> {
         return try {
             serializer.readValue(data, EventEnvelope::class.java)
         } catch (exception: Exception) {

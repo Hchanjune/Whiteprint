@@ -6,5 +6,5 @@ import java.time.Duration
 interface CacheRepository {
     val keyPrefix: String
     val defaultTtl: Duration
-    val provider: org.whiteprint.platform.core.cache.provider.CacheProvider
+    val provider: CacheProvider
 }

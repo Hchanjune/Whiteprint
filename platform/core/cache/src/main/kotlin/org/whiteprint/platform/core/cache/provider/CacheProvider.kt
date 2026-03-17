@@ -8,10 +8,10 @@ import org.whiteprint.platform.core.cache.operation.SetOperations
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 
 interface CacheProvider {
-    val value: org.whiteprint.platform.core.cache.operation.ValueOperations
-    val atomic: org.whiteprint.platform.core.cache.operation.AtomicOperations
-    val batch: org.whiteprint.platform.core.cache.operation.BatchOperations
-    val list: org.whiteprint.platform.core.cache.operation.ListOperations
-    val set: org.whiteprint.platform.core.cache.operation.SetOperations
-    val lock: org.whiteprint.platform.core.cache.operation.DistributedLockOperations
+    val value: ValueOperations
+    val atomic: AtomicOperations
+    val batch: BatchOperations
+    val list: ListOperations
+    val set: SetOperations
+    val lock: DistributedLockOperations
 }

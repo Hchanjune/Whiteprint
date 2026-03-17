@@ -1,11 +1,11 @@
 package org.whiteprint.platform.infra.messaging.kafka.provider
 
-import com.hc.core.messaging.model.EventType
-import com.hc.core.messaging.policy.EventEnvelope
-import com.hc.core.messaging.policy.TopicResolver
-import com.hc.core.messaging.provider.EventProducer
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.kafka.core.KafkaTemplate
+import org.whiteprint.platform.core.messaging.model.EventType
+import org.whiteprint.platform.core.messaging.policy.EventEnvelope
+import org.whiteprint.platform.core.messaging.policy.TopicResolver
+import org.whiteprint.platform.core.messaging.provider.EventProducer
 
 class KafkaEventProducer(
     private val topicResolver: TopicResolver,

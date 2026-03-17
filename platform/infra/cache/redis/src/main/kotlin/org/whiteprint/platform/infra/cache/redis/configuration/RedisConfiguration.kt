@@ -29,9 +29,9 @@ import org.springframework.data.redis.serializer.RedisSerializer
 import java.time.Duration
 
 @Configuration
-@EnableConfigurationProperties(_root_ide_package_.org.whiteprint.platform.infra.cache.redis.configuration.RedisConfigurationProperties::class)
+@EnableConfigurationProperties(RedisConfigurationProperties::class)
 class RedisConfiguration(
-    private val redisProperties: org.whiteprint.platform.infra.cache.redis.configuration.RedisConfigurationProperties,
+    private val redisProperties: RedisConfigurationProperties,
 ) {
 
     @Bean
@@ -64,58 +64,58 @@ class RedisConfiguration(
     }
 
     @Bean
-    fun distributedLockOwnerProvider(): org.whiteprint.platform.core.cache.provider.DistributedLockOwnerProvider =
-        _root_ide_package_.org.whiteprint.platform.infra.cache.redis.provider.DefaultDistributedLockOwnerProvider()
+    fun distributedLockOwnerProvider(): DistributedLockOwnerProvider =
+        DefaultDistributedLockOwnerProvider()
 
     @Bean
     fun valueOperations(
         redisTemplate: RedisTemplate<String, Any>,
-    ): org.whiteprint.platform.core.cache.operation.ValueOperations =
-        _root_ide_package_.org.whiteprint.platform.infra.cache.redis.operation.RedisValueOperations(redisTemplate)
+    ): ValueOperations =
+        RedisValueOperations(redisTemplate)
 
     @Bean
     fun atomicOperation(
         redisTemplate: RedisTemplate<String, Any>,
-    ): org.whiteprint.platform.core.cache.operation.AtomicOperations =
-        _root_ide_package_.org.whiteprint.platform.infra.cache.redis.operation.RedisAtomicOperations(redisTemplate)
+    ): AtomicOperations =
+        RedisAtomicOperations(redisTemplate)
 
     @Bean
     fun batchOperations(
         redisTemplate: RedisTemplate<String, Any>,
-    ): org.whiteprint.platform.core.cache.operation.BatchOperations =
-        _root_ide_package_.org.whiteprint.platform.infra.cache.redis.operation.RedisBatchOperations(redisTemplate)
+    ): BatchOperations =
+        RedisBatchOperations(redisTemplate)
 
     @Bean
     fun listOperations(
         redisTemplate: RedisTemplate<String, Any>,
-    ): org.whiteprint.platform.core.cache.operation.ListOperations =
-        _root_ide_package_.org.whiteprint.platform.infra.cache.redis.operation.RedisListOperations(redisTemplate)
+    ): ListOperations =
+        RedisListOperations(redisTemplate)
 
     @Bean
     fun setOperations(
         redisTemplate: RedisTemplate<String, Any>,
-    ): org.whiteprint.platform.core.cache.operation.SetOperations =
-        _root_ide_package_.org.whiteprint.platform.infra.cache.redis.operation.RedisSetOperations(redisTemplate)
+    ): SetOperations =
+        RedisSetOperations(redisTemplate)
 
     @Bean
     fun distributedLockOperations(
         redisTemplate: RedisTemplate<String, Any>,
-        distributedLockOwnerProvider: org.whiteprint.platform.core.cache.provider.DistributedLockOwnerProvider,
-    ): org.whiteprint.platform.core.cache.operation.DistributedLockOperations =
-        _root_ide_package_.org.whiteprint.platform.infra.cache.redis.operation.RedisDistributedLockOperations(
+        distributedLockOwnerProvider: DistributedLockOwnerProvider,
+    ): DistributedLockOperations =
+        RedisDistributedLockOperations(
             redisTemplate,
             distributedLockOwnerProvider.provideOwner()
         )
 
     @Bean
     fun cacheProvider(
-        valueOperations: org.whiteprint.platform.core.cache.operation.ValueOperations,
-        atomicOperation: org.whiteprint.platform.core.cache.operation.AtomicOperations,
-        batchOperations: org.whiteprint.platform.core.cache.operation.BatchOperations,
-        listOperations: org.whiteprint.platform.core.cache.operation.ListOperations,
-        setOperations: org.whiteprint.platform.core.cache.operation.SetOperations,
-        distributedLockOperations: org.whiteprint.platform.core.cache.operation.DistributedLockOperations
-    ): org.whiteprint.platform.core.cache.provider.CacheProvider = _root_ide_package_.org.whiteprint.platform.infra.cache.redis.provider.RedisCacheProvider(
+        valueOperations: ValueOperations,
+        atomicOperation: AtomicOperations,
+        batchOperations: BatchOperations,
+        listOperations: ListOperations,
+        setOperations: SetOperations,
+        distributedLockOperations: DistributedLockOperations
+    ): CacheProvider = RedisCacheProvider(
         value = valueOperations,
         atomic = atomicOperation,
         batch = batchOperations,

@@ -5,14 +5,14 @@ import java.time.Duration
 
 interface BatchOperations {
 
-    fun multiGetRaw(keys: List<org.whiteprint.platform.core.cache.model.CacheKey>): List<Any?>
+    fun multiGetRaw(keys: List<CacheKey>): List<Any?>
 
-    fun <T: Any> multiSet(map: Map<org.whiteprint.platform.core.cache.model.CacheKey, T>)
+    fun <T: Any> multiSet(map: Map<CacheKey, T>)
 
-    fun multiDelete(keys: List<org.whiteprint.platform.core.cache.model.CacheKey>)
+    fun multiDelete(keys: List<CacheKey>)
 
-    fun multiExpire(keys: List<org.whiteprint.platform.core.cache.model.CacheKey>, ttl: Duration)
+    fun multiExpire(keys: List<CacheKey>, ttl: Duration)
 
-    fun <T: Any> multiSetAndExpire(map: Map<org.whiteprint.platform.core.cache.model.CacheKey, T>, ttl: Duration)
+    fun <T: Any> multiSetAndExpire(map: Map<CacheKey, T>, ttl: Duration)
 
 }

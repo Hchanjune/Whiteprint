@@ -1,9 +1,5 @@
 package org.whiteprint.platform.infra.messaging.kafka.configuration
 
-import org.whiteprint.platform.core.messaging.policy.EventEnvelope
-import org.whiteprint.platform.core.messaging.policy.EventException
-import org.whiteprint.platform.core.messaging.policy.EventPolicy
-import org.whiteprint.platform.core.messaging.policy.TopicResolver
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaEventDeserializer
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaEventSerializer
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaTopicResolver
@@ -24,6 +20,10 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.util.backoff.FixedBackOff
+import org.whiteprint.platform.core.messaging.policy.EventEnvelope
+import org.whiteprint.platform.core.messaging.policy.EventException
+import org.whiteprint.platform.core.messaging.policy.EventPolicy
+import org.whiteprint.platform.core.messaging.policy.TopicResolver
 
 @Configuration
 @EnableConfigurationProperties(KafkaConfigurationProperties::class)
@@ -32,18 +32,18 @@ class KafkaConfiguration(
 ) {
 
     @Bean
-    fun topicResolver(): org.whiteprint.platform.core.messaging.policy.TopicResolver {
+    fun topicResolver(): TopicResolver {
         val topicPartRegex = Regex("^[a-z0-9-]+$")
         val producer = kafkaProperties.producer
         val parts = listOf(producer.prefix, producer.host, producer.topic, producer.version)
 
         if (producer.topic.isBlank() || producer.topic == "topic") {
-            throw _root_ide_package_.org.whiteprint.platform.core.messaging.policy.EventException(_root_ide_package_.org.whiteprint.platform.core.messaging.policy.EventPolicy.TOPIC_NOT_CONFIGURED)
+            throw EventException(EventPolicy.TOPIC_NOT_CONFIGURED)
         }
 
         parts.filter { it.isNotBlank() }.forEach { part ->
             if (!topicPartRegex.matches(part)) {
-                throw _root_ide_package_.org.whiteprint.platform.core.messaging.policy.EventException(_root_ide_package_.org.whiteprint.platform.core.messaging.policy.EventPolicy.INVALID_TOPIC_FORMAT)
+                throw EventException(EventPolicy.INVALID_TOPIC_FORMAT)
             }
         }
 
@@ -57,7 +57,7 @@ class KafkaConfiguration(
 
     @Bean
     fun autoCreateTopic(
-        topicResolver: org.whiteprint.platform.core.messaging.policy.TopicResolver,
+        topicResolver: TopicResolver,
     ): NewTopic {
         return TopicBuilder.name(topicResolver.resolve())
             .partitions(kafkaProperties.producer.partitions)
@@ -66,7 +66,7 @@ class KafkaConfiguration(
     }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<Long, org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>> {
+    fun consumerFactory(): ConsumerFactory<Long, EventEnvelope<*>> {
         val config = mutableMapOf<String, Any>()
         config[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
         config[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "${kafkaProperties.host}:${kafkaProperties.port}"
@@ -77,9 +77,9 @@ class KafkaConfiguration(
 
     @Bean
     fun kafkaListenerContainerFactory(
-        consumerFactory: ConsumerFactory<Long, org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>>
-    ): ConcurrentKafkaListenerContainerFactory<Long, org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>> {
-        val factory = ConcurrentKafkaListenerContainerFactory<Long, org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>>()
+        consumerFactory: ConsumerFactory<Long, EventEnvelope<*>>
+    ): ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope<*>> {
+        val factory = ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope<*>>()
         factory.setConsumerFactory(consumerFactory)
         factory.setConcurrency(kafkaProperties.listener.concurrency)
         val backoff = FixedBackOff(kafkaProperties.retry.backoffInterval, kafkaProperties.retry.maxAttempts)
@@ -88,7 +88,7 @@ class KafkaConfiguration(
     }
 
     @Bean
-    fun producerFactory(): ProducerFactory<Long, org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>> {
+    fun producerFactory(): ProducerFactory<Long, EventEnvelope<*>> {
         val config = mutableMapOf<String, Any>()
         config[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = "${kafkaProperties.host}:${kafkaProperties.port}"
         config[ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG] = true
@@ -100,8 +100,8 @@ class KafkaConfiguration(
 
     @Bean
     fun kafkaTemplate(
-        producerFactory: ProducerFactory<Long, org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>>,
-    ): KafkaTemplate<Long, org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>> {
+        producerFactory: ProducerFactory<Long, EventEnvelope<*>>,
+    ): KafkaTemplate<Long, EventEnvelope<*>> {
         return KafkaTemplate(producerFactory)
     }
 

@@ -5,20 +5,20 @@ import java.time.Duration
 
 interface ValueOperations {
 
-    fun raw(key: org.whiteprint.platform.core.cache.model.CacheKey): Any?
+    fun raw(key: CacheKey): Any?
 
-    fun set(key: org.whiteprint.platform.core.cache.model.CacheKey, value: Any)
+    fun set(key: CacheKey, value: Any)
 
-    fun setWithTtl(key: org.whiteprint.platform.core.cache.model.CacheKey, value: Any, ttl: Duration)
+    fun setWithTtl(key: CacheKey, value: Any, ttl: Duration)
 
-    fun setIfAbsent(key: org.whiteprint.platform.core.cache.model.CacheKey, value: Any): Boolean
+    fun setIfAbsent(key: CacheKey, value: Any): Boolean
 
-    fun setIfAbsentWithTtl(key: org.whiteprint.platform.core.cache.model.CacheKey, value: Any, ttl: Duration): Boolean
+    fun setIfAbsentWithTtl(key: CacheKey, value: Any, ttl: Duration): Boolean
 
-    fun delete(key: org.whiteprint.platform.core.cache.model.CacheKey): Boolean
+    fun delete(key: CacheKey): Boolean
 
-    fun exists(key: org.whiteprint.platform.core.cache.model.CacheKey): Boolean
+    fun exists(key: CacheKey): Boolean
 
-    fun expire(key: org.whiteprint.platform.core.cache.model.CacheKey, ttl: Duration): Boolean
+    fun expire(key: CacheKey, ttl: Duration): Boolean
 
 }

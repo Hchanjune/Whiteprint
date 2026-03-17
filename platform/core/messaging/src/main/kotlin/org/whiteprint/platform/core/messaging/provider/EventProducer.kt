@@ -4,6 +4,6 @@ import org.whiteprint.platform.core.messaging.policy.EventEnvelope
 
 interface EventProducer {
 
-    fun produce(envelope: org.whiteprint.platform.core.messaging.policy.EventEnvelope<*>)
+    fun produce(envelope: EventEnvelope<*>)
 
 }

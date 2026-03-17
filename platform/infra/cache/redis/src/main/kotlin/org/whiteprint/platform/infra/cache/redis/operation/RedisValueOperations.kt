@@ -1,9 +1,9 @@
 package org.whiteprint.platform.infra.cache.redis.operation
 
-import com.hc.core.cache.model.CacheKey
-import com.hc.core.cache.model.CacheValidator
-import com.hc.core.cache.operation.ValueOperations
 import org.springframework.data.redis.core.RedisTemplate
+import org.whiteprint.platform.core.cache.model.CacheKey
+import org.whiteprint.platform.core.cache.model.CacheValidator
+import org.whiteprint.platform.core.cache.operation.ValueOperations
 import java.time.Duration
 
 class RedisValueOperations(
