@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm")
 }
 
 group = "com.hc"
@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":core-kernel"))
+    implementation(project(":core:kernel"))
 }
 
 kotlin {

@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("tools.jackson:jackson-bom:3.1.0"))
+    api(platform("tools.jackson:jackson-bom:3.1.0"))
     api("tools.jackson.core:jackson-databind")
     implementation("tools.jackson.module:jackson-module-kotlin")
 

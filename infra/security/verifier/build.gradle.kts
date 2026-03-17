@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":core-kernel"))
+    api(project(":core:kernel"))
 
     api("io.jsonwebtoken:jjwt-api:0.13.0")
     api("io.jsonwebtoken:jjwt-impl:0.13.0")

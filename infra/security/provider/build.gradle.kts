@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":infra-security:verifier"))
+    api(project(":infra:security:verifier"))
 }
 
 kotlin {

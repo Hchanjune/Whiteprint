@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":core-kernel"))
+    implementation(project(":core:kernel"))
 }
 
 kotlin {

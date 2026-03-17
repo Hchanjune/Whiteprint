@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    `maven-publish`
 }
 
 group = "com.hc.infra.jpa"
@@ -14,7 +15,12 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":infra-jpa:core"))
+    api(project(":core:kernel"))
+    api(project(":core:domain"))
+
+    api("org.springframework.boot:spring-boot-starter-data-jpa")
+    compileOnly("org.springframework.boot:spring-boot-autoconfigure")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
 
 kotlin {

@@ -15,11 +15,11 @@ repositories {
 
 dependencies {
     // Cores
-    api(project(":core-kernel"))
-    api(project(":core-domain"))
+    api(project(":core:kernel"))
+    api(project(":core:domain"))
 
     // Infra
-    api(project(":infra-security:verifier"))
+    api(project(":infra:security:verifier"))
 
     //OperationManagerKit
     api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.5.5")

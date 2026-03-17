@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    api(project(":core-kernel"))
-    api(project(":core-messaging"))
+    api(project(":core:kernel"))
+    api(project(":core:messaging"))
 
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-autoconfigure")
