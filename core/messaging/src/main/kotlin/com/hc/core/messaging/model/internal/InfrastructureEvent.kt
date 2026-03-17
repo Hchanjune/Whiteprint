@@ -1,3 +1,3 @@
 package com.hc.core.messaging.model.internal
 
-interface InfrastructureEvent: InternalEvent
+interface InfrastructureEvent<out T>: InternalEvent<T>

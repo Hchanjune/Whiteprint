@@ -1,3 +1,3 @@
 package com.hc.core.messaging.model.external
 
-interface CompensationEvent: ExternalEvent
+interface CompensationEvent<out T>: ExternalEvent<T>

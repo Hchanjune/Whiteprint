@@ -1,9 +1,9 @@
 package com.hc.core.messaging.policy
 
-import com.hc.core.messaging.model.Event
+import com.hc.core.messaging.model.EventOutbox
 
 interface EventEnveloper {
 
-    fun <E: Event> envelope(event: E): EventEnvelope<E>
+    fun <E: EventOutbox> envelope(eventOutbox: E): EventEnvelope<E>
 
 }

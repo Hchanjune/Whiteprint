@@ -8,9 +8,9 @@ interface EventPublisher {
         this.publishAll(recorder.pullEvents())
     }
 
-    fun <E: Event> publish(event: E)
+    fun <E: Event<Any>> publish(event: E)
 
-    fun <E: Event> publishAll(events: Collection<E>) {
+    fun <E: Event<Any>> publishAll(events: Collection<E>) {
         events.forEach { publish(it) }
     }
 
