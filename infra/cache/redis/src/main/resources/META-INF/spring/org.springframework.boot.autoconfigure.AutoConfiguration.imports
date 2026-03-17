@@ -1,1 +1,1 @@
-com.hc.infra.redis.core.configuration.InfraRedisAutoConfiguration.imports
+com.hc.infra.cache.redis.configuration.InfraRedisAutoConfiguration.imports

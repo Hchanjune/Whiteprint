@@ -1,1 +1,1 @@
-com.hc.infra.kafka.core.configuration.InfraKafkaAutoConfiguration.imports
+com.hc.infra.messaging.kafka.configuration.InfraKafkaAutoConfiguration.imports

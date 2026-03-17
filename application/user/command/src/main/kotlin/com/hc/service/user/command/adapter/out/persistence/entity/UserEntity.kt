@@ -1,6 +1,6 @@
 package com.hc.service.user.command.adapter.out.persistence.entity
 
-import com.hc.infra.jpa.core.entity.RootEntity
+import com.hc.infra.persistence.jpa.entity.RootEntity
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

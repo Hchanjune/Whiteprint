@@ -1,0 +1,47 @@
+package com.hc.infra.persistence.jpa.repository
+
+import com.hc.infra.persistence.jpa.entity.BaseEntity
+import com.hc.infra.persistence.jpa.entity.contract.DeletableEntity
+import jakarta.persistence.EntityManager
+import org.springframework.data.jpa.repository.support.JpaEntityInformation
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository
+import org.springframework.transaction.annotation.Transactional
+import java.io.Serializable
+
+class OptimizedJpaRepository<T: Any, ID: Serializable>(
+    entityInformation: JpaEntityInformation<T, ID>,
+    private val entityManager: EntityManager
+): SimpleJpaRepository<T, ID>(entityInformation, entityManager) {
+
+    @Transactional
+    override fun <S: T> save(entity: S): S {
+        return if (entity is BaseEntity<out Serializable>) {
+            if (entity.isNew) {
+                entityManager.persist(entity)
+                entity
+            } else {
+                entityManager.merge(entity)
+            }
+        } else {
+            super.save(entity)
+        }
+    }
+
+    @Transactional
+    override fun delete(entity: T) {
+        if (entity is DeletableEntity) {
+            if (entity.useSoftDelete) {
+                entity.delete()
+                this.save(entity)
+                return
+            }
+        }
+        super.delete(entity)
+    }
+
+    @Transactional
+    override fun deleteById(id: ID) {
+        findById(id).ifPresent { this.delete(it) }
+    }
+
+}
