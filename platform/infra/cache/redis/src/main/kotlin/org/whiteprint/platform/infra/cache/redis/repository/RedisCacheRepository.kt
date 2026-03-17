@@ -1,8 +1,8 @@
 package org.whiteprint.platform.infra.cache.redis.repository
 
-import com.hc.core.cache.provider.CacheProvider
-import com.hc.core.cache.repository.CacheRepository
 import org.springframework.stereotype.Repository
+import org.whiteprint.platform.core.cache.provider.CacheProvider
+import org.whiteprint.platform.core.cache.repository.CacheRepository
 import java.time.Duration
 
 @Repository

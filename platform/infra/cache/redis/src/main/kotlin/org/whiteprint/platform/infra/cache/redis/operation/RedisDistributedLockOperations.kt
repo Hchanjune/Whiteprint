@@ -1,12 +1,12 @@
 package org.whiteprint.platform.infra.cache.redis.operation
 
-import com.hc.core.cache.model.CacheKey
-import com.hc.core.cache.model.CacheLockHandle
-import com.hc.core.cache.model.CacheValidator
-import com.hc.core.cache.operation.DistributedLockOperations
 import org.whiteprint.platform.infra.cache.redis.model.FencingKey
 import org.whiteprint.platform.infra.cache.redis.model.LuaScript
 import org.springframework.data.redis.core.RedisTemplate
+import org.whiteprint.platform.core.cache.model.CacheKey
+import org.whiteprint.platform.core.cache.model.CacheLockHandle
+import org.whiteprint.platform.core.cache.model.CacheValidator
+import org.whiteprint.platform.core.cache.operation.DistributedLockOperations
 import java.time.Duration
 
 class RedisDistributedLockOperations(
@@ -58,16 +58,16 @@ class RedisDistributedLockOperations(
         """
 
         private val acquireLockWithTokenScript =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+            LuaScript(
                 script = ACQUIRE_LOCK_SCRIPT,
                 resultType = Long::class.java,
             )
-        private val releaseLockScript = _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+        private val releaseLockScript = LuaScript(
             script = RELEASE_LOCK_SCRIPT,
             resultType = Long::class.java,
         )
 
-        private val extendLockScript = _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+        private val extendLockScript = LuaScript(
             script = EXTEND_LOCK_SCRIPT,
             resultType = Long::class.java,
         )
@@ -82,7 +82,7 @@ class RedisDistributedLockOperations(
         CacheValidator.validateTtlOrThrow(ttl)
 
         val fencingKey =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.FencingKey("${key.value}$FENCING_TOKEN_SUFFIX")
+            FencingKey("${key.value}$FENCING_TOKEN_SUFFIX")
 
         val token = redisTemplate.execute(
             acquireLockWithTokenScript.redisScript,

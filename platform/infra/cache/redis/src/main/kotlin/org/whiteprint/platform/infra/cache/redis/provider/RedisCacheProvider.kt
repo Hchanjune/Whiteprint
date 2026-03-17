@@ -1,12 +1,12 @@
 package org.whiteprint.platform.infra.cache.redis.provider
 
-import com.hc.core.cache.operation.AtomicOperations
-import com.hc.core.cache.operation.BatchOperations
-import com.hc.core.cache.operation.DistributedLockOperations
-import com.hc.core.cache.operation.ListOperations
-import com.hc.core.cache.operation.SetOperations
-import com.hc.core.cache.operation.ValueOperations
-import com.hc.core.cache.provider.CacheProvider
+import org.whiteprint.platform.core.cache.operation.AtomicOperations
+import org.whiteprint.platform.core.cache.operation.BatchOperations
+import org.whiteprint.platform.core.cache.operation.DistributedLockOperations
+import org.whiteprint.platform.core.cache.operation.ListOperations
+import org.whiteprint.platform.core.cache.operation.SetOperations
+import org.whiteprint.platform.core.cache.operation.ValueOperations
+import org.whiteprint.platform.core.cache.provider.CacheProvider
 
 class RedisCacheProvider(
     override val value: ValueOperations,

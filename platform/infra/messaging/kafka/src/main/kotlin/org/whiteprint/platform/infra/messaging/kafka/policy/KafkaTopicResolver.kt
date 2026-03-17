@@ -1,6 +1,6 @@
 package org.whiteprint.platform.infra.messaging.kafka.policy
 
-import com.hc.core.messaging.policy.TopicResolver
+import org.whiteprint.platform.core.messaging.policy.TopicResolver
 
 class KafkaTopicResolver(
     private val prefix: String,

@@ -1,10 +1,10 @@
 package org.whiteprint.platform.infra.messaging.kafka.policy
 
 import org.whiteprint.platform.core.kernel.serializer.JsonSerializer
-import com.hc.core.messaging.policy.EventEnvelope
-import com.hc.core.messaging.policy.EventException
-import com.hc.core.messaging.policy.EventPolicy
 import org.apache.kafka.common.serialization.Serializer
+import org.whiteprint.platform.core.messaging.policy.EventEnvelope
+import org.whiteprint.platform.core.messaging.policy.EventException
+import org.whiteprint.platform.core.messaging.policy.EventPolicy
 
 class KafkaEventSerializer: Serializer<EventEnvelope<*>> {
 

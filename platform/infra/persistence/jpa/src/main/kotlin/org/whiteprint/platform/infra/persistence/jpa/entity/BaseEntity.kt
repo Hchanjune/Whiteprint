@@ -10,8 +10,7 @@ import jakarta.persistence.Transient
 import java.io.Serializable
 
 @MappedSuperclass
-abstract class BaseEntity<ID: Serializable>:
-    org.whiteprint.platform.infra.persistence.jpa.entity.contract.PersistableEntity<ID> {
+abstract class BaseEntity<ID: Serializable>: PersistableEntity<ID> {
 
     @Id
     @Column(name = "id")

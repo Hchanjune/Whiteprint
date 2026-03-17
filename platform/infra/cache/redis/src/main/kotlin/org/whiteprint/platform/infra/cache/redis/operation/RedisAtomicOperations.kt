@@ -5,13 +5,13 @@ import org.whiteprint.platform.core.cache.model.CacheValidator
 import org.whiteprint.platform.core.cache.operation.AtomicOperations
 import org.whiteprint.platform.core.cache.policy.CacheException
 import org.whiteprint.platform.core.cache.policy.CachePolicy
-import org.whiteprint.platform.infra.cache.redis.model.LuaScript
 import org.springframework.data.redis.core.RedisTemplate
+import org.whiteprint.platform.infra.cache.redis.model.LuaScript
 import java.time.Duration
 
 class RedisAtomicOperations(
     private val redisTemplate: RedisTemplate<String, Any>
-) : org.whiteprint.platform.core.cache.operation.AtomicOperations {
+) : AtomicOperations {
 
     companion object {
         /**
@@ -103,41 +103,41 @@ class RedisAtomicOperations(
         """
 
         private val incrementAndExpireScript =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+            LuaScript(
                 script = INCREMENT_AND_EXPIRE_SCRIPT,
                 resultType = Long::class.java
             )
 
         private val decrementAndExpireScript =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+            LuaScript(
                 script = DECREMENT_AND_EXPIRE_SCRIPT,
                 resultType = Long::class.java
             )
 
         private val incrementWithLimitScript =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+            LuaScript(
                 script = INCREMENT_WITH_LIMIT_SCRIPT,
                 resultType = List::class.java
             )
         private val incrementWithLimitAndExpireScript =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+            LuaScript(
                 script = INCREMENT_WITH_LIMIT_AND_EXPIRE_SCRIPT,
                 resultType = List::class.java
             )
 
         private val decrementWithLimitScript =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+            LuaScript(
                 script = DECREMENT_WITH_LIMIT_SCRIPT,
                 resultType = List::class.java
             )
         private val decrementWithLimitAndExpireScript =
-            _root_ide_package_.org.whiteprint.platform.infra.cache.redis.model.LuaScript(
+            LuaScript(
                 script = DECREMENT_WITH_LIMIT_AND_EXPIRE_SCRIPT,
                 resultType = List::class.java
             )
     }
 
-    override fun incrementOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, delta: Long): Long {
+    override fun incrementOrThrow(key: CacheKey, delta: Long): Long {
         return redisTemplate.opsForValue().increment(key.value, delta)?:
         throw CacheException(
             policy = CachePolicy.INCREMENT_FAILED,

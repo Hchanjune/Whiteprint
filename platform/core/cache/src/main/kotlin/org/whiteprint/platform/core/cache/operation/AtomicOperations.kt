@@ -4,15 +4,15 @@ import org.whiteprint.platform.core.cache.model.CacheKey
 import java.time.Duration
 
 interface AtomicOperations {
-    fun incrementOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, delta: Long = 1L): Long
-    fun incrementAndExpireOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, ttl: Duration, delta: Long = 1L): Long
+    fun incrementOrThrow(key: CacheKey, delta: Long = 1L): Long
+    fun incrementAndExpireOrThrow(key: CacheKey, ttl: Duration, delta: Long = 1L): Long
 
-    fun incrementWithLimitOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, delta: Long = 1L, limit: Long): Long
-    fun incrementWithLimitAndExpireOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, delta: Long = 1L, limit: Long, ttl: Duration): Long
+    fun incrementWithLimitOrThrow(key: CacheKey, delta: Long = 1L, limit: Long): Long
+    fun incrementWithLimitAndExpireOrThrow(key: CacheKey, delta: Long = 1L, limit: Long, ttl: Duration): Long
 
-    fun decrementOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, delta: Long = 1L): Long
-    fun decrementAndExpireOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, ttl: Duration, delta: Long = 1L): Long
+    fun decrementOrThrow(key: CacheKey, delta: Long = 1L): Long
+    fun decrementAndExpireOrThrow(key: CacheKey, ttl: Duration, delta: Long = 1L): Long
 
-    fun decrementWithLimitOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, delta: Long = 1L, limit: Long): Long
-    fun decrementWithLimitAndExpireOrThrow(key: org.whiteprint.platform.core.cache.model.CacheKey, delta: Long = 1L, limit: Long, ttl: Duration): Long
+    fun decrementWithLimitOrThrow(key: CacheKey, delta: Long = 1L, limit: Long): Long
+    fun decrementWithLimitAndExpireOrThrow(key: CacheKey, delta: Long = 1L, limit: Long, ttl: Duration): Long
 }

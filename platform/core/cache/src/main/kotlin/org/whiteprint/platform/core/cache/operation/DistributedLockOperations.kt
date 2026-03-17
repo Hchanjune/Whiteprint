@@ -7,12 +7,12 @@ import java.time.Duration
 interface DistributedLockOperations {
 
     fun acquireLock(
-        key: org.whiteprint.platform.core.cache.model.CacheKey,
+        key: CacheKey,
         ttl: Duration
-    ): org.whiteprint.platform.core.cache.model.CacheLockHandle?
+    ): CacheLockHandle?
 
-    fun releaseLock(lock: org.whiteprint.platform.core.cache.model.CacheLockHandle): Boolean
+    fun releaseLock(lock: CacheLockHandle): Boolean
 
-    fun extendLock(lock: org.whiteprint.platform.core.cache.model.CacheLockHandle, ttl: Duration): Boolean
+    fun extendLock(lock: CacheLockHandle, ttl: Duration): Boolean
 
 }

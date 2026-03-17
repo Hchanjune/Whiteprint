@@ -9,8 +9,7 @@ import java.io.Serializable
 import java.time.Instant
 
 @MappedSuperclass
-abstract class RootEntity<ID: Serializable>: org.whiteprint.platform.infra.persistence.jpa.entity.BaseEntity<ID>(),
-    org.whiteprint.platform.infra.persistence.jpa.entity.contract.AuditableEntity {
+abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity {
 
     @Column(name = "inserted_at", nullable = false)
     override var insertedAt: Instant = Instant.now()
