@@ -1,5 +1,6 @@
 package org.whiteprint.platform.infra.cache.redis.configuration
 
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.whiteprint.platform.core.cache.operation.AtomicOperations
 import org.whiteprint.platform.core.cache.operation.BatchOperations
 import org.whiteprint.platform.core.cache.operation.DistributedLockOperations
@@ -19,11 +20,13 @@ import org.whiteprint.platform.infra.cache.redis.provider.RedisCacheProvider
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializer
 import java.time.Duration
@@ -34,31 +37,49 @@ class RedisConfiguration(
     private val redisProperties: RedisConfigurationProperties,
 ) {
 
+    @Primary
     @Bean
     fun redisConnectionFactory(): RedisConnectionFactory {
-        val serverConfig = RedisStandaloneConfiguration(
-            redisProperties.host,
-            redisProperties.port
-        ).apply {
-            password = RedisPassword.of(redisProperties.password)
+        val datasource = redisProperties.datasource
+        val timeout = redisProperties.timeout
+        val pooling = redisProperties.pooling
+
+        val serverConfig = RedisStandaloneConfiguration(datasource.host, datasource.port).apply {
+            password = RedisPassword.of(datasource.password)
+            database = datasource.database
         }
 
-        val clientConfig = LettuceClientConfiguration.builder()
-            .commandTimeout(Duration.ofMillis(redisProperties.timeout.commandTimeoutMillis))
-            .shutdownTimeout(Duration.ofMillis(redisProperties.timeout.shutdownTimeoutMillis))
+        val clientConfigBuilder = if (pooling.enabled) {
+            val poolConfig = GenericObjectPoolConfig<io.lettuce.core.api.StatefulConnection<*, *>>().apply {
+                maxTotal = pooling.maxActive
+                maxIdle = pooling.maxIdle
+                minIdle = pooling.minIdle
+                if (pooling.maxWaitMillis > 0) {
+                    setMaxWait(Duration.ofMillis(pooling.maxWaitMillis))
+                }
+            }
+            LettucePoolingClientConfiguration.builder().poolConfig(poolConfig)
+        } else {
+            LettuceClientConfiguration.builder()
+        }
+
+        val clientConfig = clientConfigBuilder
+            .commandTimeout(Duration.ofMillis(timeout.commandTimeoutMillis))
+            .shutdownTimeout(Duration.ofMillis(timeout.shutdownTimeoutMillis))
             .build()
 
         return LettuceConnectionFactory(serverConfig, clientConfig)
     }
 
+    @Primary
     @Bean
     fun redisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
         return RedisTemplate<String, Any>().apply {
-            this.connectionFactory = connectionFactory
-            this.keySerializer = RedisSerializer.string()
-            this.hashKeySerializer = RedisSerializer.string()
-            this.valueSerializer = RedisSerializer.json()
-            this.hashValueSerializer = RedisSerializer.json()
+            setConnectionFactory(connectionFactory)
+            keySerializer = RedisSerializer.string()
+            hashKeySerializer = RedisSerializer.string()
+            valueSerializer = RedisSerializer.json()
+            hashValueSerializer = RedisSerializer.json()
             afterPropertiesSet()
         }
     }
@@ -66,6 +87,16 @@ class RedisConfiguration(
     @Bean
     fun distributedLockOwnerProvider(): DistributedLockOwnerProvider =
         DefaultDistributedLockOwnerProvider()
+
+    @Bean
+    fun distributedLockOperations(
+        redisTemplate: RedisTemplate<String, Any>,
+        distributedLockOwnerProvider: DistributedLockOwnerProvider,
+    ): DistributedLockOperations =
+        RedisDistributedLockOperations(
+            redisTemplate,
+            distributedLockOwnerProvider.provideOwner()
+        )
 
     @Bean
     fun valueOperations(
@@ -96,16 +127,6 @@ class RedisConfiguration(
         redisTemplate: RedisTemplate<String, Any>,
     ): SetOperations =
         RedisSetOperations(redisTemplate)
-
-    @Bean
-    fun distributedLockOperations(
-        redisTemplate: RedisTemplate<String, Any>,
-        distributedLockOwnerProvider: DistributedLockOwnerProvider,
-    ): DistributedLockOperations =
-        RedisDistributedLockOperations(
-            redisTemplate,
-            distributedLockOwnerProvider.provideOwner()
-        )
 
     @Bean
     fun cacheProvider(

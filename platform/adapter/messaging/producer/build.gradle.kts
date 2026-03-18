@@ -17,6 +17,7 @@ dependencies {
     api(project(":platform:infra:messaging:kafka"))
 
     implementation("org.springframework:spring-tx")
+    implementation("org.springframework:spring-context")
 }
 
 kotlin {

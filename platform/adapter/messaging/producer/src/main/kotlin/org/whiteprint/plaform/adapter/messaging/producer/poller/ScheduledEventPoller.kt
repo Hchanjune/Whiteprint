@@ -1,5 +1,6 @@
-package org.whiteprint.plaform.adapter.messaging.producer
+package org.whiteprint.plaform.adapter.messaging.producer.poller
 
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.core.messaging.contract.EventEnveloper
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
@@ -12,6 +13,7 @@ open class ScheduledEventPoller(
     private val producer: EventProducer,
 ): EventPoller {
 
+    @Scheduled(fixedDelay = 1000)
     @Transactional
     override fun pollOnce(): Int {
         val events = outboxEventStore.lockPending(limit = 100)
