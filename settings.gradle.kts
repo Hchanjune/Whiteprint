@@ -1,9 +1,9 @@
 rootProject.name = "Whiteprint"
 
 // Application
-include("application:auth")
-include("application:user:command")
-include("application:user:query")
+include("service:auth")
+include("service:user:command")
+include("service:user:query")
 
 // Platform Adapter
 include("platform:adapter:messaging:outbox")
