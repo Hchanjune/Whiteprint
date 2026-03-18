@@ -20,10 +20,10 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.util.backoff.FixedBackOff
-import org.whiteprint.platform.core.messaging.policy.EventEnvelope
+import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
-import org.whiteprint.platform.core.messaging.policy.TopicResolver
+import org.whiteprint.platform.core.messaging.contract.TopicResolver
 
 @Configuration
 @EnableConfigurationProperties(KafkaConfigurationProperties::class)
@@ -66,7 +66,7 @@ class KafkaConfiguration(
     }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<Long, EventEnvelope<*>> {
+    fun consumerFactory(): ConsumerFactory<Long, EventEnvelope> {
         val config = mutableMapOf<String, Any>()
         config[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
         config[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "${kafkaProperties.host}:${kafkaProperties.port}"
@@ -77,9 +77,9 @@ class KafkaConfiguration(
 
     @Bean
     fun kafkaListenerContainerFactory(
-        consumerFactory: ConsumerFactory<Long, EventEnvelope<*>>
-    ): ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope<*>> {
-        val factory = ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope<*>>()
+        consumerFactory: ConsumerFactory<Long, EventEnvelope>
+    ): ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope> {
+        val factory = ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope>()
         factory.setConsumerFactory(consumerFactory)
         factory.setConcurrency(kafkaProperties.listener.concurrency)
         val backoff = FixedBackOff(kafkaProperties.retry.backoffInterval, kafkaProperties.retry.maxAttempts)
@@ -88,7 +88,7 @@ class KafkaConfiguration(
     }
 
     @Bean
-    fun producerFactory(): ProducerFactory<Long, EventEnvelope<*>> {
+    fun producerFactory(): ProducerFactory<Long, EventEnvelope> {
         val config = mutableMapOf<String, Any>()
         config[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = "${kafkaProperties.host}:${kafkaProperties.port}"
         config[ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG] = true
@@ -100,8 +100,8 @@ class KafkaConfiguration(
 
     @Bean
     fun kafkaTemplate(
-        producerFactory: ProducerFactory<Long, EventEnvelope<*>>,
-    ): KafkaTemplate<Long, EventEnvelope<*>> {
+        producerFactory: ProducerFactory<Long, EventEnvelope>,
+    ): KafkaTemplate<Long, EventEnvelope> {
         return KafkaTemplate(producerFactory)
     }
 

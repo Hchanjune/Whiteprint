@@ -6,7 +6,7 @@ include("application:user:command")
 include("application:user:query")
 
 // Platform Adapter
-include("platform:adapter:messaging")
+include("platform:adapter:messaging:outbox")
 include("platform:adapter:security:provider")
 include("platform:adapter:security:verifier")
 include("platform:adapter:web:servlet")
@@ -23,3 +23,4 @@ include("platform:core:kernel")
 include("platform:core:domain")
 include("platform:core:cache")
 include("platform:core:messaging")
+include("platform:adapter:messaging:producer")

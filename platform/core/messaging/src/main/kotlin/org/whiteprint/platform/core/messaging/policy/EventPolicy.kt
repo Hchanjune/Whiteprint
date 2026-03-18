@@ -8,6 +8,8 @@ enum class EventPolicy(
     override val message: String,
 ): Policy {
 
+    EVENT_SCOPE_NOT_DEFINED(500, "EVENT_SCOPE_NOT_DEFINED", "Event SCOPE_NOT_DEFINED"),
+
     INVALID_TOPIC_FORMAT(500, "EVENT_INVALID_TOPIC_FORMAT", "Invalid topic format."),
 
     TOPIC_NOT_CONFIGURED(500, "EVENT_TOPIC_NOT_CONFIGURED", "EVENT_TOPIC_NOT_CONFIGURED, Please config topic in application.yml "),
@@ -19,9 +21,9 @@ enum class EventPolicy(
      * - [topic]
      * - [partitionKey]
      * - [eventId]
-     * - [eventName]
+     * - [eventType]
      */
-    SERIALIZATION_FAILED(500, "EVENT_SERIALIZATION_FAILED", "Event Serialization failed topic:[[topic]] partitionKey:[[partitionKey]] eventId:[[eventId]] eventName:[[eventName]]"),
+    SERIALIZATION_FAILED(500, "EVENT_SERIALIZATION_FAILED", "Event Serialization failed topic:[[topic]] partitionKey:[[partitionKey]] eventId:[[eventId]] eventType:[[eventType]]"),
 
     /**
      * RequiredAttributes
