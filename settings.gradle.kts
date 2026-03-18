@@ -7,6 +7,7 @@ include("application:user:query")
 
 // Platform Adapter
 include("platform:adapter:messaging:outbox")
+include("platform:adapter:lock:distributed")
 include("platform:adapter:security:provider")
 include("platform:adapter:security:verifier")
 include("platform:adapter:web:servlet")
