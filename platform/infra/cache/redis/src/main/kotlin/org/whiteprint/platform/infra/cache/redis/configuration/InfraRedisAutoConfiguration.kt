@@ -1,8 +1,0 @@
-package org.whiteprint.platform.infra.cache.redis.configuration
-
-import org.springframework.boot.autoconfigure.AutoConfiguration
-import org.springframework.context.annotation.Import
-
-@AutoConfiguration
-@Import(RedisConfiguration::class)
-class InfraRedisAutoConfiguration

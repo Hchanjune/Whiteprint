@@ -1,6 +1,6 @@
 package org.whiteprint.platform.infra.messaging.kafka.policy
 
-import org.whiteprint.platform.core.kernel.serializer.JsonSerializer
+import org.whiteprint.platform.core.kernel.serializer.DefaultSerializer
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
@@ -8,7 +8,7 @@ import org.apache.kafka.common.serialization.Deserializer
 
 class KafkaEventDeserializer: Deserializer<EventEnvelope> {
 
-    private val serializer = JsonSerializer.default
+    private val serializer = DefaultSerializer.jsonMapper
 
     override fun deserialize(topic: String, data: ByteArray): EventEnvelope {
         return try {

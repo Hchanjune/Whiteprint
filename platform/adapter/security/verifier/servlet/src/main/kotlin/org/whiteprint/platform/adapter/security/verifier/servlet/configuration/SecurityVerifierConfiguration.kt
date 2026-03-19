@@ -23,7 +23,7 @@ import org.whiteprint.platform.adapter.security.verifier.core.policy.AccessToken
 import org.whiteprint.platform.adapter.security.verifier.core.policy.RevocationChecker
 import org.whiteprint.platform.adapter.security.verifier.core.service.AccessTokenVerifier
 import org.whiteprint.platform.adapter.security.verifier.core.service.DefaultAccessTokenVerifier
-import org.whiteprint.platform.core.kernel.serializer.JsonSerializer
+import org.whiteprint.platform.core.kernel.serializer.DefaultSerializer
 import tools.jackson.databind.ObjectMapper
 
 @Configuration
@@ -32,7 +32,7 @@ import tools.jackson.databind.ObjectMapper
 class SecurityVerifierConfiguration {
 
     @Bean
-    fun securityObjectMapper(): ObjectMapper = JsonSerializer.default
+    fun securityObjectMapper(): ObjectMapper = DefaultSerializer.jsonMapper
 
     @Bean
     fun securityEntryPointProvider(
