@@ -13,10 +13,10 @@ data class JpaConfigurationProperties (
 ) {
 
     data class DataSourceProperties (
-        var driverClassName: String? = null,
-        var jdbcUrl: String? = null,
-        var username: String? = null,
-        var password: String? = null,
+        var driverClassName: String = "",
+        var url: String = "",
+        var username: String = "",
+        var password: String = "",
     )
 
     data class PsqlOptions(

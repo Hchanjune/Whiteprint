@@ -102,7 +102,7 @@ class KafkaConfiguration(
         kafkaTemplate: KafkaTemplate<Long, EventEnvelope> // DLT 전송용 템플릿 주입
     ): ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope> {
         val factory = ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope>()
-        factory.consumerFactory = consumerFactory
+        factory.setConsumerFactory(consumerFactory)
         factory.setConcurrency(kafkaProperties.consumer.concurrency)
 
         val retry = kafkaProperties.retryPolicy

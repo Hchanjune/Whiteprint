@@ -29,7 +29,7 @@ class JpaConfiguration(
         return (DataSourceBuilder.create()
             .type(HikariDataSource::class.java)
             .driverClassName(datasource.driverClassName)
-            .url(datasource.jdbcUrl)
+            .url(datasource.url)
             .username(datasource.username)
             .password(datasource.password)
             .build() as HikariDataSource).apply {

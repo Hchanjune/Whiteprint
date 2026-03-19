@@ -1,0 +1,11 @@
+package org.whiteprint.platform.adapter.security.verifier.servlet.configuration
+
+
+import org.springframework.boot.autoconfigure.AutoConfiguration
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Import
+
+@AutoConfiguration
+@Import(SecurityVerifierConfiguration::class)
+@EnableConfigurationProperties(SecurityVerifierConfigurationProperties::class)
+class SecurityVerifierAutoConfiguration

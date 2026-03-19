@@ -5,11 +5,12 @@ import jakarta.persistence.Column
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Version
+import org.whiteprint.platform.infra.persistence.jpa.entity.contract.LockableEntity
 import java.io.Serializable
 import java.time.Instant
 
 @MappedSuperclass
-abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity {
+abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, LockableEntity {
 
     @Column(name = "inserted_at", nullable = false)
     override var insertedAt: Instant = Instant.now()
@@ -27,6 +28,9 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity {
     @Column(name = "version", nullable = false)
     override var version: Long = 0
         protected set
+
+    @Column(name = "last_fencing_token", nullable = true)
+    override var lastFencingToken: String? = null
 
     @PreUpdate
     override fun preUpdate() {
