@@ -25,7 +25,7 @@ dependencies {
 	implementation(project(":platform:core:kernel"))
 	implementation(project(":platform:infra:persistence:jpa"))
 
-	implementation(project(":platform:adapter:web:servlet"))
+	implementation(project(":platform:adapter:security:verifier:servlet"))
 	implementation(project(":platform:adapter:event:outbox"))
 	implementation(project(":platform:adapter:event:publisher"))
 
