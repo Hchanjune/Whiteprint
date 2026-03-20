@@ -22,7 +22,7 @@ import org.whiteprint.platform.adapter.security.verifier.servlet.security.Securi
 import org.whiteprint.platform.adapter.security.verifier.core.policy.AccessTokenVerificationKeyResolver
 import org.whiteprint.platform.adapter.security.verifier.core.policy.RevocationChecker
 import org.whiteprint.platform.adapter.security.verifier.core.service.AccessTokenVerifier
-import org.whiteprint.platform.adapter.security.verifier.core.service.DefaultAccessTokenVerifier
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccessTokenVerifierImpl
 import org.whiteprint.platform.core.kernel.serializer.DefaultSerializer
 import tools.jackson.databind.ObjectMapper
 
@@ -58,7 +58,7 @@ class SecurityVerifierConfiguration {
         accessTokenKeyResolver: AccessTokenVerificationKeyResolver,
         revocationChecker: RevocationChecker
     ): AccessTokenVerifier
-        = DefaultAccessTokenVerifier(
+        = AccessTokenVerifierImpl(
         keyResolver = accessTokenKeyResolver,
         revocationChecker = revocationChecker,
     )

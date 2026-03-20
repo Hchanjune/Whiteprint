@@ -7,5 +7,8 @@ import org.springframework.context.annotation.Import
 
 @AutoConfiguration
 @Import(SecurityVerifierConfiguration::class)
-@EnableConfigurationProperties(SecurityVerifierConfigurationProperties::class)
+@EnableConfigurationProperties(
+    SecurityVerifierConfigurationProperties::class,
+    SecurityCacheConfiguration::class,
+)
 class SecurityVerifierAutoConfiguration

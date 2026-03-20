@@ -35,15 +35,15 @@ import java.time.Duration
 @Configuration
 @EnableConfigurationProperties(CacheConfigurationProperties::class)
 class CacheConfiguration(
-    private val redisProperties: CacheConfigurationProperties,
+    private val properties: CacheConfigurationProperties,
 ) {
 
     @Primary
     @Bean
     fun redisConnectionFactory(): RedisConnectionFactory {
-        val datasource = redisProperties.datasource
-        val timeout = redisProperties.timeout
-        val pooling = redisProperties.pooling
+        val datasource = properties.datasource
+        val timeout = properties.timeout
+        val pooling = properties.pooling
 
         val serverConfig = RedisStandaloneConfiguration(datasource.host, datasource.port).apply {
             password = RedisPassword.of(datasource.password)

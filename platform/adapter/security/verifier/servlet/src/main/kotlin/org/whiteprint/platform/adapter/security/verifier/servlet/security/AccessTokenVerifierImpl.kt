@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.security.verifier.core.service
+package org.whiteprint.platform.adapter.security.verifier.servlet.security
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Header
@@ -9,8 +9,9 @@ import org.whiteprint.platform.adapter.security.verifier.core.policy.AccessToken
 import org.whiteprint.platform.adapter.security.verifier.core.policy.JwtException
 import org.whiteprint.platform.adapter.security.verifier.core.policy.RevocationChecker
 import org.whiteprint.platform.adapter.security.verifier.core.policy.TokenPolicy
+import org.whiteprint.platform.adapter.security.verifier.core.service.AccessTokenVerifier
 
-class DefaultAccessTokenVerifier (
+class AccessTokenVerifierImpl (
     private val keyResolver: AccessTokenVerificationKeyResolver,
     private val revocationChecker: RevocationChecker
 ): AccessTokenVerifier {

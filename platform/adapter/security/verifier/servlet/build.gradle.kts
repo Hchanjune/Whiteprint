@@ -13,6 +13,9 @@ dependencies {
     api(project(":platform:infra:cache:redis"))
     api(project(":platform:adapter:security:verifier:core"))
 
+    implementation("org.apache.commons:commons-pool2")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
     api("org.springframework.boot:spring-boot-starter-web")
     api("org.springframework.boot:spring-boot-starter-security")
 }

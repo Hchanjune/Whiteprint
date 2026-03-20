@@ -3,6 +3,7 @@ package org.whiteprint.platform.adapter.security.verifier.servlet.filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -12,12 +13,15 @@ import org.whiteprint.platform.adapter.security.verifier.core.model.AccessToken
 import org.whiteprint.platform.adapter.security.verifier.core.policy.JwtException
 import org.whiteprint.platform.adapter.security.verifier.core.policy.TokenPolicy
 import org.whiteprint.platform.adapter.security.verifier.core.service.AccessTokenVerifier
+import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.model.ApiResponse
 import tools.jackson.databind.ObjectMapper
 
 class StatelessSecurityFilter(
     private val objectMapper: ObjectMapper,
-    private val accessTokenVerifier: AccessTokenVerifier
+    private val accessTokenVerifier: AccessTokenVerifier,
+    @param:Qualifier("securityCacheValueOperations")
+    private val cacheValueOperation: ValueOperations
 ): OncePerRequestFilter() {
 
     override fun shouldNotFilterErrorDispatch(): Boolean = true
@@ -29,15 +33,20 @@ class StatelessSecurityFilter(
     ) {
         try {
             val token = extractToken(request)
-            if (token != null) {
-                val claims = accessTokenVerifier.verifyOrThrow(AccessToken(token))
-                val authentication = UsernamePasswordAuthenticationToken(
-                    claims.subject,
-                    null,
-                    claims.authorities.map { SimpleGrantedAuthority(it) }
-                )
-                SecurityContextHolder.getContext().authentication = authentication
+
+            require(token != null) {
+                throw JwtException(TokenPolicy.TOKEN_NOT_FOUND)
             }
+
+            val claims = accessTokenVerifier.verifyOrThrow(AccessToken(token))
+
+            val authentication = UsernamePasswordAuthenticationToken(
+                claims.subject,
+                null,
+                claims.authorities.map { SimpleGrantedAuthority(it) }
+            )
+            SecurityContextHolder.getContext().authentication = authentication
+
             filterChain.doFilter(request, response)
         } catch (exception: JwtException) {
             returnErrorResponse(response, exception)
