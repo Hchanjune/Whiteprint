@@ -1,11 +1,17 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.security
 
-import org.whiteprint.platform.adapter.security.verifier.core.model.AccessTokenVerificationKey
-import org.whiteprint.platform.adapter.security.verifier.core.policy.AccessTokenVerificationKeyResolver
+import org.whiteprint.platform.core.kms.service.KeyCache
+import org.whiteprint.platform.core.kms.service.KeyMaterialService
+import org.whiteprint.platform.core.security.model.AccessTokenVerificationKey
+import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
 
+class AccessTokenKeyResolverImpl(
+    private val keyCache: KeyCache,
+    private val keyMaterialService: KeyMaterialService
+): AccessTokenVerificationKeyResolver {
 
-class AccessTokenKeyResolverImpl: AccessTokenVerificationKeyResolver {
     override fun resolve(keyId: String): AccessTokenVerificationKey {
         TODO("Not yet implemented")
     }
+
 }

@@ -1,6 +1,7 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.configuration
 
 import jakarta.servlet.DispatcherType
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,20 +20,23 @@ import org.whiteprint.platform.adapter.security.verifier.servlet.filter.Stateles
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccessTokenKeyResolverImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.RevocationCheckerImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityEntryPointProvider
-import org.whiteprint.platform.adapter.security.verifier.core.policy.AccessTokenVerificationKeyResolver
-import org.whiteprint.platform.adapter.security.verifier.core.policy.RevocationChecker
-import org.whiteprint.platform.adapter.security.verifier.core.service.AccessTokenVerifier
-import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccessTokenVerifierImpl
-import org.whiteprint.platform.core.kernel.serializer.DefaultSerializer
-import tools.jackson.databind.ObjectMapper
+import org.whiteprint.platform.core.cache.operation.ValueOperations
+import org.whiteprint.platform.core.kernel.serializer.Serializer
+import org.whiteprint.platform.core.kms.service.KeyCache
+import org.whiteprint.platform.core.kms.service.KeyMaterialService
+import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
+import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
+import org.whiteprint.platform.core.security.verifier.RevocationChecker
+import org.whiteprint.platform.infra.security.jwt.verifier.JwtAccessTokenVerifier
+import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 
 @Configuration
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityVerifierConfigurationProperties::class)
 class SecurityVerifierConfiguration {
 
-    @Bean
-    fun securityObjectMapper(): ObjectMapper = DefaultSerializer.jsonMapper
+    @Bean("securityVerifierSerializer")
+    fun securityVerifierSerializer(): Serializer = JacksonSerializer()
 
     @Bean
     fun securityEntryPointProvider(
@@ -41,35 +45,42 @@ class SecurityVerifierConfiguration {
         SecurityEntryPointProvider(props)
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
-    }
+    fun revocationChecker(
+        @Qualifier("securityCacheValueOperations")
+        securityCache: ValueOperations
+    ): RevocationChecker = RevocationCheckerImpl(
+        securityCache
+    )
 
     @Bean
-    fun revocationChecker(): RevocationChecker
-        = RevocationCheckerImpl()
-
-    @Bean
-    fun accessTokenKeyResolver(): AccessTokenVerificationKeyResolver
-        = AccessTokenKeyResolverImpl()
+    fun accessTokenKeyResolver(
+        @Qualifier("verifierKmsCache")
+        keyCache: KeyCache,
+        @Qualifier("verifierKeyMaterialService")
+        keyMaterialService: KeyMaterialService
+    ): AccessTokenVerificationKeyResolver
+        = AccessTokenKeyResolverImpl(
+            keyCache = keyCache,
+            keyMaterialService = keyMaterialService
+        )
 
     @Bean
     fun accessTokenVerifier(
         accessTokenKeyResolver: AccessTokenVerificationKeyResolver,
         revocationChecker: RevocationChecker
     ): AccessTokenVerifier
-        = AccessTokenVerifierImpl(
+        = JwtAccessTokenVerifier(
         keyResolver = accessTokenKeyResolver,
         revocationChecker = revocationChecker,
     )
 
     @Bean
     fun statelessSecurityFilter(
-        objectMapper: ObjectMapper,
+        serializer: Serializer,
         accessTokenVerifier: AccessTokenVerifier
     ): StatelessSecurityFilter =
         StatelessSecurityFilter(
-            objectMapper = objectMapper,
+            serializer = serializer,
             accessTokenVerifier = accessTokenVerifier
         )
 

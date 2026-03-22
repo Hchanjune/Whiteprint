@@ -10,10 +10,6 @@ plugins {
 group = "org.whiteprint.platform.infra.persistence"
 version = "0.0.1-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(project(":platform:core:kernel"))
     api(project(":platform:core:domain"))
@@ -25,8 +21,4 @@ dependencies {
 
 kotlin {
     jvmToolchain(21)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

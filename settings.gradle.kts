@@ -18,10 +18,8 @@ include("platform:adapter:cache:reactive")
 
 include("platform:adapter:lock:distributed")
 
-include("platform:adapter:security:provider:core")
 include("platform:adapter:security:provider:servlet")
 include("platform:adapter:security:provider:reactive")
-include("platform:adapter:security:verifier:core")
 include("platform:adapter:security:verifier:servlet")
 include("platform:adapter:security:verifier:reactive")
 
@@ -40,8 +38,14 @@ include("platform:infra:observability:servlet")
 include("platform:infra:serializer:jackson")
 include("platform:infra:serializer:protobuf")
 
+include("platform:infra:security:jwt")
+
+include("platform:infra:kms:vault")
+
 // Platform Core
 include("platform:core:kernel")
 include("platform:core:domain")
 include("platform:core:cache")
 include("platform:core:messaging")
+include("platform:core:kms")
+include("platform:core:security")

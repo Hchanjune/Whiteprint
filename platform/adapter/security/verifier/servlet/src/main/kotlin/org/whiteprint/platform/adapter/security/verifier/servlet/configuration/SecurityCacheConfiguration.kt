@@ -59,7 +59,9 @@ class SecurityCacheConfiguration(
 
 
     @Bean("securityCacheTemplate")
-    fun securityCacheTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
+    fun securityCacheTemplate(
+        @Qualifier("securityCacheConnectionFactory") connectionFactory: RedisConnectionFactory
+    ): RedisTemplate<String, Any> {
         return RedisTemplate<String, Any>().apply {
             setConnectionFactory(connectionFactory)
             keySerializer = RedisSerializer.string()

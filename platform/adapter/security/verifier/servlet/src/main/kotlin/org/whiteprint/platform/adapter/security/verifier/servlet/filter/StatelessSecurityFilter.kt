@@ -9,19 +9,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
-import org.whiteprint.platform.adapter.security.verifier.core.model.AccessToken
-import org.whiteprint.platform.adapter.security.verifier.core.policy.JwtException
-import org.whiteprint.platform.adapter.security.verifier.core.policy.TokenPolicy
-import org.whiteprint.platform.adapter.security.verifier.core.service.AccessTokenVerifier
-import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.model.ApiResponse
-import tools.jackson.databind.ObjectMapper
+import org.whiteprint.platform.core.kernel.serializer.Serializer
+import org.whiteprint.platform.core.security.model.AccessToken
+import org.whiteprint.platform.core.security.policy.SecurityException
+import org.whiteprint.platform.core.security.policy.SecurityPolicy
+import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
 
 class StatelessSecurityFilter(
-    private val objectMapper: ObjectMapper,
+    private val serializer: Serializer,
     private val accessTokenVerifier: AccessTokenVerifier,
-    @param:Qualifier("securityCacheValueOperations")
-    private val cacheValueOperation: ValueOperations
 ): OncePerRequestFilter() {
 
     override fun shouldNotFilterErrorDispatch(): Boolean = true
@@ -35,7 +32,7 @@ class StatelessSecurityFilter(
             val token = extractToken(request)
 
             require(token != null) {
-                throw JwtException(TokenPolicy.TOKEN_NOT_FOUND)
+                throw SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
             }
 
             val claims = accessTokenVerifier.verifyOrThrow(AccessToken(token))
@@ -48,10 +45,10 @@ class StatelessSecurityFilter(
             SecurityContextHolder.getContext().authentication = authentication
 
             filterChain.doFilter(request, response)
-        } catch (exception: JwtException) {
+        } catch (exception: SecurityException) {
             returnErrorResponse(response, exception)
         } catch (exception: Exception) {
-            returnErrorResponse(response, JwtException(TokenPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR))
+            returnErrorResponse(response, SecurityException(SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR))
         }
     }
 
@@ -63,18 +60,18 @@ class StatelessSecurityFilter(
         return null
     }
 
-    private fun returnErrorResponse(response: HttpServletResponse, exception: JwtException) {
+    private fun returnErrorResponse(response: HttpServletResponse, exception: SecurityException) {
         response.status = exception.status
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.characterEncoding = "UTF-8"
 
-        val errorBody = ApiResponse.Companion.error(
+        val errorBody = ApiResponse.error(
             id = "-",
             exception = exception,
             traceId = null,
         )
 
-        response.writer.write(objectMapper.writeValueAsString(errorBody))
+        response.writer.write(serializer.serializeToJson(errorBody))
         response.writer.flush()
     }
 
