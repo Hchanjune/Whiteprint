@@ -9,6 +9,14 @@ group = "org.whiteprint.platform.adapter.security.provider"
 version = "0.0.1-SNAPSHOT"
 
 dependencies {
+    api(project(":platform:core:kernel"))
+
+    api(project(":platform:core:kms"))
+    api(project(":platform:infra:kms:vault"))
+
+    api(project(":platform:core:security"))
+    api(project(":platform:infra:security:jwt"))
+
     api(project(":platform:infra:observability:servlet"))
 
     api("org.springframework.boot:spring-boot-starter-web")

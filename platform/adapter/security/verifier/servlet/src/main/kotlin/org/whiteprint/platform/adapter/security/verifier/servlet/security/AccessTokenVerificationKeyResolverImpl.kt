@@ -5,20 +5,20 @@ import org.whiteprint.platform.core.kms.model.toJavaAlgorithm
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
 import org.whiteprint.platform.core.kms.service.KeyCache
-import org.whiteprint.platform.core.kms.service.KeyMaterialService
+import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.security.model.AccessTokenVerificationKey
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
 
 class AccessTokenVerificationKeyResolverImpl(
     private val keyCache: KeyCache,
-    private val keyMaterialService: KeyMaterialService
+    private val keyMaterialProvider: KeyMaterialProvider
 ): AccessTokenVerificationKeyResolver {
 
     override fun resolve(keyId: String): AccessTokenVerificationKey {
         val kid = KeyId(keyId)
 
         val material = keyCache.getPublicKey(kid)
-            ?: keyMaterialService.getPublicKey(kid).also { keyCache.putPublicKey(kid, it) }
+            ?: keyMaterialProvider.getPublicKey(kid).also { keyCache.putPublicKey(kid, it) }
 
         val publicKey = try {
             val algorithm = material.type.toJavaAlgorithm()

@@ -6,11 +6,11 @@ import org.whiteprint.platform.core.kms.model.KeyMaterial
 import org.whiteprint.platform.core.kms.model.toKeyType
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
-import org.whiteprint.platform.core.kms.service.KeyMaterialService
+import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 
-class VaultKeyMaterialService(
+class VaultKeyMaterialProvider(
     private val vaultOperations: VaultOperations
-) : KeyMaterialService {
+) : KeyMaterialProvider {
 
     /**
      * Vault Transit 키 정보를 조회하여 공개키(Public Key)를 추출합니다.
@@ -43,6 +43,10 @@ class VaultKeyMaterialService(
         )
     }
 
+    override fun getLatestPublicKey(alias: String): KeyMaterial {
+        TODO("Not yet implemented")
+    }
+
     private fun extractDerFromPem(pem: String): ByteArray {
         val cleanPem = pem
             .replace("-----BEGIN PUBLIC KEY-----", "")
@@ -57,6 +61,10 @@ class VaultKeyMaterialService(
      */
     override fun getPrivateKey(keyId: KeyId): KeyMaterial {
         throw KmsException(KmsPolicy.KMS_EXTERNAL_ERROR, mapOf("reason" to "Exporting full key material (Private Key) is disabled by Vault Transit policy to ensure hardware-level security. for key: ${keyId.value}"))
+    }
+
+    override fun getLatestPrivateKey(alias: String): KeyMaterial {
+        TODO("Not yet implemented")
     }
 
     override fun getSecretKey(keyId: KeyId): KeyMaterial {
@@ -78,6 +86,10 @@ class VaultKeyMaterialService(
             type = (data["type"] as String).toKeyType(),
             encoded = java.util.Base64.getDecoder().decode(rawKeyBase64)
         )
+    }
+
+    override fun getLatestSecretKey(alias: String): KeyMaterial {
+        TODO("Not yet implemented")
     }
 
 

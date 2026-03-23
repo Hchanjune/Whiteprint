@@ -10,6 +10,19 @@ enum class KmsPolicy(
 
     /**
      * Required Attributes
+     * - [input]
+     */
+    INVALID_KEY_ID_FORMAT(500, "INVALID_KEY_ID_FORMAT", "Invalid KeyId format. Expected 'alias:version' but got '[[input]]'"),
+
+    /**
+     * Required Attributes
+     * - [alias]
+     * - [version]
+     */
+    MATERIAL_NOT_FOUND(404, "MATERIAL_NOT_FOUND", "MATERIAL_NOT_FOUND alias: [[alias]], version: [[version]]"),
+
+    /**
+     * Required Attributes
      * - [keyId]
      */
     KEY_NOT_FOUND(404, "KEY_NOT_FOUND", "KeyId [[keyId]] not found from KMS"),

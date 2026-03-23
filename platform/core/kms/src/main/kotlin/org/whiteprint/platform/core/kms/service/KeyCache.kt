@@ -1,20 +1,13 @@
 package org.whiteprint.platform.core.kms.service
 
+import org.whiteprint.platform.core.kms.model.KeyBundle
 import org.whiteprint.platform.core.kms.model.KeyId
-import org.whiteprint.platform.core.kms.model.KeyMaterial
-import org.whiteprint.platform.core.kms.model.KeyMetadata
-import java.security.PrivateKey
+import org.whiteprint.platform.core.kms.model.KeySide
 
 interface KeyCache {
-    fun getMetadata(keyId: KeyId): KeyMetadata?
-    fun putMetadata(metadata: KeyMetadata)
+    fun getBundle(keyId: KeyId, side: KeySide): KeyBundle?
+    fun putBundle(side: KeySide, bundle: KeyBundle)
 
-    fun getPublicKey(keyId: KeyId): KeyMaterial?
-    fun putPublicKey(keyId: KeyId, material: KeyMaterial)
-
-    fun getPrivateKey(keyId: KeyId): KeyMaterial?
-    fun putPrivateKey(keyId: KeyId, material: KeyMaterial)
-
-    fun getSecretKey(keyId: KeyId): KeyMaterial?
-    fun putSecretKey(keyId: KeyId, material: KeyMaterial)
+    fun evict(keyId: KeyId)
+    fun clear()
 }

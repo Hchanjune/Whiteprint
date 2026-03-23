@@ -2,7 +2,6 @@ package org.whiteprint.platform.adapter.security.verifier.servlet.configuration
 
 import jakarta.servlet.DispatcherType
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -21,7 +20,7 @@ import org.whiteprint.platform.adapter.security.verifier.servlet.security.Securi
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.kms.service.KeyCache
-import org.whiteprint.platform.core.kms.service.KeyMaterialService
+import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.security.policy.SecurityCacheKeyStrategy
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
@@ -31,9 +30,9 @@ import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties(SecurityVerifierConfigurationProperties::class)
 class SecurityVerifierConfiguration(
-    private val verificationProperties: SecurityVerifierConfigurationProperties
+    private val verificationProperties: SecurityVerifierConfigurationProperties,
+    private val verificationCacheProperties: SecurityCacheConfigurationProperties
 ) {
 
     @Bean("securityVerifierSerializer")
@@ -50,7 +49,7 @@ class SecurityVerifierConfiguration(
     ): RevocationChecker = RevocationCheckerImpl(
         cache = securityCache,
         keyStrategy = object : SecurityCacheKeyStrategy {},
-        servicePrefix = verificationProperties.cachePrefix
+        servicePrefix = verificationCacheProperties.cachePrefix
     )
 
     @Bean
@@ -58,11 +57,11 @@ class SecurityVerifierConfiguration(
         @Qualifier("verifierKmsCache")
         keyCache: KeyCache,
         @Qualifier("verifierKeyMaterialService")
-        keyMaterialService: KeyMaterialService
+        keyMaterialProvider: KeyMaterialProvider
     ): AccessTokenVerificationKeyResolver
         = AccessTokenVerificationKeyResolverImpl(
         keyCache = keyCache,
-        keyMaterialService = keyMaterialService
+        keyMaterialProvider = keyMaterialProvider
     )
 
     @Bean

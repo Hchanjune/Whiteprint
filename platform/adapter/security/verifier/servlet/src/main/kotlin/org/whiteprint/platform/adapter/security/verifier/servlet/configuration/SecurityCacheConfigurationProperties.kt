@@ -2,9 +2,10 @@ package org.whiteprint.platform.adapter.security.verifier.servlet.configuration
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "adapter.security.cache")
+@ConfigurationProperties(prefix = "adapter.security.verifier.cache")
 data class SecurityCacheConfigurationProperties (
     var datasource: DataSourceProperties = DataSourceProperties(),
+    var cachePrefix: String = "",
     var pooling: Pooling = Pooling(),
     var timeout: Timeout = Timeout(),
 ) {

@@ -14,5 +14,6 @@ import org.springframework.context.annotation.Import
 @EnableConfigurationProperties(
     SecurityCacheConfiguration::class,
     SecurityVerifierConfigurationProperties::class,
+    SecurityVerifierKmsConfigurationProperties::class,
 )
 class SecurityVerifierAutoConfiguration

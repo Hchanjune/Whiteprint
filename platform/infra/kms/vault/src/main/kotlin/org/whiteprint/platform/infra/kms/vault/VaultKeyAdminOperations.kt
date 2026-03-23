@@ -4,12 +4,12 @@ import org.springframework.vault.core.VaultOperations
 import org.whiteprint.platform.core.kms.model.*
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
-import org.whiteprint.platform.core.kms.service.KeyAdminService
+import org.whiteprint.platform.core.kms.service.KeyAdminOperations
 import java.time.Instant
 
-class VaultKeyAdminService(
+class VaultKeyAdminOperations(
     private val vaultOperations: VaultOperations
-) : KeyAdminService {
+) : KeyAdminOperations {
 
     private val transit = vaultOperations.opsForTransit()
 
