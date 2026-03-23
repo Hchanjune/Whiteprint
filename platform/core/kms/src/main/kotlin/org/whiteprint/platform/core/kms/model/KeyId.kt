@@ -5,7 +5,7 @@ import org.whiteprint.platform.core.kms.policy.KmsPolicy
 
 data class KeyId(
     val alias: String,
-    val version: String
+    val version: String?
 ) {
     override fun toString(): String = "$alias:$version"
 

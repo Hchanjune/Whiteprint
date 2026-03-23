@@ -12,7 +12,7 @@ import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.kms.service.KeyOperations
 import org.whiteprint.platform.infra.kms.vault.VaultKeyAdminOperations
-import org.whiteprint.platform.infra.kms.vault.VaultKeyCache
+import org.whiteprint.platform.infra.kms.vault.CaffeineKeyCache
 import org.whiteprint.platform.infra.kms.vault.VaultKeyMaterialProvider
 import org.whiteprint.platform.infra.kms.vault.VaultKeyOperations
 
@@ -40,7 +40,7 @@ class SecurityProviderKmsConfiguration(
 
     @Bean("providerKmsCache")
     fun securityKmsCache(): KeyCache =
-        VaultKeyCache()
+        CaffeineKeyCache()
 
 
     @Bean("providerKeyMaterialService")

@@ -9,7 +9,7 @@ import org.springframework.vault.core.VaultOperations
 import org.springframework.vault.core.VaultTemplate
 import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
-import org.whiteprint.platform.infra.kms.vault.VaultKeyCache
+import org.whiteprint.platform.infra.kms.vault.CaffeineKeyCache
 import org.whiteprint.platform.infra.kms.vault.VaultKeyMaterialProvider
 
 @Configuration
@@ -29,18 +29,24 @@ class SecurityVerifierKmsConfiguration(
         return VaultTemplate(endpoint, clientAuthentication)
     }
 
-    @Bean("verifierKmsCache")
+    @Bean("verifierKmsCaffeineCache")
     fun securityKmsCache(): KeyCache =
-        VaultKeyCache()
+        CaffeineKeyCache(
+            expiresAfterWriteMinutes = kmsProperties.cache.expiresAfterWriteMinutes,
+            maximumSize = kmsProperties.cache.maximumSize,
+        )
 
 
     @Bean("verifierKeyMaterialService")
     fun securityKeyMaterialService(
         @Qualifier("verifierVaultOperations") vaultOperations: VaultOperations,
+        @Qualifier("verifierKmsCaffeineCache") keyCache: KeyCache,
     ): KeyMaterialProvider =
-        VaultKeyMaterialProvider(vaultOperations)
-
-
+        VaultKeyMaterialProvider(
+            vaultOperations = vaultOperations,
+            keyCache = keyCache,
+            transitPath = kmsProperties.datasource.transitPath
+        )
 
 
 }

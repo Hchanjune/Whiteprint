@@ -54,7 +54,7 @@ class SecurityVerifierConfiguration(
 
     @Bean
     fun accessTokenKeyResolver(
-        @Qualifier("verifierKmsCache")
+        @Qualifier("verifierKmsCaffeineCache")
         keyCache: KeyCache,
         @Qualifier("verifierKeyMaterialService")
         keyMaterialProvider: KeyMaterialProvider

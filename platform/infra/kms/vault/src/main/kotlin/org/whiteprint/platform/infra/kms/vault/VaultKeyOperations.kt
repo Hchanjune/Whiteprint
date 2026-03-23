@@ -4,53 +4,71 @@ import org.springframework.vault.core.VaultOperations
 import org.springframework.vault.support.Ciphertext
 import org.springframework.vault.support.Plaintext
 import org.springframework.vault.support.Signature
-import org.springframework.vault.support.VaultTransitContext
+import org.whiteprint.platform.core.kms.model.EncryptionResult
 import org.whiteprint.platform.core.kms.model.KeyId
+import org.whiteprint.platform.core.kms.model.SigningResult
 import org.whiteprint.platform.core.kms.service.KeyOperations
+import java.util.Base64
 
 class VaultKeyOperations(
-    private val vaultOperations: VaultOperations
+    private val vaultOperations: VaultOperations,
+    private val transitPath: String = "transit"
 ) : KeyOperations {
 
-    private val transit = vaultOperations.opsForTransit()
+    override fun sign(alias: String, data: ByteArray): SigningResult {
+        val ops = vaultOperations.opsForTransit(transitPath)
 
-    override fun encrypt(keyId: KeyId, plainText: ByteArray, context: Map<String, String>?): ByteArray {
-        // Plaintext.of(ByteArray)와 context를 조합
-        val request = Plaintext.of(plainText).with(createContext(context))
-        val response = transit.encrypt(keyId.value, request)
+        val plaintext = Plaintext.of(data)
 
-        // response는 Ciphertext 객체이므로 그 안의 문자열(vault:v1:...)을 추출
-        return response.ciphertext.toByteArray()
-    }
+        val vaultSignature: Signature = ops.sign(alias, plaintext)
+        val rawSignature = vaultSignature.signature // "vault:v1:..."
 
-    override fun decrypt(keyId: KeyId, cipherText: ByteArray, context: Map<String, String>?): ByteArray {
-        // Ciphertext.of(String)와 context 조합
-        val request = Ciphertext.of(String(cipherText)).with(createContext(context))
-        val response = transit.decrypt(keyId.value, request)
+        val parts = rawSignature.split(":")
+        val version = parts[1].removePrefix("v")
+        val signatureBytes = Base64.getDecoder().decode(parts[2])
 
-        return response.plaintext
-    }
-
-    override fun sign(keyId: KeyId, data: ByteArray): ByteArray {
-        // Plaintext 객체로 래핑하여 전달
-        val request = Plaintext.of(data)
-        val response = transit.sign(keyId.value, request)
-
-        // Signature 객체에서 문자열(vault:v1:...)을 추출하여 반환
-        return response.signature.toByteArray()
+        return SigningResult(
+            keyId = KeyId(alias, version),
+            signature = signatureBytes
+        )
     }
 
     override fun verify(keyId: KeyId, data: ByteArray, signature: ByteArray): Boolean {
-        // Plaintext와 Signature 객체를 각각 생성하여 전달
+        val ops = vaultOperations.opsForTransit(transitPath)
+
         val plaintext = Plaintext.of(data)
-        val signatureWrapper = Signature.of(String(signature))
+        val vaultFormat = "vault:v${keyId.version}:${Base64.getEncoder().encodeToString(signature)}"
+        val vaultSignature = Signature.of(vaultFormat)
 
-        return transit.verify(keyId.value, plaintext, signatureWrapper)
+        return ops.verify(keyId.alias, plaintext, vaultSignature)
     }
 
-    private fun createContext(context: Map<String, String>?): VaultTransitContext {
-        if (context.isNullOrEmpty()) return VaultTransitContext.empty()
-        // 예: 맵을 바이트로 변환하여 컨텍스트화
-        return VaultTransitContext.fromContext(context.toString().toByteArray())
+    override fun encrypt(alias: String, plainText: ByteArray): EncryptionResult {
+        val ops = vaultOperations.opsForTransit(transitPath)
+
+        val plaintext = Plaintext.of(plainText)
+        val vaultCipherText: Ciphertext = ops.encrypt(alias, plaintext)
+        val rawCipher = vaultCipherText.ciphertext // "vault:v1:..."
+
+        val parts = rawCipher.split(":")
+        val version = parts[1].removePrefix("v")
+        val cipherBytes = Base64.getDecoder().decode(parts[2])
+
+        return EncryptionResult(
+            keyId = KeyId(alias, version),
+            cipherText = cipherBytes,
+            iv = null
+        )
     }
+
+    override fun decrypt(keyId: KeyId, cipherText: ByteArray): ByteArray {
+        val ops = vaultOperations.opsForTransit(transitPath)
+
+        val vaultFormat = "vault:v${keyId.version}:${Base64.getEncoder().encodeToString(cipherText)}"
+        val ciphertext = Ciphertext.of(vaultFormat)
+
+        val plaintext: Plaintext = ops.decrypt(keyId.alias, ciphertext)
+        return plaintext.plaintext
+    }
+
 }

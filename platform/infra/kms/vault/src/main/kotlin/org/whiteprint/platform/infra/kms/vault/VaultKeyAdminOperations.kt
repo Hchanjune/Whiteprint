@@ -1,62 +1,76 @@
 package org.whiteprint.platform.infra.kms.vault
 
 import org.springframework.vault.core.VaultOperations
+import org.springframework.vault.support.VaultTransitKeyConfiguration
 import org.whiteprint.platform.core.kms.model.*
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
 import org.whiteprint.platform.core.kms.service.KeyAdminOperations
+import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import java.time.Instant
 
 class VaultKeyAdminOperations(
-    private val vaultOperations: VaultOperations
+    private val vaultOperations: VaultOperations,
+    private val keyMaterialProvider: KeyMaterialProvider,
+    private val transitPath: String = "transit"
 ) : KeyAdminOperations {
 
-    private val transit = vaultOperations.opsForTransit()
+    override fun createKey(alias: String, type: KeyType): KeyBundle {
+        val path = "$transitPath/keys/$alias"
 
-    override fun createKey(type: KeyType, alias: String?): KeyId {
-        val keyId = alias ?: "k-${System.currentTimeMillis()}"
-
-        // configuration 객체 없이, 필요한 'type' 정보만 Map에 담아 Vault에 직접 요청합니다.
-        // POST /transit/keys/{keyId} { "type": "{vaultType}" }
-        val requestPath = "transit/keys/$keyId"
-        val body = mapOf("type" to type.toVaultType())
-
-        vaultOperations.write(requestPath, body)
-
-        return KeyId(keyId)
-    }
-
-    override fun getMetadata(keyId: KeyId): KeyMetadata {
-        val vaultKey = transit.getKey(keyId.value)
-            ?: throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.value))
-
-        return KeyMetadata(
-            keyId = keyId,
-            type = vaultKey.type.toKeyType(),
-            status = if (vaultKey.isDeletionAllowed) KeyStatus.PENDING_DELETION else KeyStatus.ENABLED,
-            createdAt = Instant.ofEpochSecond(vaultKey.latestVersion.toLong()), // 버전 정보를 시점으로 활용
-            expiresAt = null
+        val request = mutableMapOf<String, Any>(
+            "type" to type.toVaultType(),
+            "exportable" to true,
+            "deletion_allowed" to true
         )
+
+        vaultOperations.write(path, request)
+
+        return getBundle(alias)
     }
 
-    override fun rotateKey(keyId: KeyId): KeyId {
-        transit.rotate(keyId.value)
-        return keyId
+    override fun rotateKey(alias: String): KeyBundle {
+        val ops = vaultOperations.opsForTransit(transitPath)
+        ops.rotate(alias)
+        return getBundle(alias)
     }
 
-    override fun revokeKey(keyId: KeyId) {
-        // Vault 정책상 삭제 허용 설정 후 제거
-        vaultOperations.write("transit/keys/${keyId.value}/config", mapOf("deletion_allowed" to true))
-        vaultOperations.delete("transit/keys/${keyId.value}")
-    }
+    override fun updateStatus(keyId: KeyId, status: KeyStatus) {
+        val path = "$transitPath/config/${keyId.alias}"
 
-    override fun findKeyIdByAlias(alias: String): KeyId? {
-        return try {
-            // 키 존재 여부 확인만 수행
-            if (transit.getKey(alias) != null) KeyId(alias) else null
-        } catch (e: Exception) {
-            null
+        val config = when (status) {
+            KeyStatus.DISABLED -> {
+                val latest = findLatestKeyId(keyId.alias)?.version?.toInt() ?: 1
+                VaultTransitKeyConfiguration.builder()
+                    .minEncryptionVersion(latest + 1)
+                    .build()
+            }
+            KeyStatus.ENABLED -> {
+                VaultTransitKeyConfiguration.builder()
+                    .minEncryptionVersion(0)
+                    .minDecryptionVersion(0)
+                    .build()
+            }
+            else -> throw KmsException(KmsPolicy.KMS_NOT_SUPPORTED)
         }
+
+        vaultOperations.write(path, config)
     }
+
+    override fun getBundle(alias: String): KeyBundle {
+        return keyMaterialProvider.getKeyBundle(KeyId(alias, null), KeySide.PUBLIC)
+    }
+
+    override fun findLatestKeyId(alias: String): KeyId? {
+        val key = vaultOperations.opsForTransit(transitPath).getKey(alias)
+        return key?.let { KeyId(alias, it.latestVersion.toString()) }
+    }
+
+    override fun findAllVersions(alias: String): List<KeyId> {
+        val key = vaultOperations.opsForTransit(transitPath).getKey(alias)
+            ?: return emptyList()
+        return key.keys.keys.map { version -> KeyId(alias, version) }
+    }
+
 
 }

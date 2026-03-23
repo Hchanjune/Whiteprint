@@ -1,96 +1,186 @@
 package org.whiteprint.platform.infra.kms.vault
 
 import org.springframework.vault.core.VaultOperations
+import org.springframework.vault.support.VaultTransitKey
+import org.whiteprint.platform.core.kms.model.KeyBundle
 import org.whiteprint.platform.core.kms.model.KeyId
 import org.whiteprint.platform.core.kms.model.KeyMaterial
+import org.whiteprint.platform.core.kms.model.KeyMetadata
+import org.whiteprint.platform.core.kms.model.KeySide
+import org.whiteprint.platform.core.kms.model.KeyStatus
 import org.whiteprint.platform.core.kms.model.toKeyType
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
+import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.util.Base64
 
 class VaultKeyMaterialProvider(
-    private val vaultOperations: VaultOperations
+    private val vaultOperations: VaultOperations,
+    private val keyCache: KeyCache,
+    private val transitPath: String = "transit"
 ) : KeyMaterialProvider {
 
-    /**
-     * Vault Transit 키 정보를 조회하여 공개키(Public Key)를 추출합니다.
-     * GET /transit/keys/{keyId}
-     */
-    override fun getPublicKey(keyId: KeyId): KeyMaterial {
-        val response = vaultOperations.read("transit/keys/${keyId.value}")
-            ?: throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.value))
+    override fun getKeyBundle(
+        keyId: KeyId,
+        side: KeySide
+    ): KeyBundle {
+        keyCache.getBundle(keyId, side)?.let { return it }
+        val bundle = fetchFromVault(keyId, side)
+        keyCache.putBundle(side, bundle)
+        return bundle
+    }
 
-        val data = response.data ?: throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.value))
+    private fun fetchFromVault(keyId: KeyId, side: KeySide): KeyBundle {
+        val response = vaultOperations.opsForTransit(transitPath).getKey(keyId.alias)
+            ?: throw KmsException(
+                policy = KmsPolicy.KMS_EXTERNAL_ERROR,
+                attributes = mapOf(
+                    "reason" to "Key not found in Vault: ${keyId.alias}"
+                )
+            )
 
-        // 1. 명시적인 최신 버전 번호 추출
-        val latestVersion = data["latest_version"]?.toString()
-            ?: throw KmsException(KmsPolicy.KMS_EXTERNAL_ERROR, mapOf("reason" to "Latest version not found"))
+        val metadata = mapToMetadata(keyId, response)
 
-        // 2. 해당 버전의 데이터 맵 추출
-        val keys = data["keys"] as? Map<String, Any>
-        val latestKeyData = keys?.get(latestVersion) as? Map<String, Any>
+        val material = when (side) {
+            KeySide.PUBLIC -> extractPublicKey(keyId, response)
+            KeySide.SECRET -> extractSecretKey(keyId, response)
+            KeySide.PRIVATE -> throw KmsException(
+                policy = KmsPolicy.KMS_NOT_SUPPORTED,
+                attributes = mapOf(
+                    "reason" to "Private key export is not allowed"
+                )
+            )
+        }
 
-        val pemString = latestKeyData?.get("public_key") as? String
-            ?: throw KmsException(KmsPolicy.KMS_EXTERNAL_ERROR, mapOf("reason" to "Public key not found"))
+        return KeyBundle(material, metadata)
+    }
 
-        // 3. PEM 문자열에서 순수 키 자재(DER) 추출 (정규식 등으로 Header/Footer 제거 및 Base64 디코딩)
-        val encodedBytes = extractDerFromPem(pemString)
+    private fun mapToMetadata(keyId: KeyId, response: VaultTransitKey): KeyMetadata {
+        val latestVersion = response.latestVersion.toString()
+        val targetVersion = keyId.version ?: latestVersion
 
-        return KeyMaterial(
-            keyId = keyId,
-            type = (data["type"] as String).toKeyType(),
-            encoded = encodedBytes
+        val versionInfo = response.keys[targetVersion] as? Map<String, Any> ?: emptyMap()
+
+        val createdAt = (versionInfo["creation_time"] as? String)?.let {
+            OffsetDateTime.parse(it).toInstant()
+        } ?: Instant.EPOCH
+
+        return KeyMetadata(
+            keyId = KeyId(keyId.alias, targetVersion),
+            type = response.type.toKeyType(),
+            status = resolveStatus(response),
+
+            createdAt = createdAt,
+            updatedAt = createdAt,
+
+            latestVersion = latestVersion,
+            minAvailableVersion = response.minDecryptionVersion.toString(),
+
+                        isExportable = response.isExportable,
+            isDeletable = response.isDeletionAllowed,
+
+            expiresAt = null,
+            tags = emptyMap()
         )
     }
 
-    override fun getLatestPublicKey(alias: String): KeyMaterial {
-        TODO("Not yet implemented")
+    private fun resolveStatus(response: VaultTransitKey): KeyStatus {
+        if (response.isDeletionAllowed) {
+            return KeyStatus.PENDING_DELETION
+        }
+
+        if (response.minEncryptionVersion > response.latestVersion) {
+            return KeyStatus.DISABLED
+        }
+
+        if (response.minDecryptionVersion > response.latestVersion) {
+            return KeyStatus.EXPIRED
+        }
+
+        return KeyStatus.ENABLED
     }
 
-    private fun extractDerFromPem(pem: String): ByteArray {
+    private fun extractPublicKey(keyId: KeyId, response: VaultTransitKey): KeyMaterial {
+        val targetVersion = keyId.version ?: response.latestVersion.toString()
+
+        val versionData = response.keys[targetVersion] as? Map<*, *>
+            ?: throw KmsException(
+                policy = KmsPolicy.KMS_EXTERNAL_ERROR,
+                attributes = mapOf("reason" to "Version $targetVersion not found for key ${keyId.alias}")
+            )
+
+        val pemContent = versionData["public_key"] as? String
+            ?: throw KmsException(
+                policy = KmsPolicy.KEY_NOT_FOUND,
+                attributes = mapOf("reason" to "Public key material missing for version $targetVersion")
+            )
+
+        return KeyMaterial(
+            keyId = KeyId(keyId.alias, targetVersion),
+            type = response.type.toKeyType(),
+            side = KeySide.PUBLIC,
+            encoded = decodePemToDer(pemContent)
+        )
+    }
+
+    private fun extractSecretKey(keyId: KeyId, response: VaultTransitKey): KeyMaterial {
+        if (!response.isExportable) {
+            throw KmsException(
+                policy = KmsPolicy.KMS_NOT_SUPPORTED,
+                attributes = mapOf(
+                    "alias" to keyId.alias,
+                    "reason" to "Key is not exportable. Check Vault transit key configuration."
+                )
+            )
+        }
+
+        val targetVersion = keyId.version ?: response.latestVersion.toString()
+
+        val versionData = response.keys[targetVersion] as? Map<*, *>
+            ?: throw KmsException(
+                policy = KmsPolicy.KMS_EXTERNAL_ERROR,
+                attributes = mapOf("reason" to "Version $targetVersion not found for key ${keyId.alias}")
+            )
+
+        val rawSecret = versionData["key"] as? String
+            ?: throw KmsException(
+                policy = KmsPolicy.KEY_NOT_FOUND,
+                attributes = mapOf(
+                    "alias" to keyId.alias,
+                    "version" to targetVersion,
+                    "reason" to "Secret key material is missing in response despite exportable=true"
+                )
+            )
+
+        return KeyMaterial(
+            keyId = KeyId(keyId.alias, targetVersion),
+            type = response.type.toKeyType(),
+            side = KeySide.SECRET,
+            encoded = try {
+                Base64.getDecoder().decode(rawSecret)
+            } catch (e: IllegalArgumentException) {
+                throw KmsException(KmsPolicy.KMS_EXTERNAL_ERROR, mapOf("reason" to "Invalid Base64 in secret key"))
+            }
+        )
+    }
+
+    private fun decodePemToDer(pem: String): ByteArray {
         val cleanPem = pem
             .replace("-----BEGIN PUBLIC KEY-----", "")
             .replace("-----END PUBLIC KEY-----", "")
-            .replace("\\s".toRegex(), "") // 줄바꿈 및 공백 제거
-        return java.util.Base64.getDecoder().decode(cleanPem)
+            .replace("\\s".toRegex(), "")
+
+        return try {
+            Base64.getDecoder().decode(cleanPem)
+        } catch (e: IllegalArgumentException) {
+            throw KmsException(
+                policy = KmsPolicy.KMS_EXTERNAL_ERROR,
+                attributes = mapOf("reason" to "Invalid Base64 encoding in public key")
+            )
+        }
     }
-
-    /**
-     * Transit Engine은 기본적으로 개인키 내보내기를 지원하지 않습니다.
-     * 보안 정책상 이 기능을 차단하거나, 반드시 필요한 경우 별도의 로직을 타야 합니다.
-     */
-    override fun getPrivateKey(keyId: KeyId): KeyMaterial {
-        throw KmsException(KmsPolicy.KMS_EXTERNAL_ERROR, mapOf("reason" to "Exporting full key material (Private Key) is disabled by Vault Transit policy to ensure hardware-level security. for key: ${keyId.value}"))
-    }
-
-    override fun getLatestPrivateKey(alias: String): KeyMaterial {
-        TODO("Not yet implemented")
-    }
-
-    override fun getSecretKey(keyId: KeyId): KeyMaterial {
-        // 1. Vault Transit Export 엔드포인트 호출 (HMAC/대칭키 자재 추출)
-        // 경로: transit/export/signing-key/{keyId} 또는 encryption-key/{keyId}
-        val response = vaultOperations.read("transit/export/signing-key/${keyId.value}")
-            ?: throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.value))
-
-        val data = response.data ?: throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.value))
-
-        // 2. keys 맵에서 키 자재 추출 (Vault는 보통 Base64 문자열로 반환)
-        val keys = data["keys"] as? Map<String, String>
-        val rawKeyBase64 = keys?.values?.firstOrNull()
-            ?: throw KmsException(KmsPolicy.KMS_EXTERNAL_ERROR, mapOf("reason" to "SecretKey not found for key: ${keyId.value}"))
-
-        // 3. Base64 디코딩 후 KeyMaterial 생성
-        return KeyMaterial(
-            keyId = keyId,
-            type = (data["type"] as String).toKeyType(),
-            encoded = java.util.Base64.getDecoder().decode(rawKeyBase64)
-        )
-    }
-
-    override fun getLatestSecretKey(alias: String): KeyMaterial {
-        TODO("Not yet implemented")
-    }
-
 
 }

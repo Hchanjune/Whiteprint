@@ -44,6 +44,12 @@ enum class KmsPolicy(
      * Required Attributes
      * - [reason]
      */
-    KMS_EXTERNAL_ERROR(502, "KMS_EXTERNAL_ERROR", "External KMS provider error: [[reason]]")
+    KMS_EXTERNAL_ERROR(502, "KMS_EXTERNAL_ERROR", "External KMS provider error: [[reason]]"),
+
+    /**
+     * Required Attributes
+     * - [reason]
+     */
+    KMS_NOT_SUPPORTED(500, "KMS_NOT_SUPPORTED", "Not Supported function. [[reason]]")
 
 }
