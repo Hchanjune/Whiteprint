@@ -21,6 +21,11 @@ class VaultKeyCache : KeyCache {
         .maximumSize(500)
         .build()
 
+    private val secretKeyCache: Cache<KeyId, KeyMaterial> = Caffeine.newBuilder()
+        .expireAfterWrite(6, TimeUnit.HOURS)
+        .maximumSize(500)
+        .build()
+
     override fun getMetadata(keyId: KeyId): KeyMetadata? {
         return metadataCache.getIfPresent(keyId)
     }
@@ -35,6 +40,28 @@ class VaultKeyCache : KeyCache {
 
     override fun putPublicKey(keyId: KeyId, material: KeyMaterial) {
         publicKeyCache.put(keyId, material)
+    }
+
+    override fun getPrivateKey(keyId: KeyId): KeyMaterial? {
+        return secretKeyCache.getIfPresent(keyId)
+    }
+
+    override fun putPrivateKey(
+        keyId: KeyId,
+        material: KeyMaterial
+    ) {
+        secretKeyCache.put(keyId, material)
+    }
+
+    override fun getSecretKey(keyId: KeyId): KeyMaterial? {
+        return secretKeyCache.getIfPresent(keyId)
+    }
+
+    override fun putSecretKey(
+        keyId: KeyId,
+        material: KeyMaterial
+    ) {
+        secretKeyCache.put(keyId, material)
     }
 
 }

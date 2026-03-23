@@ -3,10 +3,11 @@ package org.whiteprint.platform.core.security.model
 import java.time.Instant
 
 data class AccessTokenClaims(
-    val subject: String,
-    val issuer: String,
-    val audience: Set<String>,
-    val issuedAt: Instant,
-    val expiresAt: Instant,
+    override val tokenId: String,
+    override val subject: String,
+    override val issuer: String,
+    override val audience: Set<String>,
+    override val issuedAt: Instant,
+    override val expiresAt: Instant,
     val authorities: Set<String>,
-)
+): TokenClaims

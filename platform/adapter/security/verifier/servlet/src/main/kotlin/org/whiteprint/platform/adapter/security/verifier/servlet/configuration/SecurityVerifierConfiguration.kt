@@ -9,21 +9,20 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.whiteprint.platform.adapter.security.verifier.servlet.filter.StatelessSecurityFilter
-import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccessTokenKeyResolverImpl
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccessTokenVerificationKeyResolverImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.RevocationCheckerImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityEntryPointProvider
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialService
+import org.whiteprint.platform.core.security.policy.SecurityCacheKeyStrategy
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
 import org.whiteprint.platform.core.security.verifier.RevocationChecker
@@ -33,23 +32,25 @@ import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 @Configuration
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityVerifierConfigurationProperties::class)
-class SecurityVerifierConfiguration {
+class SecurityVerifierConfiguration(
+    private val verificationProperties: SecurityVerifierConfigurationProperties
+) {
 
     @Bean("securityVerifierSerializer")
     fun securityVerifierSerializer(): Serializer = JacksonSerializer()
 
     @Bean
-    fun securityEntryPointProvider(
-        props: SecurityVerifierConfigurationProperties,
-    ): SecurityEntryPointProvider =
-        SecurityEntryPointProvider(props)
+    fun securityEntryPointProvider(): SecurityEntryPointProvider =
+        SecurityEntryPointProvider(verificationProperties)
 
     @Bean
     fun revocationChecker(
         @Qualifier("securityCacheValueOperations")
         securityCache: ValueOperations
     ): RevocationChecker = RevocationCheckerImpl(
-        securityCache
+        cache = securityCache,
+        keyStrategy = object : SecurityCacheKeyStrategy {},
+        servicePrefix = verificationProperties.cachePrefix
     )
 
     @Bean
@@ -59,10 +60,10 @@ class SecurityVerifierConfiguration {
         @Qualifier("verifierKeyMaterialService")
         keyMaterialService: KeyMaterialService
     ): AccessTokenVerificationKeyResolver
-        = AccessTokenKeyResolverImpl(
-            keyCache = keyCache,
-            keyMaterialService = keyMaterialService
-        )
+        = AccessTokenVerificationKeyResolverImpl(
+        keyCache = keyCache,
+        keyMaterialService = keyMaterialService
+    )
 
     @Bean
     fun accessTokenVerifier(

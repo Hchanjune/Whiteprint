@@ -9,21 +9,21 @@ class SecurityEntryPointProvider(
     private val props: SecurityVerifierConfigurationProperties,
 ) {
     fun permitAllMatchers(): List<RequestMatcher> {
-        return props.rules.filter { it.decision == SecurityDecision.PERMIT }
+        return props.entryPoints.filter { it.decision == SecurityDecision.PERMIT }
             .map { rule ->
                 PathPatternRequestMatcher.pathPattern(rule.method, rule.path)
             }
     }
 
     fun denyAllMatchers(): List<RequestMatcher> {
-        return props.rules.filter { it.decision == SecurityDecision.DENY }
+        return props.entryPoints.filter { it.decision == SecurityDecision.DENY }
             .map { rule ->
                 PathPatternRequestMatcher.pathPattern(rule.method, rule.path)
             }
     }
 
     fun authenticateAllMatchers(): List<RequestMatcher> {
-        return props.rules.filter { it.decision == SecurityDecision.AUTHENTICATED }
+        return props.entryPoints.filter { it.decision == SecurityDecision.AUTHENTICATED }
             .map { rule ->
                 PathPatternRequestMatcher.pathPattern(rule.method, rule.path)
             }

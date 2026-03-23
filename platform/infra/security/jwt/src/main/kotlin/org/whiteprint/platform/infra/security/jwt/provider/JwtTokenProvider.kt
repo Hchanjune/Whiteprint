@@ -1,6 +1,7 @@
 package org.whiteprint.platform.infra.security.jwt.provider
 
 import io.jsonwebtoken.Jwts
+import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.model.AccessTokenClaims
 import org.whiteprint.platform.core.security.model.AccessTokenSigningKey
@@ -11,9 +12,7 @@ import org.whiteprint.platform.core.security.provider.AccessTokenSigningKeyResol
 import org.whiteprint.platform.core.security.provider.TokenProvider
 import java.util.Date
 
-class JwtTokenProvider(
-    accessTokenSigningKeyResolver: AccessTokenSigningKeyResolver
-): TokenProvider {
+class JwtTokenProvider: TokenProvider {
     override fun generateAccessToken(
         claims: AccessTokenClaims,
         key: AccessTokenSigningKey
@@ -23,6 +22,7 @@ class JwtTokenProvider(
             .keyId(key.keyId)
             .type("JWT")
             .and()
+            .id(TsidGenerator.generate().toString())
             .subject(claims.subject)
             .issuer(claims.issuer)
             .audience().add(claims.audience)
@@ -44,6 +44,7 @@ class JwtTokenProvider(
             .keyId(key.keyId)
             .type("JWT")
             .and()
+            .id(TsidGenerator.generate().toString())
             .subject(claims.subject)
             .issuer(claims.issuer)
             .audience().add(claims.audience)

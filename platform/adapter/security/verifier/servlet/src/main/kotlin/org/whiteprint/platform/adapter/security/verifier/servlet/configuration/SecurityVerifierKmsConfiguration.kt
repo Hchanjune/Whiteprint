@@ -14,7 +14,7 @@ import org.whiteprint.platform.core.kms.service.KeyOperations
 import org.whiteprint.platform.infra.kms.vault.VaultKeyCache
 import org.whiteprint.platform.infra.kms.vault.VaultKeyMaterialService
 import org.whiteprint.platform.infra.kms.vault.VaultKeyOperations
-import org.whiteprint.platform.infra.kms.vault.adapter.VaultKeyAdminService
+import org.whiteprint.platform.infra.kms.vault.VaultKeyAdminService
 
 @Configuration
 @EnableConfigurationProperties(SecurityVerifierKmsConfigurationProperties::class)

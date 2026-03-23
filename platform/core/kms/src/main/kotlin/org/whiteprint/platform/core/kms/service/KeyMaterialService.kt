@@ -7,6 +7,8 @@ interface KeyMaterialService {
 
     fun getPublicKey(keyId: KeyId): KeyMaterial
 
-    fun getFullKeyMaterial(keyId: KeyId): KeyMaterial
+    fun getPrivateKey(keyId: KeyId): KeyMaterial
+
+    fun getSecretKey(keyId: KeyId): KeyMaterial
 
 }

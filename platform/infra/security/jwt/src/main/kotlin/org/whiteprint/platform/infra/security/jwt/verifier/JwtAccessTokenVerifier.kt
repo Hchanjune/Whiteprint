@@ -29,6 +29,7 @@ class JwtAccessTokenVerifier (
                 .payload
 
             val accessTokenClaims = AccessTokenClaims(
+                tokenId = claims.id,
                 subject = claims.subject,
                 issuer = claims.issuer,
                 audience = claims.audience,

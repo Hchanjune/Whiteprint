@@ -45,10 +45,10 @@ enum class SecurityPolicy(
         "User information has changed. Please refresh your token."
     ),
 
-    REFRESH_TOKEN_BLACKLISTED(
+    TOKEN_BLACKLISTED(
         403,
-        "REFRESH_TOKEN_BLACKLISTED",
-        "Refresh Token is blacklisted by logout. Please re-login."
+        "TOKEN_BLACKLISTED",
+        "Token is blacklisted by logout. Please re-login."
     ),
 
     TOKEN_CLAIM_INVALID(

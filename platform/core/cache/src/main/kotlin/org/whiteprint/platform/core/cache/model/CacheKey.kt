@@ -1,5 +1,6 @@
 package org.whiteprint.platform.core.cache.model
 
-interface CacheKey {
+@JvmInline
+value class CacheKey(
     val value: String
-}
+)

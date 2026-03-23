@@ -5,7 +5,8 @@ import org.springframework.http.HttpMethod
 
 @ConfigurationProperties("adapter.security.entry-points")
 data class SecurityVerifierConfigurationProperties(
-    val rules: List<Rule> = emptyList(),
+    var cachePrefix: String = "",
+    val entryPoints: List<Rule> = emptyList(),
 ) {
     data class Rule(
         var path: String,
