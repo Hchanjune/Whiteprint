@@ -26,11 +26,9 @@ dependencies {
 	implementation(project(":platform:infra:persistence:jpa"))
 
 	implementation(project(":platform:adapter:security:verifier:servlet"))
+	implementation(project(":platform:adapter:lock:distributed"))
 	implementation(project(":platform:adapter:event:outbox"))
 	implementation(project(":platform:adapter:event:publisher"))
-
-	//implementation("org.springframework.boot:spring-boot-starter-data-redis")
-	//implementation("org.springframework.boot:spring-boot-starter-kafka")
 
 	runtimeOnly("org.postgresql:postgresql")
 
