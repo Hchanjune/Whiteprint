@@ -7,10 +7,14 @@ import org.springframework.vault.authentication.TokenAuthentication
 import org.springframework.vault.client.VaultEndpoint
 import org.springframework.vault.core.VaultOperations
 import org.springframework.vault.core.VaultTemplate
+import org.whiteprint.platform.adapter.security.provider.servlet.key.AccessTokenSignerImpl
+import org.whiteprint.platform.adapter.security.provider.servlet.key.RefreshTokenKeyResolverImpl
 import org.whiteprint.platform.core.kms.service.KeyAdminOperations
 import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.kms.service.KeyOperations
+import org.whiteprint.platform.core.security.provider.AccessTokenSigner
+import org.whiteprint.platform.core.security.provider.RefreshTokenKeyResolver
 import org.whiteprint.platform.infra.kms.vault.VaultKeyAdminOperations
 import org.whiteprint.platform.infra.kms.vault.CaffeineKeyCache
 import org.whiteprint.platform.infra.kms.vault.VaultKeyMaterialProvider
@@ -36,28 +40,53 @@ class SecurityProviderKmsConfiguration(
     fun keyOperations(
         @Qualifier("providerVaultOperations") vaultOperations: VaultOperations,
     ): KeyOperations =
-        VaultKeyOperations(vaultOperations)
+        VaultKeyOperations(
+            vaultOperations = vaultOperations,
+            transitPath = kmsProperties.datasource.transitPath
+        )
 
     @Bean("providerKmsCache")
     fun securityKmsCache(): KeyCache =
         CaffeineKeyCache()
 
-
-    @Bean("providerKeyMaterialService")
+    @Bean("providerKeyMaterialProvider")
     fun securityKeyMaterialService(
         @Qualifier("providerVaultOperations") vaultOperations: VaultOperations,
+        @Qualifier("providerKmsCache") keyCache: KeyCache,
     ): KeyMaterialProvider =
-        VaultKeyMaterialProvider(vaultOperations)
+        VaultKeyMaterialProvider(
+            vaultOperations = vaultOperations,
+            keyCache = keyCache,
+            transitPath = kmsProperties.datasource.transitPath,
+        )
 
     @Bean("providerKeyAdminService")
     fun securityKeyAdminService(
         @Qualifier("providerVaultOperations") vaultOperations: VaultOperations,
+        @Qualifier("providerKeyMaterialProvider") keyMaterialProvider: KeyMaterialProvider,
     ): KeyAdminOperations =
-        VaultKeyAdminOperations(vaultOperations)
+        VaultKeyAdminOperations(
+            vaultOperations = vaultOperations,
+            keyMaterialProvider = keyMaterialProvider,
+            transitPath = kmsProperties.datasource.transitPath,
+        )
 
-    @Bean("providerKeyOperations")
-    fun securityKeyOperations(
-        @Qualifier("providerVaultOperations") vaultOperations: VaultOperations,
-    ): KeyOperations =
-        VaultKeyOperations(vaultOperations)
+    @Bean("providerAccessTokenSigner")
+    fun accessTokenSigner(
+        @Qualifier("providerKeyOperations") keyOperations: KeyOperations,
+    ): AccessTokenSigner =
+        AccessTokenSignerImpl(
+            keyOperations = keyOperations,
+            accessTokenPolicy = kmsProperties.accessTokenKeyPolicy,
+        )
+
+    @Bean("providerRefreshTokenKeyResolver")
+    fun refreshTokenKeyResolver(
+        @Qualifier("providerKeyMaterialProvider") keyMaterialProvider: KeyMaterialProvider,
+    ): RefreshTokenKeyResolver =
+        RefreshTokenKeyResolverImpl(
+            keyMaterialProvider = keyMaterialProvider,
+            refreshTokenPolicy = kmsProperties.refreshTokenKeyPolicy,
+        )
+
 }

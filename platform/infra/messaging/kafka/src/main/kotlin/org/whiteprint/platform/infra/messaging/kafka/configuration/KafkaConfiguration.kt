@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.LongDeserializer
 import org.apache.kafka.common.serialization.LongSerializer
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,16 +24,22 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.util.backoff.FixedBackOff
+import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import org.whiteprint.platform.core.messaging.contract.TopicResolver
+import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 
 @Configuration
 @EnableConfigurationProperties(KafkaConfigurationProperties::class)
 class KafkaConfiguration(
     private val kafkaProperties: KafkaConfigurationProperties
 ) {
+
+    @Bean
+    @ConditionalOnMissingBean(Serializer::class)
+    fun serializer(): Serializer = JacksonSerializer()
 
     @Primary
     @Bean
@@ -77,7 +84,9 @@ class KafkaConfiguration(
 
     @Primary
     @Bean
-    fun consumerFactory(): ConsumerFactory<Long, EventEnvelope> {
+    fun consumerFactory(
+        serializer: Serializer
+    ): ConsumerFactory<Long, EventEnvelope> {
         val config = mutableMapOf<String, Any>()
         val datasource = kafkaProperties.datasource
         val consumer = kafkaProperties.consumer
@@ -91,7 +100,7 @@ class KafkaConfiguration(
         return DefaultKafkaConsumerFactory(
             config,
             LongDeserializer(),
-            KafkaEventDeserializer()
+            KafkaEventDeserializer(serializer)
         )
     }
 
@@ -123,7 +132,9 @@ class KafkaConfiguration(
 
     @Primary
     @Bean
-    fun producerFactory(): ProducerFactory<Long, EventEnvelope> {
+    fun producerFactory(
+        serializer: Serializer,
+    ): ProducerFactory<Long, EventEnvelope> {
         val config = mutableMapOf<String, Any>()
         val ds = kafkaProperties.datasource
         val producer = kafkaProperties.producer
@@ -144,7 +155,7 @@ class KafkaConfiguration(
         return DefaultKafkaProducerFactory(
             config,
             LongSerializer(),
-            KafkaEventSerializer()
+            KafkaEventSerializer(serializer)
         )
     }
 

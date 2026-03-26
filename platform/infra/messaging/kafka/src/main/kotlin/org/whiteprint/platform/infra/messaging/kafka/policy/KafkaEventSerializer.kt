@@ -1,18 +1,18 @@
 package org.whiteprint.platform.infra.messaging.kafka.policy
 
-import org.whiteprint.platform.core.kernel.serializer.DefaultSerializer
-import org.apache.kafka.common.serialization.Serializer
+import org.whiteprint.platform.core.kernel.serializer.Serializer
+import org.apache.kafka.common.serialization.Serializer as KafkaSerializer
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 
-class KafkaEventSerializer: Serializer<EventEnvelope> {
-
-    private val serializer = DefaultSerializer.jsonMapper
+class KafkaEventSerializer(
+    private val serializer: Serializer
+): KafkaSerializer<EventEnvelope> {
 
     override fun serialize(topic: String, data: EventEnvelope): ByteArray {
         return try {
-            serializer.writeValueAsBytes(data)
+            serializer.serializeToBytes(data)
         } catch (exception: Exception) {
             throw EventException(
                 policy = EventPolicy.SERIALIZATION_FAILED,

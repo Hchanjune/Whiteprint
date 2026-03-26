@@ -16,6 +16,8 @@ dependencies {
     api(project(":platform:core:kernel"))
     api(project(":platform:core:messaging"))
 
+    api(project(":platform:infra:serializer:jackson"))
+
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-autoconfigure")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

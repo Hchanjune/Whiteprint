@@ -1,6 +1,5 @@
 package org.whiteprint.platform.infra.serializer.jackson
 
-import org.whiteprint.platform.core.kernel.serializer.DefaultSerializer
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
@@ -12,18 +11,18 @@ class JacksonSerializer: Serializer {
         .build()
 
     override fun <T : Any> serializeToJson(obj: T): String {
-        return DefaultSerializer.jsonMapper.writeValueAsString(obj)
+        return jsonMapper.writeValueAsString(obj)
     }
 
     override fun <T : Any> deserializeFromJson(json: String, type: Class<T>): T {
-        return DefaultSerializer.jsonMapper.readValue(json, type)
+        return jsonMapper.readValue(json, type)
     }
 
     override fun <T : Any> serializeToBytes(obj: T): ByteArray {
-        return DefaultSerializer.jsonMapper.writeValueAsBytes(obj)
+        return jsonMapper.writeValueAsBytes(obj)
     }
 
     override fun <T : Any> deserializeFromBytes(bytes: ByteArray, type: Class<T>): T {
-        return DefaultSerializer.jsonMapper.readValue(bytes, type)
+        return jsonMapper.readValue(bytes, type)
     }
 }

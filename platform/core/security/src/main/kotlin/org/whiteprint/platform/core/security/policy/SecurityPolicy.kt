@@ -67,5 +67,11 @@ enum class SecurityPolicy(
         500,
         "TOKEN_VERIFICATION_INTERNAL_ERROR",
         "An unexpected error occurred during token verification."
+    ),
+
+    TOKEN_VERIFICATION_KEY_ERROR(
+        500,
+        "TOKEN_VERIFICATION_KEY_ERROR",
+        "Verification should be handled by Verifier with Public Key."
     )
 }

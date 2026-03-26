@@ -1,16 +1,6 @@
 spring:
   application:
-    name: api-command
-
-  docker:
-    compose:
-      enabled: false
-
-#  kafka:
-#    bootstrap-servers: ""
-#
-#  datasource:
-#    driver-class-name :
+    name: test
 
 adapter:
   security:
@@ -50,31 +40,3 @@ adapter:
         timeout:
           command-timeout-millis: 2000
           shutdown-timeout-millis: 100
-
-
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-    endpoint:
-      prometheus:
-        enabled: true
-  observations:
-    key-values:
-      application: ${spring.application.name}
-
-
-operation-manager:
-  webmvc:
-    mdc-service-aspect:
-      enabled: true
-    micrometer:
-      enabled: true
-    logging:
-      enabled: true
-      pretty: true
-      json: true
-      success-level: INFO
-      failure-level: ERROR

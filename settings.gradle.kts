@@ -6,6 +6,8 @@ include("service:auth")
 include("service:user:command")
 include("service:user:query")
 
+include("service:test")
+
 // Platform Adapter
 include("platform:adapter:serializer")
 

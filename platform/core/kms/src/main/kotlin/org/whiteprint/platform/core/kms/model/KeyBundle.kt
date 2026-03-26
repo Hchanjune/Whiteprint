@@ -12,7 +12,7 @@ data class KeyBundle(
             policy = KmsPolicy.MATERIAL_NOT_FOUND,
             attributes = mapOf(
                 "alias" to metadata.keyId.alias,
-                "version" to metadata.keyId.version,
+                "version" to (metadata.keyId.version?: "latest"),
             )
         )
     }

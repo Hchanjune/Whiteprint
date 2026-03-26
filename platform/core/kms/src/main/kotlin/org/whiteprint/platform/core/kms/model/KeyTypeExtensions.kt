@@ -31,3 +31,13 @@ fun String.toKeyType(): KeyType = when (this.lowercase()) {
         mapOf("reason" to "Unsupported or unknown Vault key type: $this")
     )
 }
+
+fun KeyType.toJjwtAlgorithm(): String = when (this) {
+    KeyType.RSA_2048, KeyType.RSA_4096 -> "RS256"
+    KeyType.EC_P256 -> "ES256"
+    KeyType.HMAC_SHA256 -> "HS256"
+    else -> throw KmsException(
+        KmsPolicy.KMS_NOT_SUPPORTED,
+        mapOf("reason" to "This KeyType does not support JWT signing: $this")
+    )
+}

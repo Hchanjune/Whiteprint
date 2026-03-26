@@ -5,4 +5,5 @@ import javax.crypto.SecretKey
 data class RefreshTokenKey(
     val keyId: String,
     val secretKey: SecretKey,
+    val algorithm: String
 )
