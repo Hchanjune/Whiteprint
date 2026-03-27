@@ -11,7 +11,7 @@ class RedisValueOperations(
 ): ValueOperations {
 
     override fun raw(key: CacheKey): Any? {
-        return redisTemplate.opsForValue().get(key)
+        return redisTemplate.opsForValue().get(key.value)
     }
 
     override fun set(key: CacheKey, value: Any) {

@@ -52,6 +52,11 @@ enum class KmsPolicy(
      */
     KMS_NOT_SUPPORTED(500, "KMS_NOT_SUPPORTED", "Not Supported function. [[reason]]"),
 
-    ASYMMETRIC_PRIVATE_KEY_FORBIDDEN(403, "ASYMMETRIC_PRIVATE_KEY_FORBIDDEN", "The private key in asymmetric cryptography cannot be exported outside.")
+    ASYMMETRIC_PRIVATE_KEY_FORBIDDEN(403, "ASYMMETRIC_PRIVATE_KEY_FORBIDDEN", "The private key in asymmetric cryptography cannot be exported outside."),
+
+    /**
+     * Require Stacktrace
+     */
+    KMS_INTERNAL_ERROR(500, "KMS_INTERNAL_ERROR", "KMS internal error."),
 
 }

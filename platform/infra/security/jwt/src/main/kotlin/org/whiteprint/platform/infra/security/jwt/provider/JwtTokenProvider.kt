@@ -31,7 +31,7 @@ class JwtTokenProvider(
     ): AccessToken {
         val now = Instant.now()
         val expiresAt = now.plusSeconds(policy.accessTokenPolicy.expirationSeconds)
-        val dummyKey = Keys.hmacShaKeyFor(ByteArray(2))
+        val dummyKey = Jwts.SIG.HS256.key().build()
         val jwt = Jwts.builder()
             .header()
             .keyId(accessTokenSigner.getKeyId())

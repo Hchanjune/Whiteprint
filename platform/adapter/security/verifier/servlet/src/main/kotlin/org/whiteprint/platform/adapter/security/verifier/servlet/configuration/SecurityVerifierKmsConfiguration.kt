@@ -22,7 +22,9 @@ class SecurityVerifierKmsConfiguration(
         val endpoint = VaultEndpoint.create(
             kmsProperties.datasource.host,
             kmsProperties.datasource.port,
-        )
+        ).apply {
+            this.scheme = "http"
+        }
 
         val clientAuthentication = TokenAuthentication(kmsProperties.datasource.password)
 

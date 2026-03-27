@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.whiteprint.platform.adapter.web.servlet.omk.ResponseEntityGenerator
+import org.whiteprint.platform.core.cache.model.CacheKey
+import org.whiteprint.platform.core.cache.operation.ValueOperations
+import org.whiteprint.platform.core.cache.operation.get
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.platform.core.kernel.model.ApiResponse
 import org.whiteprint.platform.core.security.model.AccessToken
@@ -18,12 +20,13 @@ import java.time.Instant
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthRestController(
+    private val valueOperations: ValueOperations,
     private val tokenProvider: TokenProvider,
 ) {
 
     @GetMapping("/test")
     fun test(): String {
-        return "test"
+        return valueOperations.get<String>(CacheKey("123")).toString()
     }
 
     @PostMapping("/login")
@@ -38,7 +41,7 @@ class AuthRestController(
             authorities = emptySet(),
         )
         val token = tokenProvider.generateAccessToken(accessTokenClaims)
-        val response = ApiResponse.success<AccessToken>(
+        val response = ApiResponse.success(
             id = "",
             data = token,
             traceId = null,

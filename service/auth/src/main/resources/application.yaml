@@ -18,7 +18,7 @@ adapter:
           decision: PERMIT
       kms:
         datasource:
-          host: localhost
+          host: sinandle.iptime.org
           port: 8200
           password: root
           transit-path: transit
@@ -27,7 +27,7 @@ adapter:
           maximum-size: 1000
       cache:
         datasource:
-          host: localhost
+          host: sinandle.iptime.org
           port: 6379
           password: ~
           database: 0
@@ -50,7 +50,7 @@ adapter:
           expiration-seconds: 3600
       kms:
         datasource:
-          host: localhost
+          host: sinandle.iptime.org
           port: 8200
           password: root
           transit-path: transit

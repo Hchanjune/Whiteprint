@@ -4,9 +4,13 @@ import org.springframework.vault.core.VaultOperations
 import org.springframework.vault.support.Ciphertext
 import org.springframework.vault.support.Plaintext
 import org.springframework.vault.support.Signature
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.whiteprint.platform.core.kms.model.EncryptionResult
 import org.whiteprint.platform.core.kms.model.KeyId
 import org.whiteprint.platform.core.kms.model.SigningResult
+import org.whiteprint.platform.core.kms.policy.KmsException
+import org.whiteprint.platform.core.kms.policy.KmsPolicy
 import org.whiteprint.platform.core.kms.service.KeyOperations
 import java.util.Base64
 
@@ -17,13 +21,17 @@ class VaultKeyOperations(
 
     override fun sign(alias: String, data: ByteArray): SigningResult {
         val ops = vaultOperations.opsForTransit(transitPath)
-
         val plaintext = Plaintext.of(data)
 
-        val vaultSignature: Signature = ops.sign(alias, plaintext)
-        val rawSignature = vaultSignature.signature // "vault:v1:..."
+        val vaultSignature = try {
+            ops.sign(alias, plaintext)
+        } catch (exception: HttpClientErrorException.NotFound) {
+            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to alias), exception)
+        } catch (exception: HttpServerErrorException) {
+            throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap(), exception)
+        }
 
-        val parts = rawSignature.split(":")
+        val parts = vaultSignature.signature.split(":")
         val version = parts[1].removePrefix("v")
         val signatureBytes = Base64.getDecoder().decode(parts[2])
 
@@ -40,14 +48,26 @@ class VaultKeyOperations(
         val vaultFormat = "vault:v${keyId.version}:${Base64.getEncoder().encodeToString(signature)}"
         val vaultSignature = Signature.of(vaultFormat)
 
-        return ops.verify(keyId.alias, plaintext, vaultSignature)
+        return try {
+            ops.verify(keyId.alias, plaintext, vaultSignature)
+        } catch (exception: HttpClientErrorException.NotFound) {
+            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.toString()), exception)
+        } catch (exception: HttpServerErrorException) {
+            throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap(), exception)
+        }
     }
 
     override fun encrypt(alias: String, plainText: ByteArray): EncryptionResult {
         val ops = vaultOperations.opsForTransit(transitPath)
 
         val plaintext = Plaintext.of(plainText)
-        val vaultCipherText: Ciphertext = ops.encrypt(alias, plaintext)
+        val vaultCipherText: Ciphertext = try {
+            ops.encrypt(alias, plaintext)
+        } catch (exception: HttpClientErrorException.NotFound) {
+            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to alias), exception)
+        } catch (exception: HttpServerErrorException) {
+            throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap(), exception)
+        }
         val rawCipher = vaultCipherText.ciphertext // "vault:v1:..."
 
         val parts = rawCipher.split(":")
@@ -67,7 +87,13 @@ class VaultKeyOperations(
         val vaultFormat = "vault:v${keyId.version}:${Base64.getEncoder().encodeToString(cipherText)}"
         val ciphertext = Ciphertext.of(vaultFormat)
 
-        val plaintext: Plaintext = ops.decrypt(keyId.alias, ciphertext)
+        val plaintext: Plaintext = try {
+            ops.decrypt(keyId.alias, ciphertext)
+        } catch (exception: HttpClientErrorException.NotFound) {
+            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.toString()), exception)
+        } catch (exception: HttpServerErrorException) {
+            throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap(), exception)
+        }
         return plaintext.plaintext
     }
 
