@@ -1,5 +1,6 @@
 package org.whiteprint.platform.core.kernel.model
 
+import org.whiteprint.platform.core.kernel.policy.exception.StandardException
 import java.time.Instant
 
 data class ApiResponse<out T>(
@@ -35,11 +36,21 @@ data class ApiResponse<out T>(
             traceId: String?,
             exception: Exception
         ): ApiResponse<Any?> {
+            val message = if (exception is StandardException) {
+                exception.message?: "unknown error"
+            } else {
+                exception.localizedMessage?: exception.message?: exception::class.simpleName ?: "unknown error"
+            }
+            val code = if (exception is StandardException) {
+                exception.code
+            } else {
+                null
+            }
             return ApiResponse(
                 id = id?: "-",
                 isSuccess = false,
-                message = exception.localizedMessage?: exception.message?: exception::class.simpleName ?: "unknown error",
-                data = "Internal Error Occurred",
+                message = message,
+                data = code,
                 timestamp = Instant.now(),
                 traceId = traceId?: "-",
             )

@@ -1,10 +1,66 @@
-security:
-  entry-point:
-    rules:
-      - path: /api/v1/auth/login
-        method: POST
-        decision: PERMIT
+spring:
+  application:
+    name: service-auth
 
-      - path: /api/v1/auth/refresh
-        method: POST
-        decision: PERMIT
+adapter:
+  security:
+    verifier:
+      policy:
+        key-alias: access-token-sig
+        expected-issuers:
+          - Whiteprint
+      entry-points:
+        - path: /api/v1/auth/login
+          method: POST
+          decision: PERMIT
+        - path: /api/v1/auth/test
+          method: GET
+          decision: PERMIT
+      kms:
+        datasource:
+          host: localhost
+          port: 8200
+          password: root
+          transit-path: transit
+        cache:
+          expires-after-write-minutes: 60
+          maximum-size: 1000
+      cache:
+        datasource:
+          host: localhost
+          port: 6379
+          password: ~
+          database: 0
+        pooling:
+          enabled: true
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait-millis: -1
+        timeout:
+          command-timeout-millis: 2000
+          shutdown-timeout-millis: 100
+    provider:
+      token:
+        access-token-policy:
+          issuer: Sample
+          expiration-seconds: 3600
+        refresh-token-policy:
+          issuer: Sample
+          expiration-seconds: 3600
+      kms:
+        datasource:
+          host: localhost
+          port: 8200
+          password: root
+          transit-path: transit
+        access-token-key-policy:
+          key-alias: access-token-sig
+          rotation-interval-seconds: 2592000
+          overlap-seconds: 86400
+          algorithm: RSA_2048
+        refresh-token-key-policy:
+          key-alias: refresh-token-sig
+          rotation-interval-seconds: 2592000
+          overlap-seconds: 86400
+          algorithm: HMAC_SHA256

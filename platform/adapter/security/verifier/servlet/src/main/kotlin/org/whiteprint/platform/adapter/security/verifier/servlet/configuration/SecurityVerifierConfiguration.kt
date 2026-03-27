@@ -74,10 +74,12 @@ class SecurityVerifierConfiguration(
     @Bean
     fun statelessSecurityFilter(
         serializer: Serializer,
-        accessTokenVerifier: AccessTokenVerifier
+        securityEntryPointProvider: SecurityEntryPointProvider,
+        accessTokenVerifier: AccessTokenVerifier,
     ): StatelessSecurityFilter =
         StatelessSecurityFilter(
             serializer = serializer,
+            securityEntryPointProvider = securityEntryPointProvider,
             accessTokenVerifier = accessTokenVerifier
         )
 

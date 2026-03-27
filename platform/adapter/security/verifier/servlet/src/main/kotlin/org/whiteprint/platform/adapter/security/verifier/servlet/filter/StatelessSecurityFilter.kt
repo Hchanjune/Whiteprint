@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityEntryPointProvider
 import org.whiteprint.platform.core.kernel.model.ApiResponse
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.security.model.AccessToken
@@ -17,6 +18,7 @@ import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
 
 class StatelessSecurityFilter(
     private val serializer: Serializer,
+    private val securityEntryPointProvider: SecurityEntryPointProvider,
     private val accessTokenVerifier: AccessTokenVerifier,
 ): OncePerRequestFilter() {
 
@@ -27,6 +29,13 @@ class StatelessSecurityFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        val permitAllMatchers = securityEntryPointProvider.permitAllMatchers()
+
+        if (permitAllMatchers.any { it.matches(request) }) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
         try {
             val token = extractToken(request)
 

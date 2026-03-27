@@ -6,7 +6,7 @@ import org.springframework.http.HttpMethod
 @ConfigurationProperties("adapter.security.verifier")
 data class SecurityVerifierConfigurationProperties(
     var policy: AccessTokenVerifierPolicy = AccessTokenVerifierPolicy(),
-    val entryPoints: List<Rule> = emptyList(),
+    var entryPoints: MutableList<Rule> = mutableListOf(),
 ) {
 
     data class AccessTokenVerifierPolicy(

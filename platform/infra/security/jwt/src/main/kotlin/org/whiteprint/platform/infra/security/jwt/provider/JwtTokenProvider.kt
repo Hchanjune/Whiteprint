@@ -1,6 +1,7 @@
 package org.whiteprint.platform.infra.security.jwt.provider
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SecureDigestAlgorithm
 import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.VerifySecureDigestRequest
@@ -30,7 +31,7 @@ class JwtTokenProvider(
     ): AccessToken {
         val now = Instant.now()
         val expiresAt = now.plusSeconds(policy.accessTokenPolicy.expirationSeconds)
-
+        val dummyKey = Keys.hmacShaKeyFor(ByteArray(2))
         val jwt = Jwts.builder()
             .header()
             .keyId(accessTokenSigner.getKeyId())
@@ -45,7 +46,7 @@ class JwtTokenProvider(
             .expiration(Date.from(expiresAt))
             .claim("authorities", claims.authorities)
             .signWith(
-                null,
+                dummyKey,
                 object: SecureDigestAlgorithm<Key, Key> {
                     override fun getId(): String = accessTokenSigner.getAlgorithm()
                     override fun digest(request: SecureRequest<InputStream, Key>): ByteArray {

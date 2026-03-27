@@ -27,7 +27,6 @@ data class SecurityProviderKmsConfigurationProperties(
 
     data class RefreshTokenKeyPolicy(
         var keyAlias: String = "refresh-token-sig",
-        var expirationSeconds: Long = 604800,
 
         var rotationIntervalSeconds: Long = 2592000,
         var overlapSeconds: Long = 86400,
