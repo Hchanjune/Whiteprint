@@ -1,7 +1,7 @@
 package org.whiteprint.platform.infra.persistence.jpa.entity
 
-import org.whiteprint.platform.infra.persistence.jpa.policy.EntityException
-import org.whiteprint.platform.infra.persistence.jpa.policy.EntityPolicy
+import org.whiteprint.platform.core.persistence.policy.PersistenceException
+import org.whiteprint.platform.core.persistence.policy.PersistencePolicy
 import java.io.Serializable
 
 fun <E: BaseEntity<ID>, ID: Serializable> E.withId(id: ID?): E {
@@ -11,8 +11,8 @@ fun <E: BaseEntity<ID>, ID: Serializable> E.withId(id: ID?): E {
 
 inline fun <reified E : BaseEntity<*>> E?.ensureExistsOrThrow(rootId: Any): E {
     return this ?:
-        throw EntityException(
-            policy = EntityPolicy.INTEGRITY_VIOLATION,
+        throw PersistenceException(
+            policy = PersistencePolicy.INTEGRITY_VIOLATION,
             attributes = mapOf(
                 "targetName" to (E::class.simpleName ?: "UnknownEntity"),
                 "rootId" to rootId.toString()

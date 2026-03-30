@@ -49,7 +49,7 @@ include("platform:infra:kms:vault")
 
 // Platform Core
 include("platform:core:kernel")
-include("platform:core:domain")
+include("platform:core:persistence")
 include("platform:core:cache")
 include("platform:core:messaging")
 include("platform:core:kms")

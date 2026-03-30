@@ -1,6 +1,6 @@
 package org.whiteprint.platform.infra.persistence.jpa.entity.contract
 
-import org.whiteprint.platform.core.domain.model.contract.Deletable
+import org.whiteprint.platform.core.persistence.model.contract.Deletable
 
 interface DeletableEntity: Deletable {
     val useSoftDelete: Boolean

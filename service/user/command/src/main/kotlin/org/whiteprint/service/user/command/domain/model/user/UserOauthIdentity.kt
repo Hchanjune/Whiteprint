@@ -1,7 +1,7 @@
 package org.whiteprint.service.user.command.domain.model.user
 
-import org.whiteprint.platform.core.domain.model.contract.Auditable
-import org.whiteprint.platform.core.domain.model.contract.Identifiable
+import org.whiteprint.platform.core.persistence.model.contract.Auditable
+import org.whiteprint.platform.core.persistence.model.contract.Identifiable
 import java.time.Instant
 
 data class UserOauthIdentity(
