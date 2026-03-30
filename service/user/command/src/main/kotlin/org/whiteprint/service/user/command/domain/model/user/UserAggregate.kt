@@ -1,6 +1,6 @@
 package org.whiteprint.service.user.command.domain.model.user
 
-import org.whiteprint.platform.core.persistence.model.aggregate.Aggregate
+import org.whiteprint.platform.core.domain.model.aggregate.Aggregate
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import java.io.Serializable
 import java.time.Instant

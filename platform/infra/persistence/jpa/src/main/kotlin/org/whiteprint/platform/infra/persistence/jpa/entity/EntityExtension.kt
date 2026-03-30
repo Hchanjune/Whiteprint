@@ -1,7 +1,7 @@
 package org.whiteprint.platform.infra.persistence.jpa.entity
 
-import org.whiteprint.platform.core.persistence.policy.PersistenceException
-import org.whiteprint.platform.core.persistence.policy.PersistencePolicy
+import org.whiteprint.platform.core.domain.policy.PersistenceException
+import org.whiteprint.platform.core.domain.policy.PersistencePolicy
 import java.io.Serializable
 
 fun <E: BaseEntity<ID>, ID: Serializable> E.withId(id: ID?): E {

@@ -12,11 +12,9 @@ version = "0.0.1-SNAPSHOT"
 
 dependencies {
     api(project(":platform:core:kernel"))
-    api(project(":platform:core:persistence"))
+    api(project(":platform:core:domain"))
 
     api("org.springframework.boot:spring-boot-starter-data-jpa")
-    compileOnly("org.springframework.boot:spring-boot-autoconfigure")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
 
 kotlin {

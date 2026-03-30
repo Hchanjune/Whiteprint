@@ -18,9 +18,7 @@ dependencies {
 
     api(project(":platform:infra:serializer:jackson"))
 
-    implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    api("org.springframework.kafka:spring-kafka")
 }
 
 kotlin {
