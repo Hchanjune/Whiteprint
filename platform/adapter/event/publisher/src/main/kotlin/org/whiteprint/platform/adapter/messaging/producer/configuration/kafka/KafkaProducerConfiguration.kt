@@ -22,9 +22,9 @@ import org.whiteprint.platform.core.messaging.contract.TopicResolver
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 
 @Configuration
-@ConditionalOnProperty(prefix = "adapter.messaging.producer", name = ["infrastructureImplementation"], havingValue = "KAFKA")
+@ConditionalOnProperty(prefix = "adapter.messaging.producer", name = ["infrastructureImplementation"], havingValue = "KAFKA", matchIfMissing = true)
 class KafkaProducerConfiguration(
-    private val kafkaProperties: KafkaConfigurationProperties
+    private val kafkaProperties: KafkaProducerConfigurationProperties
 ) {
 
     @Bean

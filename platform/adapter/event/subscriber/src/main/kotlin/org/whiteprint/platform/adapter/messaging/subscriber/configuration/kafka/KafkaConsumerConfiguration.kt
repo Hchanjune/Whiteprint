@@ -26,9 +26,9 @@ import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 
 @Configuration
-@ConditionalOnProperty(prefix = "adapter.messaging.subscriber", name = ["infrastructureImplementation"], havingValue = "KAFKA")
+@ConditionalOnProperty(prefix = "adapter.messaging.subscriber", name = ["infrastructureImplementation"], havingValue = "KAFKA", matchIfMissing = true)
 class KafkaConsumerConfiguration(
-    private val kafkaProperties: KafkaConfigurationProperties
+    private val kafkaProperties: KafkaConsumerConfigurationProperties
 ) {
 
     @Bean

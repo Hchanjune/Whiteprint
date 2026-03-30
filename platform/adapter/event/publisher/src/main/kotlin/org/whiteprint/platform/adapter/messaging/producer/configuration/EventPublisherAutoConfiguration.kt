@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Import
 import org.whiteprint.platform.adapter.messaging.producer.configuration.kafka.KafkaProducerConfiguration
-import org.whiteprint.platform.adapter.messaging.producer.configuration.kafka.KafkaConfigurationProperties
+import org.whiteprint.platform.adapter.messaging.producer.configuration.kafka.KafkaProducerConfigurationProperties
 
 @AutoConfiguration
 @Import(
@@ -12,7 +12,7 @@ import org.whiteprint.platform.adapter.messaging.producer.configuration.kafka.Ka
 )
 @EnableConfigurationProperties(
     EventPublisherAutoConfigurationProperties::class,
-    KafkaConfigurationProperties::class,
+    KafkaProducerConfigurationProperties::class,
 )
 class EventPublisherAutoConfiguration {
 }

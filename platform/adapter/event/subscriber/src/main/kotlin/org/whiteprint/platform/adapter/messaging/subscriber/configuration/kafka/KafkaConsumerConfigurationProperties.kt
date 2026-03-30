@@ -1,9 +1,9 @@
-package org.whiteprint.platform.adapter.messaging.producer.configuration.kafka
+package org.whiteprint.platform.adapter.messaging.subscriber.configuration.kafka
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "adapter.messaging.producer.kafka")
-data class KafkaConfigurationProperties(
+@ConfigurationProperties(prefix = "adapter.messaging.subscriber.kafka")
+data class KafkaConsumerConfigurationProperties(
     var datasource: DataSourceProperties = DataSourceProperties(),
     var topicPolicy: TopicPolicy = TopicPolicy(),
     var producer: Producer = Producer(),
