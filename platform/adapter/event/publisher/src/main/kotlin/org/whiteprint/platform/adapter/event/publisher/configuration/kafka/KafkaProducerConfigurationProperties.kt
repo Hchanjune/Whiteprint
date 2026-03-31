@@ -18,9 +18,9 @@ data class KafkaProducerConfigurationProperties(
     data class TopicPolicy(
         var autoCreate: Boolean = true,
         var prefix: String = "wp",
-        var host: String = "",
         var topic: String = "topic",
         var version: String = "v1",
+        var separator: String = ".",
 
         var defaultPartitions: Int = 3,
         var defaultReplicationFactor: Int = 1,

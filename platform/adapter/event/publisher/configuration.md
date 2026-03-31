@@ -17,8 +17,8 @@ adapter:
         topic-policy:
           auto-create: true
           prefix: wp
-          host:
           topic: topic
+          separator: .
           version: v1
           default-partitions: 3
           default-replication-factor: 1

@@ -35,7 +35,7 @@ class KafkaProducerConfiguration(
     fun topicResolver(): TopicResolver {
         val topicPartRegex = Regex("^[a-z0-9-]+$")
         val producer = kafkaProperties.topicPolicy
-        val parts = listOf(producer.prefix, producer.host, producer.topic, producer.version)
+        val parts = listOf(producer.prefix, producer.topic, producer.version)
 
         if (producer.topic.isBlank() || producer.topic == "topic") {
             throw EventException(EventPolicy.TOPIC_NOT_CONFIGURED)
@@ -49,9 +49,9 @@ class KafkaProducerConfiguration(
 
         return KafkaTopicResolver(
             prefix = producer.prefix.lowercase(),
-            host = producer.host.lowercase(),
             topic = producer.topic.lowercase(),
-            version = producer.version.lowercase()
+            version = producer.version.lowercase(),
+            separator = producer.separator,
         )
     }
 
