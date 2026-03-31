@@ -1,1 +1,1 @@
-org.whiteprint.platform.adapter.messaging.subscriber.configuration.EventSubscriberAutoConfiguration
+org.whiteprint.platform.adapter.event.subscriber.configuration.EventSubscriberAutoConfiguration

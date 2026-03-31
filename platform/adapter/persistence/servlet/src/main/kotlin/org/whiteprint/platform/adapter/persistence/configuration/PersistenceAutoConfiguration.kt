@@ -12,6 +12,4 @@ import org.whiteprint.platform.adapter.persistence.configuration.jpa.JpaConfigur
     PersistenceConfigurationProperties::class,
     JpaConfigurationProperties::class,
 )
-class PersistenceAutoConfiguration {
-
-}
+class PersistenceAutoConfiguration

@@ -29,6 +29,7 @@ dependencies {
 	implementation(project(":platform:adapter:lock:distributed"))
 	implementation(project(":platform:adapter:event:outbox"))
 	implementation(project(":platform:adapter:event:publisher"))
+	implementation(project(":platform:adapter:event:subscriber"))
 
 	runtimeOnly("org.postgresql:postgresql")
 

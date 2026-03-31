@@ -2,17 +2,8 @@ spring:
   application:
     name: api-command
 
-  docker:
-    compose:
-      enabled: false
-
-#  kafka:
-#    bootstrap-servers: ""
-#
-#  datasource:
-#    driver-class-name :
-
 adapter:
+
   security:
     verifier:
       policy:
@@ -51,6 +42,62 @@ adapter:
           command-timeout-millis: 2000
           shutdown-timeout-millis: 100
 
+  event:
+    publisher:
+      infrastructure-implementation: kafka
+      kafka:
+        datasource:
+          host: localhost
+          port: 9092
+        topic-policy:
+          auto-create: true
+          prefix: wp
+          host:
+          topic: topic
+          version: v1
+          default-partitions: 3
+          default-replication-factor: 1
+          retention-millis: 604800000
+          cleanup-policy: delete
+        producer:
+          acks: all
+          batch-size: 16384
+          linger-millis: 5
+          compression-type: lz4
+          retries: 2147483647
+        publish:
+          retry:
+            max-attempts: 3
+            backoff-interval: 2000
+
+    outbox:
+      infrastructure-implementation: jpa
+
+    subscriber:
+      infrastructure-implementation: kafka
+      kafka:
+        datasource:
+          host: localhost
+          port: 9092
+        consumer:
+          group-id: platform-group
+          auto-offset-reset: earliest
+          concurrency: 3
+          enable-auto-commit: false
+          isolation-level: read_committed
+        error-handling:
+          retry:
+            max-attempts: 3
+            backoff-interval: 2000
+          dead-letter:
+            enabled: true
+            topic-suffix: .DLT
+            producer:
+              acks: all
+              batch-size: 16384
+              linger-millis: 5
+              compression-type: lz4
+              retries: 2147483647
 
 
 management:
