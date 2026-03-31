@@ -14,5 +14,4 @@ import org.whiteprint.platform.adapter.event.publisher.configuration.kafka.Kafka
     EventPublisherAutoConfigurationProperties::class,
     KafkaProducerConfigurationProperties::class,
 )
-class EventPublisherAutoConfiguration {
-}
+class EventPublisherAutoConfiguration
