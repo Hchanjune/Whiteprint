@@ -1,10 +1,10 @@
-package org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers
+package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers
 
 import com.zaxxer.hikari.HikariDataSource
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.OracleOption
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.H2Option
 
-class OracleOptionApplier(
-    private val options: OracleOption
+class H2OptionApplier(
+    private val options: H2Option
 ): DataSourceOptionApplier {
 
     init {

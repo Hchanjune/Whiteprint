@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options
+package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options
 
 data class MysqlOption(
     var rewriteBatchEnabled: Boolean = false,

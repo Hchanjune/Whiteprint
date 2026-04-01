@@ -1,13 +1,13 @@
-package org.whiteprint.platform.adapter.persistence.configurations.jpa
+package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.Databases
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.H2Option
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.MariadbOption
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.MysqlOption
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.OracleOption
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.PostgresqlOption
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.SqlServerOption
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.Databases
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.H2Option
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.MariadbOption
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.MysqlOption
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.OracleOption
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.PostgresqlOption
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.SqlServerOption
 
 @ConfigurationProperties(prefix = "adapter.persistence.jpa")
 data class JpaConfigurationProperties (
@@ -26,7 +26,7 @@ data class JpaConfigurationProperties (
 
     data class DataSourceProperties (
         var database: Databases = Databases.POSTGRESQL,
-        var driverClassName: String = "",
+        var driverClassName: String? = null,
 
         var host: String = "",
         var port: Int = 5432,

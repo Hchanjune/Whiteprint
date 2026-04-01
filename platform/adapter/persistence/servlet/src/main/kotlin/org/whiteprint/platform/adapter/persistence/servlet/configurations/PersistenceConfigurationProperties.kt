@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.persistence.configurations
+package org.whiteprint.platform.adapter.persistence.servlet.configurations
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

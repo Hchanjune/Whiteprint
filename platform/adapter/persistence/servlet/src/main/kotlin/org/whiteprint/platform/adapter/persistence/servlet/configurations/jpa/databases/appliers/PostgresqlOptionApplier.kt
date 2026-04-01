@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers
+package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers
 
 import com.zaxxer.hikari.HikariDataSource
 import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.PostgresqlOption

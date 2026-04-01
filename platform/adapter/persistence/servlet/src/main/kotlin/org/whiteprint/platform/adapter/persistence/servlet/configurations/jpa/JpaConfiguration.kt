@@ -1,29 +1,30 @@
-package org.whiteprint.platform.adapter.persistence.configurations.jpa
+package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa
 
 import com.zaxxer.hikari.HikariDataSource
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.orm.jpa.JpaTransactionManager
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import org.springframework.transaction.PlatformTransactionManager
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.Databases
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.DataSourceOptionApplier
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.H2OptionApplier
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.MariadbOptionApplier
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.MysqlOptionApplier
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.OracleOptionApplier
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.PostgresqlOptionApplier
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.SqlServerOptionApplier
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.jdbc.JdbcUrlResolver
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.jdbc.JdbcUrlResolverImpl
+import org.springframework.transaction.annotation.EnableTransactionManagement
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.Databases
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers.DataSourceOptionApplier
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers.H2OptionApplier
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers.MariadbOptionApplier
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers.MysqlOptionApplier
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers.OracleOptionApplier
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers.PostgresqlOptionApplier
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers.SqlServerOptionApplier
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.jdbc.JdbcUrlResolver
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.jdbc.JdbcUrlResolverImpl
 import java.util.Properties
 import javax.sql.DataSource
 
 @Configuration
 @ConditionalOnProperty(prefix = "adapter.persistence", name = ["infrastructureImplementation"], havingValue = "JPA")
+@EnableTransactionManagement(proxyTargetClass = true)
 class JpaConfiguration(
     private val jpaProperties: JpaConfigurationProperties
 ) {
@@ -49,7 +50,7 @@ class JpaConfiguration(
         jdbcUrlResolver: JdbcUrlResolver,
         dataSourceOptionApplier: DataSourceOptionApplier,
     ): DataSource = HikariDataSource().apply {
-        jpaProperties.datasource.driverClassName.takeIf { it.isNotBlank() }?.let { this.driverClassName = it }
+        jpaProperties.datasource.driverClassName?.takeIf { it.isNotBlank() }?.let { this.driverClassName = it }
         jdbcUrl = jdbcUrlResolver.resolve()
         username = jpaProperties.datasource.username
         password = jpaProperties.datasource.password
@@ -64,8 +65,7 @@ class JpaConfiguration(
         dataSourceOptionApplier.applyOptions(this)
     }
 
-
-    @Primary
+    @Suppress("UsePropertyAccessSyntax")
     @Bean
     fun entityManagerFactory(
         dataSource: DataSource,
@@ -78,7 +78,7 @@ class JpaConfiguration(
         val adapter = HibernateJpaVendorAdapter()
         adapter.setShowSql(jpaProperties.options.showSql)
         adapter.setGenerateDdl(jpaProperties.options.generateDdl)
-        factory.jpaVendorAdapter = adapter
+        factory.setJpaVendorAdapter(adapter)
 
         val dialect = jpaProperties.datasource.database.dialect
         val hibernateConfig = jpaProperties.hibernate
@@ -102,7 +102,6 @@ class JpaConfiguration(
         return factory
     }
 
-    @Primary
     @Bean
     fun transactionManager(entityManagerFactory: LocalContainerEntityManagerFactoryBean): PlatformTransactionManager {
         return JpaTransactionManager(entityManagerFactory.`object`!!)

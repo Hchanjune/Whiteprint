@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.persistence.configurations.jpa.databases
+package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases
 
 enum class Databases(
     val dialect: String

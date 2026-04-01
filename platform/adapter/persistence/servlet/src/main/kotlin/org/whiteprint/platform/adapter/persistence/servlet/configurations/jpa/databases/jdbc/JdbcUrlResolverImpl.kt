@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.jdbc
+package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.jdbc
 
 import org.whiteprint.platform.adapter.persistence.configurations.jpa.JpaConfigurationProperties
 import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.Databases
