@@ -17,6 +17,8 @@ import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.
 import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.OracleOptionApplier
 import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.PostgresqlOptionApplier
 import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.appliers.SqlServerOptionApplier
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.jdbc.JdbcUrlResolver
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.jdbc.JdbcUrlResolverImpl
 import java.util.Properties
 import javax.sql.DataSource
 
@@ -25,6 +27,10 @@ import javax.sql.DataSource
 class JpaConfiguration(
     private val jpaProperties: JpaConfigurationProperties
 ) {
+
+    @Bean
+    fun jdbcUrlResolver(): JdbcUrlResolver =
+        JdbcUrlResolverImpl(jpaProperties.datasource)
 
     @Bean
     fun dataSourceOptionApplier(): DataSourceOptionApplier {
@@ -40,10 +46,11 @@ class JpaConfiguration(
 
     @Bean
     fun dataSource(
+        jdbcUrlResolver: JdbcUrlResolver,
         dataSourceOptionApplier: DataSourceOptionApplier,
     ): DataSource = HikariDataSource().apply {
-        driverClassName = jpaProperties.datasource.driverClassName
-        jdbcUrl = jpaProperties.datasource.url
+        jpaProperties.datasource.driverClassName.takeIf { it.isNotBlank() }?.let { this.driverClassName = it }
+        jdbcUrl = jdbcUrlResolver.resolve()
         username = jpaProperties.datasource.username
         password = jpaProperties.datasource.password
 

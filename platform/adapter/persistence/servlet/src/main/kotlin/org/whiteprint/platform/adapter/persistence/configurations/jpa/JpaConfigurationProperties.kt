@@ -27,7 +27,13 @@ data class JpaConfigurationProperties (
     data class DataSourceProperties (
         var database: Databases = Databases.POSTGRESQL,
         var driverClassName: String = "",
-        var url: String = "",
+
+        var host: String = "",
+        var port: Int = 5432,
+        var databaseName: String = "",
+
+        var parameters: Map<String, String> = emptyMap(),
+
         var username: String = "",
         var password: String = "",
     )
