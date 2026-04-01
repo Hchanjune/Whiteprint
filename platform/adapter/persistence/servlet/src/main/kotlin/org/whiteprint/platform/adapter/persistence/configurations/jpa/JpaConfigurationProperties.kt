@@ -1,38 +1,35 @@
-package org.whiteprint.platform.adapter.persistence.configuration.jpa
+package org.whiteprint.platform.adapter.persistence.configurations.jpa
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.Databases
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.H2Option
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.MariadbOption
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.MysqlOption
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.OracleOption
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.PostgresqlOption
+import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.SqlServerOption
 
 @ConfigurationProperties(prefix = "adapter.persistence.jpa")
 data class JpaConfigurationProperties (
     var datasource: DataSourceProperties = DataSourceProperties(),
-    var psqlOption: PsqlOptions = PsqlOptions(),
-    var mySqlOption: MySqlOptions = MySqlOptions(),
     var hikari: HikariProperties = HikariProperties(),
     var hibernate: HibernateProperties = HibernateProperties(),
     var options: Options = Options(),
+
+    var h2: H2Option = H2Option(),
+    var mariadb: MariadbOption = MariadbOption(),
+    var mysql: MysqlOption = MysqlOption(),
+    var oracle: OracleOption = OracleOption(),
+    var postgresql: PostgresqlOption = PostgresqlOption(),
+    var sqlServer: SqlServerOption = SqlServerOption()
 ) {
 
     data class DataSourceProperties (
+        var database: Databases = Databases.POSTGRESQL,
         var driverClassName: String = "",
         var url: String = "",
         var username: String = "",
         var password: String = "",
-    )
-
-    data class PsqlOptions(
-        var rewriteBatchEnabled: Boolean = false,
-        var reWriteBatchedInserts: Boolean = true,
-        var assumeMinServerVersion: String = "9.4",
-        var tcpKeepAlive: Boolean = true
-    )
-
-    data class MySqlOptions(
-        var rewriteBatchEnabled: Boolean = false,
-        var rewriteBatchedStatements: Boolean = true,
-        var cachePreparedStatements: Boolean = true,
-        var prepStmtCacheSize: Int = 250,
-        var prepStmtCacheSqlLimit: Int = 2048,
-        var useServerPrepStmts: Boolean = true
     )
 
     data class HikariProperties(
@@ -46,7 +43,6 @@ data class JpaConfigurationProperties (
     )
 
     data class HibernateProperties (
-        var dialect: String = "org.hibernate.dialect.PostgreSQLDialect",
         var fetchSize: Int = 1000,
         var batchSize: Int = 100,
         var providerDisablesAutocommit: Boolean = true,
@@ -60,9 +56,8 @@ data class JpaConfigurationProperties (
         var defaultBatchFetchSize: Int = 100
     )
 
-    @Suppress("ArrayInDataClass")
     data class Options(
-        var packagesToScan: Array<String> = arrayOf(),
+        var packagesToScan: MutableList<String> = mutableListOf(),
         var showSql: Boolean = false,
         var generateDdl: Boolean = false,
     )
