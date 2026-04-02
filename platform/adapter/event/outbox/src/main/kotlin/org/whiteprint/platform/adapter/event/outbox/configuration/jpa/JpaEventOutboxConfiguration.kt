@@ -27,7 +27,7 @@ import javax.sql.DataSource
     havingValue = "JPA",
     matchIfMissing = false
 )
-@EnableJpaRepositories(basePackageClasses = [JpaEventOutboxRepository::class])
+//@EnableJpaRepositories(basePackageClasses = [JpaEventOutboxRepository::class])
 class JpaEventOutboxConfiguration {
 
     @Bean

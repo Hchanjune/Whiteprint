@@ -16,17 +16,16 @@ java {
 	}
 }
 
-repositories {
-	mavenCentral()
-	maven("https://jitpack.io")
-}
-
 dependencies {
 	implementation(project(":platform:core:kernel"))
 
 	implementation(project(":platform:adapter:web:servlet"))
 	implementation(project(":platform:adapter:security:verifier:servlet"))
+
+	implementation(project(":platform:adapter:persistence:servlet"))
+
 	implementation(project(":platform:adapter:lock:distributed"))
+
 	implementation(project(":platform:adapter:event:outbox"))
 	implementation(project(":platform:adapter:event:publisher"))
 	implementation(project(":platform:adapter:event:subscriber"))
