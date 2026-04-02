@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers
 
 import com.zaxxer.hikari.HikariDataSource
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.MariadbOption
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.MariadbOption
 
 class MariadbOptionApplier(
     private val options: MariadbOption

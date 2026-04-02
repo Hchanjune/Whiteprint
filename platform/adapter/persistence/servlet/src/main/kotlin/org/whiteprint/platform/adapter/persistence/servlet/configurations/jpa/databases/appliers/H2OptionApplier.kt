@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.appliers
 
 import com.zaxxer.hikari.HikariDataSource
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.options.H2Option
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.options.H2Option
 
 class H2OptionApplier(
     private val options: H2Option

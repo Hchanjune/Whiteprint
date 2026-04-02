@@ -108,9 +108,7 @@ adapter:
         host: sinandle.iptime.org
         port: 5432
         database-name: mydatabase
-        parameters:
-          param1: "123"
-          param2: "456"
+        #parameters:
         username:
         password:
       hikari:
@@ -135,9 +133,7 @@ adapter:
         default-batch-fetch-size: 100
       options:
         packages-to-scan:
-          - a
-          - b
-          - c
+          - "org.whiteprint.service.user"
         show-sql: false
         generate-ddl: false
 

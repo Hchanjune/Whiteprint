@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.jdbc
 
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.JpaConfigurationProperties
-import org.whiteprint.platform.adapter.persistence.configurations.jpa.databases.Databases
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.JpaConfigurationProperties
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases.Databases
 import java.net.URLEncoder
 import kotlin.text.Charsets.UTF_8
 

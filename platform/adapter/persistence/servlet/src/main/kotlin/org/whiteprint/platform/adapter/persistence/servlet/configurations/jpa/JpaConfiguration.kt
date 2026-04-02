@@ -1,6 +1,7 @@
 package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa
 
 import com.zaxxer.hikari.HikariDataSource
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,7 +24,7 @@ import java.util.Properties
 import javax.sql.DataSource
 
 @Configuration
-@ConditionalOnProperty(prefix = "adapter.persistence", name = ["infrastructureImplementation"], havingValue = "JPA")
+@ConditionalOnProperty(prefix = "adapter.persistence", name = ["infrastructureImplementation"], havingValue = "JPA", matchIfMissing = true)
 @EnableTransactionManagement(proxyTargetClass = true)
 class JpaConfiguration(
     private val jpaProperties: JpaConfigurationProperties
@@ -63,6 +64,11 @@ class JpaConfiguration(
         isAutoCommit = jpaProperties.hikari.autoCommit
         poolName = jpaProperties.hikari.poolName
         dataSourceOptionApplier.applyOptions(this)
+    }
+
+    @Bean
+    fun dataSourceValidator(dataSource: DataSource) = SmartInitializingSingleton {
+        dataSource.connection.use { }
     }
 
     @Suppress("UsePropertyAccessSyntax")

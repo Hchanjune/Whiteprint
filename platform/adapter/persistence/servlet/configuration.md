@@ -1,10 +1,10 @@
 # Persistence (Servlet) Configuration Guide (SpringBoot)
 
-This is document for the security verifier adapter. It contains settings and example descriptions.
+This is document for the persistence adapter. It contains settings and example descriptions.
 
-이 문서는 플랫폼의 보안 어댑터를 사용하기 위한 설정 규격과 설명예시를 포함하고 있습니다.
+이 문서는 플랫폼의 영속(데이터베이스) 어댑터를 사용하기 위한 설정 규격과 설명예시를 포함하고 있습니다.
 
-### application.yml
+### application.yml (Full Settings)
 ```yaml
 adapter:
   persistence:
@@ -54,6 +54,6 @@ adapter:
 
 ```kotlin
 
-implementation(project(":platform:adapter:security:verifier:servlet"))
+implementation(project(":platform:adapter:persistence:servlet"))
 
 ```
