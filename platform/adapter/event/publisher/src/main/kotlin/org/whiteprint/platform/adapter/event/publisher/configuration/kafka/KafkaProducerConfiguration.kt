@@ -1,10 +1,13 @@
 package org.whiteprint.platform.adapter.event.publisher.configuration.kafka
 
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.AdminClientConfig
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaEventSerializer
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaTopicResolver
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.LongSerializer
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -20,6 +23,7 @@ import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import org.whiteprint.platform.core.messaging.contract.TopicResolver
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
+import java.util.concurrent.TimeUnit
 
 @Configuration
 @ConditionalOnProperty(prefix = "adapter.event.publisher", name = ["infrastructureImplementation"], havingValue = "kafka", matchIfMissing = true)
@@ -54,6 +58,22 @@ class KafkaProducerConfiguration(
             separator = producer.separator,
         )
     }
+
+    @Bean("producerConnectionValidator")
+    fun kafkaConnectionValidator(kafkaProperties: KafkaProducerConfigurationProperties) =
+        SmartInitializingSingleton {
+            val props = mapOf<String, Any>(
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG to
+                        "${kafkaProperties.datasource.host}:${kafkaProperties.datasource.port}",
+                AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG to 3000,
+                AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG to 3000
+            )
+
+            AdminClient.create(props).use { admin ->
+                val cluster = admin.describeCluster()
+                cluster.nodes().get(3, TimeUnit.SECONDS)
+            }
+        }
 
     @Bean
     fun autoCreateTopic(

@@ -78,7 +78,7 @@ class JpaConfiguration(
     ): LocalContainerEntityManagerFactoryBean {
         val factory = LocalContainerEntityManagerFactoryBean()
         factory.dataSource = dataSource
-        val packagesToScan = arrayOf("org.whiteprint") + jpaProperties.options.packagesToScan
+        val packagesToScan = arrayOf("org.whiteprint") + jpaProperties.options.entityPackagesToScan
         factory.setPackagesToScan(*packagesToScan)
 
         val adapter = HibernateJpaVendorAdapter()

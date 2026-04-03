@@ -1,5 +1,7 @@
 package org.whiteprint.platform.adapter.security.provider.servlet.configuration
 
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -37,6 +39,27 @@ class SecurityProviderKmsConfiguration(
 
         return VaultTemplate(endpoint, clientAuthentication)
     }
+
+    @Bean("providerVaultConnectionValidator")
+    fun vaultConnectionValidator(
+        @Qualifier("providerVaultOperations") vaultOperations: VaultOperations
+    ) =
+        SmartInitializingSingleton {
+
+            val logger = LoggerFactory.getLogger("VaultConnectionValidator-Provider")
+
+            try {
+                val result = vaultOperations.read("sys/health")
+
+                require(result != null) {
+                    "Vault health check failed: no response"
+                }
+
+                logger.info("Vault connection validation succeeded")
+            } catch (e: Exception) {
+                throw IllegalStateException("Vault connection validation failed", e)
+            }
+        }
 
     @Bean("providerKeyOperations")
     fun keyOperations(

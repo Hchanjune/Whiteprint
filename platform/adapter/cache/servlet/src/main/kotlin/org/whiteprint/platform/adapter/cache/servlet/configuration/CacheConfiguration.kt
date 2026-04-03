@@ -2,6 +2,8 @@ package org.whiteprint.platform.adapter.cache.servlet.configuration
 
 import io.lettuce.core.api.StatefulConnection
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.whiteprint.platform.core.cache.operation.AtomicOperations
 import org.whiteprint.platform.core.cache.operation.BatchOperations
 import org.whiteprint.platform.core.cache.operation.DistributedLockOperations
@@ -70,6 +72,33 @@ class CacheConfiguration(
             .build()
 
         return LettuceConnectionFactory(serverConfig, clientConfig)
+    }
+
+    @Bean
+    fun redisConnectionValidator(
+        redisConnectionFactory: RedisConnectionFactory
+    ) = SmartInitializingSingleton {
+
+        val logger = LoggerFactory.getLogger("RedisConnectionValidator")
+
+        try {
+            redisConnectionFactory.connection.use { conn ->
+                val result = conn.ping()
+
+                require(result == "PONG") {
+                    "Redis ping failed: $result"
+                }
+
+                logger.info(
+                    "Redis connection validation succeeded (host={}, port={}, db={})",
+                    properties.datasource.host,
+                    properties.datasource.port,
+                    properties.datasource.database
+                )
+            }
+        } catch (e: Exception) {
+            throw IllegalStateException("Redis connection validation failed", e)
+        }
     }
 
     @Primary

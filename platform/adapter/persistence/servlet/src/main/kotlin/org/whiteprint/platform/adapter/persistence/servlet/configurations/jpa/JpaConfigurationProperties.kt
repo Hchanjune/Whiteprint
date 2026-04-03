@@ -63,7 +63,7 @@ data class JpaConfigurationProperties (
     )
 
     data class Options(
-        var packagesToScan: MutableList<String> = mutableListOf(),
+        var entityPackagesToScan: MutableList<String> = mutableListOf(),
         var showSql: Boolean = false,
         var generateDdl: Boolean = false,
     )

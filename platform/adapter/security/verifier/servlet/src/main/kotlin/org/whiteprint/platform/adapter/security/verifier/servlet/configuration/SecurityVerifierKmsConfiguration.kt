@@ -1,5 +1,7 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.configuration
 
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -30,6 +32,27 @@ class SecurityVerifierKmsConfiguration(
 
         return VaultTemplate(endpoint, clientAuthentication)
     }
+
+    @Bean("verifierVaultConnectionValidator")
+    fun vaultConnectionValidator(
+        @Qualifier("verifierVaultOperations") vaultOperations: VaultOperations
+    ) =
+        SmartInitializingSingleton {
+
+            val logger = LoggerFactory.getLogger("VaultConnectionValidator-Verifier")
+
+            try {
+                val result = vaultOperations.read("sys/health")
+
+                require(result != null) {
+                    "Vault health check failed: no response"
+                }
+
+                logger.info("Vault connection validation succeeded")
+            } catch (e: Exception) {
+                throw IllegalStateException("Vault connection validation failed", e)
+            }
+        }
 
     @Bean("verifierKmsCaffeineCache")
     fun securityKmsCache(): KeyCache =

@@ -42,7 +42,7 @@ adapter:
         ddl-auto: none
         default-batch-fetch-size: 100
       options:
-        packages-to-scan:
+        entity-packages-to-scan:
           - a
           - b
           - c
@@ -51,9 +51,13 @@ adapter:
 ```
 
 ### build.gradle.kts
-
 ```kotlin
-
 implementation(project(":platform:adapter:persistence:servlet"))
+```
 
+### Requirements
+```kotlin
+@SpringBootApplication
+@EnableJpaRepositories
+class Application
 ```

@@ -19,7 +19,7 @@ adapter:
           decision: PERMIT
       kms:
         datasource:
-          host: sinandle.iptime.org
+          host: 192.168.0.12
           port: 8200
           password: root
           transit-path: transit
@@ -28,7 +28,7 @@ adapter:
           maximum-size: 1000
       cache:
         datasource:
-          host: sinandle.iptime.org
+          host: 192.168.0.12
           port: 6379
           password: ~
           database: 0
@@ -47,7 +47,7 @@ adapter:
       infrastructure-implementation: kafka
       kafka:
         datasource:
-          host: sinandle.iptime.org
+          host: 192.168.0.12
           port: 9092
         topic-policy:
           auto-create: true
@@ -77,7 +77,7 @@ adapter:
       infrastructure-implementation: kafka
       kafka:
         datasource:
-          host: sinandle.iptime.org
+          host: 192.168.0.12
           port: 9092
         consumer:
           group-id: platform-group
@@ -105,9 +105,9 @@ adapter:
       datasource:
         database: postgresql
         driver-class-name: ~ #Automatically Configured. Skip Recommended
-        host: sinandle.iptime.org
+        host: 192.168.0.12
         port: 5432
-        database-name: mydatabase
+        database-name: postgres
         #parameters:
         username: postgres
         password: postgres
@@ -132,7 +132,7 @@ adapter:
         ddl-auto: none
         default-batch-fetch-size: 100
       options:
-        packages-to-scan:
+        entity-packages-to-scan:
           - "org.whiteprint.service.user"
         show-sql: false
         generate-ddl: false

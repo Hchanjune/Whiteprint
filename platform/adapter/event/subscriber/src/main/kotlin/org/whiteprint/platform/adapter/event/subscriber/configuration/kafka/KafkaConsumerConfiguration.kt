@@ -1,5 +1,7 @@
 package org.whiteprint.platform.adapter.event.subscriber.configuration.kafka
 
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.AdminClientConfig
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaEventDeserializer
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaEventSerializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -7,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.LongDeserializer
 import org.apache.kafka.common.serialization.LongSerializer
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -24,6 +27,10 @@ import org.springframework.util.backoff.FixedBackOff
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
+import java.util.concurrent.TimeUnit
+import kotlin.Any
+import kotlin.String
+import kotlin.use
 
 @Configuration
 @ConditionalOnProperty(prefix = "adapter.event.subscriber", name = ["infrastructureImplementation"], havingValue = "kafka", matchIfMissing = true)
@@ -34,6 +41,22 @@ class KafkaConsumerConfiguration(
     @Bean
     @ConditionalOnMissingBean(Serializer::class)
     fun serializer(): Serializer = JacksonSerializer()
+
+    @Bean("consumerConnectionValidator")
+    fun kafkaConnectionValidator(kafkaProperties: KafkaConsumerConfigurationProperties) =
+        SmartInitializingSingleton {
+            val props = mapOf<String, Any>(
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG to
+                        "${kafkaProperties.datasource.host}:${kafkaProperties.datasource.port}",
+                AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG to 3000,
+                AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG to 3000
+            )
+
+            AdminClient.create(props).use { admin ->
+                val cluster = admin.describeCluster()
+                cluster.nodes().get(3, TimeUnit.SECONDS)
+            }
+        }
 
     @Bean
     fun consumerFactory(
