@@ -109,8 +109,8 @@ adapter:
         port: 5432
         database-name: mydatabase
         #parameters:
-        username:
-        password:
+        username: postgres
+        password: postgres
       hikari:
         maximum-pool-size: 10
         minimum-idle: 10
