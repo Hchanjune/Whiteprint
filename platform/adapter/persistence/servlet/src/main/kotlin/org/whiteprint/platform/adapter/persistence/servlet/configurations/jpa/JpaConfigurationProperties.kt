@@ -40,10 +40,10 @@ data class JpaConfigurationProperties (
 
     data class HikariProperties(
         var maximumPoolSize: Int = 10,
-        var minimumIdle: Int = 10,
+        var minimumIdle: Int = 3,
         var connectionTimeoutMillis: Long = 30000,
-        var idleTimeoutMillis: Long = 600000,
-        var maxLifetimeMillis: Long = 1800000,
+        var idleTimeoutMillis: Long = 240000,
+        var maxLifetimeMillis: Long = 300000,
         var autoCommit: Boolean = false,
         var poolName: String = "PlatformHikariPool",
     )
