@@ -40,6 +40,8 @@ include("platform:infra:messaging:kafka")
 
 include("platform:infra:observability:servlet")
 
+include("platform:infra:client:armeria")
+
 include("platform:infra:serializer:jackson")
 include("platform:infra:serializer:protobuf")
 
