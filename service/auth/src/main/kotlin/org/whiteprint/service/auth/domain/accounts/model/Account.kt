@@ -1,4 +1,4 @@
-package org.whiteprint.service.auth.domain.accounts
+package org.whiteprint.service.auth.domain.accounts.model
 
 import org.whiteprint.platform.core.domain.model.contract.Auditable
 import org.whiteprint.platform.core.domain.model.contract.Identifiable

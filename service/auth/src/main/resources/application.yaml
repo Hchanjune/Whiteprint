@@ -10,13 +10,13 @@ adapter:
         expected-issuers:
           - Whiteprint
       entry-points:
-        - path: /api/v1/auth/sign-up
+        - path: /api/v1/auth/login
           method: POST
           decision: PERMIT
-        - path: /api/v1/auth/sign-in
+        - path: /api/v1/auth/signup
           method: POST
           decision: PERMIT
-        - path: /api/v1/auth/sign-out
+        - path: /api/v1/auth/refresh
           method: POST
           decision: PERMIT
       kms:
