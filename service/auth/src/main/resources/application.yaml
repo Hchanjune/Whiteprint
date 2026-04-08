@@ -10,15 +10,18 @@ adapter:
         expected-issuers:
           - Whiteprint
       entry-points:
-        - path: /api/v1/auth/login
+        - path: /api/v1/auth/sign-up
           method: POST
           decision: PERMIT
-        - path: /api/v1/auth/test
-          method: GET
+        - path: /api/v1/auth/sign-in
+          method: POST
+          decision: PERMIT
+        - path: /api/v1/auth/sign-out
+          method: POST
           decision: PERMIT
       kms:
         datasource:
-          host: sinandle.iptime.org
+          host: 192.168.0.12
           port: 8200
           password: root
           transit-path: transit
@@ -27,7 +30,7 @@ adapter:
           maximum-size: 1000
       cache:
         datasource:
-          host: sinandle.iptime.org
+          host: 192.168.0.12
           port: 6379
           password: ~
           database: 0
@@ -50,7 +53,7 @@ adapter:
           expiration-seconds: 3600
       kms:
         datasource:
-          host: sinandle.iptime.org
+          host: 192.168.0.12
           port: 8200
           password: root
           transit-path: transit
@@ -64,3 +67,96 @@ adapter:
           rotation-interval-seconds: 2592000
           overlap-seconds: 86400
           algorithm: HMAC_SHA256
+  event:
+    publisher:
+      infrastructure-implementation: kafka
+      kafka:
+        datasource:
+          host: 192.168.0.12
+          port: 9092
+        topic-policy:
+          auto-create: true
+          prefix: test
+          topic: user
+          version: v1
+          separator: .
+          default-partitions: 3
+          default-replication-factor: 1
+          retention-millis: 604800000
+          cleanup-policy: delete
+        producer:
+          acks: all
+          batch-size: 16384
+          linger-millis: 5
+          compression-type: lz4
+          retries: 2147483647
+        publish:
+          retry:
+            max-attempts: 3
+            backoff-interval: 2000
+
+    outbox:
+      infrastructure-implementation: jpa
+
+    subscriber:
+      infrastructure-implementation: kafka
+      kafka:
+        datasource:
+          host: 192.168.0.12
+          port: 9092
+        consumer:
+          group-id: platform-group
+          auto-offset-reset: earliest
+          concurrency: 3
+          enable-auto-commit: false
+          isolation-level: read_committed
+        error-handling:
+          retry:
+            max-attempts: 3
+            backoff-interval: 2000
+          dead-letter:
+            enabled: true
+            topic-suffix: .DLT
+            producer:
+              acks: all
+              batch-size: 16384
+              linger-millis: 5
+              compression-type: lz4
+              retries: 2147483647
+  persistence:
+    infrastructure-implementation: jpa
+    jpa:
+      datasource:
+        database: postgresql
+        driver-class-name: ~ #Automatically Configured. Skip Recommended
+        host: 192.168.0.12
+        port: 5432
+        database-name: postgres
+        #parameters:
+        username: postgres
+        password: postgres
+      hikari:
+        maximum-pool-size: 10
+        minimum-idle: 10
+        connection-timeout-millis: 30000
+        idle-timeout-millis: 600000
+        max-lifetime-millis: 1800000
+        auto-commit: false
+        pool-name: myhikaripool
+      hibernate:
+        fetch-size: 1000
+        batch-size: 100
+        provider-disables-autocommit: true
+        generate-statistics: false
+        batch-versioned-data: true
+        order-inserts: true
+        order-updates: true
+        format-sql: true
+        highlight-sql: true
+        ddl-auto: none
+        default-batch-fetch-size: 100
+      options:
+        entity-packages-to-scan:
+          - "org.whiteprint.service.user"
+        show-sql: false
+        generate-ddl: false

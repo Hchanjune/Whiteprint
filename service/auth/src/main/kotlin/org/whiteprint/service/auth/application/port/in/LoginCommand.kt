@@ -1,6 +1,6 @@
 package org.whiteprint.service.auth.application.port.`in`
 
 data class LoginCommand(
-    val username: String,
+    val identifier: String,
     val password: String
 )

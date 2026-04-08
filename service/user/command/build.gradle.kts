@@ -23,14 +23,13 @@ dependencies {
 	implementation(project(":platform:adapter:security:verifier:servlet"))
 
 	implementation(project(":platform:adapter:persistence:servlet"))
+	runtimeOnly("org.postgresql:postgresql")
 
 	implementation(project(":platform:adapter:lock:distributed"))
 
 	implementation(project(":platform:adapter:event:outbox"))
 	implementation(project(":platform:adapter:event:publisher"))
 	implementation(project(":platform:adapter:event:subscriber"))
-
-	runtimeOnly("org.postgresql:postgresql")
 
 	implementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
