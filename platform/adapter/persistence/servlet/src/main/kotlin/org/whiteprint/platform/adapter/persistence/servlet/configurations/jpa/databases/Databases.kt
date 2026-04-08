@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.databases
 
 enum class Databases(
-    val dialect: String
+    private val dialect: String
 ) {
     POSTGRESQL("org.hibernate.dialect.PostgreSQLDialect"),
     MYSQL("org.hibernate.dialect.MySQLDialect"),

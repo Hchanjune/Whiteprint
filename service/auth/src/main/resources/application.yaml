@@ -131,7 +131,7 @@ adapter:
         driver-class-name: ~ #Automatically Configured. Skip Recommended
         host: 192.168.0.12
         port: 5432
-        database-name: postgres
+        database-name: auth
         #parameters:
         username: postgres
         password: postgres

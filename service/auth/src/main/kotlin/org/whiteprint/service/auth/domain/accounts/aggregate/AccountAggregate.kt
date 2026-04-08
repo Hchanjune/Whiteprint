@@ -10,30 +10,41 @@ import org.whiteprint.service.auth.domain.accounts.vo.PhoneNumber
 import org.whiteprint.service.auth.domain.accounts.vo.Username
 import java.time.Instant
 
-class AccountAggregate private constructor(
+class AccountAggregate (
     private val account: Account,
     private val credential: Credential
 ): Aggregate<Account>() {
 
-    override val schemaVersion: String
-        get() = "ALPHA"
-    override val id: Long
-        get() = account.id
-    override val root: Account
-        get() = account
-    override val insertedAt: Instant
-        get() = account.insertedAt
-    override val updatedAt: Instant
-        get() = account.updatedAt
-    override val version: Long
-        get() = account.version
-    override val isDeleted: Boolean
-        get() = account.isDeleted
-    override val deletedAt: Instant?
-        get() = account.deletedAt
+    override val schemaVersion get() = "ALPHA"
+    override val id get() = account.id
+    override val root get() = account
+
+    override val insertedAt get() = account.insertedAt
+    override val updatedAt get() = account.updatedAt
+    override val version get() = account.version
+    override val isDeleted get() = account.isDeleted
+    override val deletedAt get() = account.deletedAt
+
+    val username get() = account.username
+    val email get() = account.email
+    val phoneNumber get() = account.phoneNumber
+
+    val credentialId get() = credential.id
+    val passwordHash get() = credential.passwordHash
+    val passwordUpdatedAt get() = credential.passwordUpdatedAt
+    val passwordExpiredAt get() = credential.passwordExpiredAt
+    val failedAttempts get() = credential.failedAttempts
+    val isLocked get() = credential.isLocked
+    val lockedReason get() = credential.lockedReason
+    val lockedAt get() = credential.lockedAt
+    val lastLoginAt get() = credential.lastLoginAt
+    val lastFailedAt get() = credential.lastFailedAt
+    val mfa get() = credential.mfa
+    val passwordHistory get() = credential.passwordHistory
 
 
     companion object {
+
         fun signup(
             username: Username,
             email: Email,

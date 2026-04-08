@@ -58,6 +58,8 @@ implementation(project(":platform:adapter:persistence:servlet"))
 ### Requirements
 ```kotlin
 @SpringBootApplication
-@EnableJpaRepositories
+@EnableJpaRepositories(
+    repositoryBaseClass = OptimizedJpaRepository::class
+)
 class Application
 ```

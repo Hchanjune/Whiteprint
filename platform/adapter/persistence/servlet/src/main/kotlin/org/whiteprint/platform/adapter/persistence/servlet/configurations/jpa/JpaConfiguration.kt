@@ -86,7 +86,7 @@ class JpaConfiguration(
         adapter.setGenerateDdl(jpaProperties.options.generateDdl)
         factory.setJpaVendorAdapter(adapter)
 
-        val dialect = jpaProperties.datasource.database.dialect
+        val dialect = jpaProperties.datasource.database.toDialect()
         val hibernateConfig = jpaProperties.hibernate
         val props = Properties()
 
