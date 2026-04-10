@@ -30,7 +30,7 @@ data class SecurityProviderKmsConfigurationProperties(
 
         var rotationIntervalSeconds: Long = 2592000,
         var overlapSeconds: Long = 86400,
-        var algorithm: KeyType = KeyType.HMAC_SHA256
+        var algorithm: KeyType = KeyType.RSA_2048
     )
 
 }

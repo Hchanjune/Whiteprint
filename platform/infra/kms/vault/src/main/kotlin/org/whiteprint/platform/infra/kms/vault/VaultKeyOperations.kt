@@ -19,24 +19,28 @@ class VaultKeyOperations(
     private val transitPath: String = "transit"
 ) : KeyOperations {
 
-    override fun sign(alias: String, data: ByteArray): SigningResult {
+    override fun sign(keyAlias: String, data: ByteArray): SigningResult {
         val ops = vaultOperations.opsForTransit(transitPath)
         val plaintext = Plaintext.of(data)
 
         val vaultSignature = try {
-            ops.sign(alias, plaintext)
+            ops.sign(keyAlias, plaintext)
         } catch (exception: HttpClientErrorException.NotFound) {
-            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to alias), exception)
+            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyAlias), exception)
         } catch (exception: HttpServerErrorException) {
             throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap(), exception)
         }
 
         val parts = vaultSignature.signature.split(":")
         val version = parts[1].removePrefix("v")
-        val signatureBytes = Base64.getDecoder().decode(parts[2])
+        val signatureBytes = Base64.getDecoder().decode(parts[2].trim())
+
+        println("Debug parts: $parts")
+        println("Debug version: $version")
+        println("Debug signatureBytes: $signatureBytes")
 
         return SigningResult(
-            keyId = KeyId(alias, version),
+            keyId = KeyId(keyAlias, version),
             signature = signatureBytes
         )
     }

@@ -24,8 +24,9 @@ enum class KmsPolicy(
     /**
      * Required Attributes
      * - [keyId]
+     * - [version]
      */
-    KEY_NOT_FOUND(404, "KEY_NOT_FOUND", "KeyId [[keyId]] not found from KMS"),
+    KEY_NOT_FOUND(404, "KEY_NOT_FOUND", "KeyId [[keyId]] Version [[version]] not found from KMS"),
 
     /**
      * Required Attributes

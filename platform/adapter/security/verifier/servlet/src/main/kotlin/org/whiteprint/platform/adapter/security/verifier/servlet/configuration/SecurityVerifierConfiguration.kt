@@ -58,7 +58,6 @@ class SecurityVerifierConfiguration(
     ): AccessTokenVerificationKeyResolver
         = AccessTokenVerificationKeyResolverImpl(
             keyMaterialProvider = keyMaterialProvider,
-            keyAlias = verificationProperties.policy.keyAlias
         )
 
     @Bean

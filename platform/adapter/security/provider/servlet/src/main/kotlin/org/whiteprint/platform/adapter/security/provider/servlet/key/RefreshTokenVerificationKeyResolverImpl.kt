@@ -1,18 +1,18 @@
-package org.whiteprint.platform.adapter.security.verifier.servlet.security
+package org.whiteprint.platform.adapter.security.provider.servlet.key
 
 import org.whiteprint.platform.core.kms.model.KeyId
 import org.whiteprint.platform.core.kms.model.KeySide
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
-import org.whiteprint.platform.core.security.model.AccessTokenVerificationKey
-import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
+import org.whiteprint.platform.core.security.model.RefreshTokenVerificationKey
+import org.whiteprint.platform.core.security.verifier.RefreshTokenVerificationKeyResolver
 
-class AccessTokenVerificationKeyResolverImpl(
+class RefreshTokenVerificationKeyResolverImpl(
     private val keyMaterialProvider: KeyMaterialProvider,
-): AccessTokenVerificationKeyResolver {
+): RefreshTokenVerificationKeyResolver {
 
-    override fun resolve(keyAlias: String, keyVersion: String?): AccessTokenVerificationKey {
+    override fun resolve(keyAlias: String, keyVersion: String?): RefreshTokenVerificationKey {
         val bundle = keyMaterialProvider.getKeyBundle(
             keyId = KeyId(keyAlias, keyVersion),
             side = KeySide.PUBLIC
@@ -27,10 +27,10 @@ class AccessTokenVerificationKeyResolverImpl(
                 )
             )
 
-        return AccessTokenVerificationKey(
+        return RefreshTokenVerificationKey(
             keyAlias = keyAlias,
             keyVersion = keyVersion,
-            verifyKey = publicKey
+            verifyKey = publicKey,
         )
     }
 

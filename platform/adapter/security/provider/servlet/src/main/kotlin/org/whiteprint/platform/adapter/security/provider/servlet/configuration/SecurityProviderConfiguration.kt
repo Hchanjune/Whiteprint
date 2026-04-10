@@ -3,13 +3,15 @@ package org.whiteprint.platform.adapter.security.provider.servlet.configuration
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.whiteprint.platform.adapter.security.provider.servlet.key.RefreshTokenVerificationKeyResolverImpl
+import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.security.policy.TokenPolicy
 import org.whiteprint.platform.core.security.provider.AccessTokenSigner
-import org.whiteprint.platform.core.security.provider.RefreshTokenKeyResolver
+import org.whiteprint.platform.core.security.provider.RefreshTokenSigner
 import org.whiteprint.platform.core.security.provider.TokenProvider
+import org.whiteprint.platform.core.security.verifier.RefreshTokenVerificationKeyResolver
 import org.whiteprint.platform.core.security.verifier.RefreshTokenVerifier
 import org.whiteprint.platform.core.security.verifier.RevocationChecker
 import org.whiteprint.platform.infra.security.jwt.provider.JwtTokenProvider
@@ -17,7 +19,8 @@ import org.whiteprint.platform.infra.security.jwt.verifier.JwtRefreshTokenVerifi
 
 @Configuration
 class SecurityProviderConfiguration(
-    private val properties: SecurityProviderConfigurationProperties
+    private val properties: SecurityProviderConfigurationProperties,
+    private val kmsProperties: SecurityProviderKmsConfigurationProperties
 ) {
 
     @Bean
@@ -29,7 +32,7 @@ class SecurityProviderConfiguration(
     @Bean
     fun tokenProvider(
         @Qualifier("providerAccessTokenSigner") accessTokenSigner: AccessTokenSigner,
-        @Qualifier("providerRefreshTokenKeyResolver") refreshTokenKeyResolver: RefreshTokenKeyResolver
+        @Qualifier("providerRefreshTokenSigner") refreshTokenSigner: RefreshTokenSigner
     ): TokenProvider {
         return JwtTokenProvider(
             policy = TokenPolicy(
@@ -43,17 +46,25 @@ class SecurityProviderConfiguration(
                 )
             ),
             accessTokenSigner = accessTokenSigner,
-            refreshTokenKeyResolver = refreshTokenKeyResolver
+            refreshTokenSigner = refreshTokenSigner
         )
     }
 
+    @Bean("providerRefreshTokenVerificationKeyResolver")
+    fun refreshTokenVerificationKeyResolver(
+        @Qualifier("providerKeyMaterialProvider")  keyMaterialProvider: KeyMaterialProvider
+    ): RefreshTokenVerificationKeyResolver =
+        RefreshTokenVerificationKeyResolverImpl(
+            keyMaterialProvider = keyMaterialProvider,
+        )
+
     @Bean
     fun refreshTokenVerifier(
-        @Qualifier("providerRefreshTokenKeyResolver") refreshTokenKeyResolver: RefreshTokenKeyResolver,
+        @Qualifier("providerRefreshTokenVerificationKeyResolver") refreshTokenVerificationKeyResolver: RefreshTokenVerificationKeyResolver,
         revocationChecker: RevocationChecker
     ): RefreshTokenVerifier =
             JwtRefreshTokenVerifier(
-                keyResolver = refreshTokenKeyResolver,
+                keyResolver = refreshTokenVerificationKeyResolver,
                 revocationChecker = revocationChecker
             )
 

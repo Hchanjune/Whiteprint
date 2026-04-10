@@ -10,13 +10,13 @@ import org.springframework.vault.client.VaultEndpoint
 import org.springframework.vault.core.VaultOperations
 import org.springframework.vault.core.VaultTemplate
 import org.whiteprint.platform.adapter.security.provider.servlet.key.AccessTokenSignerImpl
-import org.whiteprint.platform.adapter.security.provider.servlet.key.RefreshTokenKeyResolverImpl
+import org.whiteprint.platform.adapter.security.provider.servlet.key.RefreshTokenSignerImpl
 import org.whiteprint.platform.core.kms.service.KeyAdminOperations
 import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.kms.service.KeyOperations
 import org.whiteprint.platform.core.security.provider.AccessTokenSigner
-import org.whiteprint.platform.core.security.provider.RefreshTokenKeyResolver
+import org.whiteprint.platform.core.security.provider.RefreshTokenSigner
 import org.whiteprint.platform.infra.kms.vault.VaultKeyAdminOperations
 import org.whiteprint.platform.infra.kms.vault.CaffeineKeyCache
 import org.whiteprint.platform.infra.kms.vault.VaultKeyMaterialProvider
@@ -99,18 +99,22 @@ class SecurityProviderKmsConfiguration(
     @Bean("providerAccessTokenSigner")
     fun accessTokenSigner(
         @Qualifier("providerKeyOperations") keyOperations: KeyOperations,
+        @Qualifier("providerKeyAdminService") adminOperations: KeyAdminOperations,
     ): AccessTokenSigner =
         AccessTokenSignerImpl(
             keyOperations = keyOperations,
+            adminOperations = adminOperations,
             accessTokenPolicy = kmsProperties.accessTokenKeyPolicy,
         )
 
-    @Bean("providerRefreshTokenKeyResolver")
-    fun refreshTokenKeyResolver(
-        @Qualifier("providerKeyMaterialProvider") keyMaterialProvider: KeyMaterialProvider,
-    ): RefreshTokenKeyResolver =
-        RefreshTokenKeyResolverImpl(
-            keyMaterialProvider = keyMaterialProvider,
+    @Bean("providerRefreshTokenSigner")
+    fun refreshTokenSigner(
+        @Qualifier("providerKeyOperations") keyOperations: KeyOperations,
+        @Qualifier("providerKeyAdminService") adminOperations: KeyAdminOperations,
+    ): RefreshTokenSigner =
+        RefreshTokenSignerImpl(
+            keyOperations = keyOperations,
+            adminOperations = adminOperations,
             refreshTokenPolicy = kmsProperties.refreshTokenKeyPolicy,
         )
 

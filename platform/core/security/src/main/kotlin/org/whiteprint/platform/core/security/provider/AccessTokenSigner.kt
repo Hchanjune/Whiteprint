@@ -1,11 +1,9 @@
 package org.whiteprint.platform.core.security.provider
 
+import org.whiteprint.platform.core.security.model.AccessTokenSigningKeyMetadata
+import org.whiteprint.platform.core.security.model.AccessTokenSigningResult
+
 interface AccessTokenSigner {
-
-    fun getKeyId(): String
-
-    fun getAlgorithm(): String
-
-    fun sign(data: ByteArray): ByteArray
-
+    fun getLatestSigningKeyMetadata(): AccessTokenSigningKeyMetadata
+    fun sign(data: ByteArray): AccessTokenSigningResult
 }

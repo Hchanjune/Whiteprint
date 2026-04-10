@@ -1,6 +1,7 @@
 package org.whiteprint.platform.infra.security.jwt.verifier
 
 import io.jsonwebtoken.Header
+import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.model.AccessTokenClaims
@@ -22,7 +23,12 @@ class JwtAccessTokenVerifier (
                 .keyLocator { header: Header ->
                     val kid = header["kid"] as? String
                         ?: throw SecurityException(SecurityPolicy.TOKEN_KEY_ID_MISSING)
-                    keyResolver.resolve(kid).verifyKey
+                    val ver = header["ver"] as? String
+                    println("Debug: $kid")
+                    println("Debug: $ver")
+                    keyResolver.resolve(kid, ver).verifyKey.also {
+                        println("Debug: $it")
+                    }
                 }
                 .build()
                 .parseSignedClaims(token.value)
@@ -35,7 +41,7 @@ class JwtAccessTokenVerifier (
                 audience = claims.audience,
                 issuedAt = claims.issuedAt.toInstant(),
                 expiresAt = claims.expiration.toInstant(),
-                authorities = (claims["authorities"] as? Iterable<*>)?.map { it.toString() }?.toSet() ?: emptySet()
+                authorities = (claims["prm"] as? Iterable<*>)?.map { it.toString() }?.toSet() ?: emptySet()
             )
 
             revocationChecker.assertNotRevoked(accessTokenClaims)
@@ -43,7 +49,12 @@ class JwtAccessTokenVerifier (
             accessTokenClaims
 
         } catch (exception: Exception) {
-            throw JwtExceptionMapper.mapFrom(exception)
+            exception.printStackTrace()
+            if (exception is JwtException) {
+                throw JwtExceptionMapper.mapFrom(exception)
+            } else {
+                throw exception
+            }
         }
     }
 

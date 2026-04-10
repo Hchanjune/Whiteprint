@@ -52,7 +52,7 @@ class LoginService(
                 AccessTokenProfile(
                     subject = accountAggregate.id.toString(),
                     audience = emptySet(),
-                    authorities = emptySet(),
+                    permissions = emptySet(),
                 )
             )
 

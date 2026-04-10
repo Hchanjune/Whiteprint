@@ -62,4 +62,9 @@ class AuthRestController(
 
     }
 
+    @PostMapping("/validate")
+    fun validate() {
+
+    }
+
 }

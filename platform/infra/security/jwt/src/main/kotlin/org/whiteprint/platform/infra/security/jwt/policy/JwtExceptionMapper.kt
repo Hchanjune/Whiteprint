@@ -9,9 +9,9 @@ import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
 
 object JwtExceptionMapper {
-    fun mapFrom(exception: Exception): org.whiteprint.platform.core.security.policy.SecurityException {
+    fun mapFrom(exception: Exception): SecurityException {
         return when (exception) {
-            is org.whiteprint.platform.core.security.policy.SecurityException -> exception
+            is SecurityException -> exception
             is ExpiredJwtException ->
                 SecurityException(SecurityPolicy.TOKEN_EXPIRED)
             is SignatureException ->
@@ -22,7 +22,7 @@ object JwtExceptionMapper {
                 SecurityException(SecurityPolicy.TOKEN_UNSUPPORTED)
             is IncorrectClaimException ->
                 SecurityException(SecurityPolicy.TOKEN_CLAIM_INVALID)
-            else -> SecurityException(SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR)
+            else -> SecurityException(SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR, cause = exception)
         }
     }
 }

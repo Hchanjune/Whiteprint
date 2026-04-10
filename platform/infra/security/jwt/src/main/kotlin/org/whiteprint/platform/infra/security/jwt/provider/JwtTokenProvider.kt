@@ -13,7 +13,7 @@ import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.platform.core.security.policy.TokenPolicy
 import org.whiteprint.platform.core.security.provider.AccessTokenSigner
-import org.whiteprint.platform.core.security.provider.RefreshTokenKeyResolver
+import org.whiteprint.platform.core.security.provider.RefreshTokenSigner
 import org.whiteprint.platform.core.security.provider.TokenProvider
 import java.io.InputStream
 import java.security.Key
@@ -23,35 +23,44 @@ import java.util.Date
 class JwtTokenProvider(
     private val policy: TokenPolicy,
     private val accessTokenSigner: AccessTokenSigner,
-    private val refreshTokenKeyResolver: RefreshTokenKeyResolver,
+    private val refreshTokenSigner: RefreshTokenSigner,
 ): TokenProvider {
+
+    private companion object {
+        val dummyKey = Jwts.SIG.RS256.keyPair().build().private
+    }
+
     override fun generateAccessToken(
         profile: AccessTokenProfile,
     ): AccessToken {
+        val signingKey = accessTokenSigner.getLatestSigningKeyMetadata()
         val now = Instant.now()
         val expiresAt = now.plusSeconds(policy.accessTokenPolicy.expirationSeconds)
-        val dummyKey = Jwts.SIG.HS256.key().build()
+
         val jwt = Jwts.builder()
             .header()
-            .keyId(accessTokenSigner.getKeyId())
-            .type("JWT")
+                .keyId(signingKey.keyAlias)
+                .add("ver", signingKey.keyVersion)
+                .type("JWT")
             .and()
-            .id(TsidGenerator.generate().toString())
-            .subject(profile.subject)
-            .issuer(policy.accessTokenPolicy.issuer)
-            .audience().add(profile.audience)
+                .id(TsidGenerator.generate().toString())
+                .subject(profile.subject)
+                .issuer(policy.accessTokenPolicy.issuer)
+                .audience().add(profile.audience)
             .and()
-            .issuedAt(Date.from(now))
-            .expiration(Date.from(expiresAt))
-            .claim("authorities", profile.authorities)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiresAt))
+            .claim("prm", profile.permissions)
             .signWith(
                 dummyKey,
                 object: SecureDigestAlgorithm<Key, Key> {
-                    override fun getId(): String = accessTokenSigner.getAlgorithm()
+                    override fun getId(): String = signingKey.algorithm
                     override fun digest(request: SecureRequest<InputStream, Key>): ByteArray {
-                        val inputStream = request.payload
-                        val data = inputStream.readAllBytes()
-                        return accessTokenSigner.sign(data)
+                        val contentToSign = request.payload.readAllBytes()
+                        println("DEBUG: Signing Input String -> ${String(contentToSign)}")
+                        val result = accessTokenSigner.sign(contentToSign)
+                        println("DEBUG: Signature Length -> ${result.signature.size}")
+                        return result.signature
                     }
                     override fun verify(request: VerifySecureDigestRequest<Key>): Boolean {
                         throw SecurityException(policy = SecurityPolicy.TOKEN_VERIFICATION_KEY_ERROR)
@@ -65,16 +74,11 @@ class JwtTokenProvider(
     override fun generateRefreshToken(
         profile: RefreshTokenProfile
     ): RefreshToken {
-        val refreshTokenKey = refreshTokenKeyResolver.resolve()
-
+        val signingKey = refreshTokenSigner.getLatestSigningKeyMetadata()
         val now = Instant.now()
         val expiresAt = now.plusSeconds(policy.refreshTokenPolicy.expirationSeconds)
 
-        val jwt = Jwts.builder()
-            .header()
-            .keyId(refreshTokenKey.keyId)
-            .type("JWT")
-            .and()
+        val claims = Jwts.claims()
             .id(TsidGenerator.generate().toString())
             .subject(profile.subject)
             .issuer(policy.refreshTokenPolicy.issuer)
@@ -82,7 +86,35 @@ class JwtTokenProvider(
             .and()
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiresAt))
-            .signWith(refreshTokenKey.secretKey)
+            .build()
+
+        val jwt = Jwts.builder()
+            .header()
+                .keyId(signingKey.keyAlias)
+                .add("ver", signingKey.keyVersion)
+                .type("JWT")
+            .and()
+                .id(TsidGenerator.generate().toString())
+                .subject(profile.subject)
+                .issuer(policy.refreshTokenPolicy.issuer)
+                .audience().add(profile.audience)
+            .and()
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiresAt))
+            .signWith(
+                dummyKey,
+                object: SecureDigestAlgorithm<Key, Key> {
+                    override fun getId(): String = signingKey.algorithm
+                    override fun digest(request: SecureRequest<InputStream, Key>): ByteArray {
+                        val contentToSign = request.payload.readAllBytes()
+                        val result = refreshTokenSigner.sign(contentToSign)
+                        return result.signature
+                    }
+                    override fun verify(request: VerifySecureDigestRequest<Key>): Boolean {
+                        throw SecurityException(policy = SecurityPolicy.TOKEN_VERIFICATION_KEY_ERROR)
+                    }
+                }
+            )
             .compact()
         return RefreshToken(jwt)
     }
