@@ -22,6 +22,7 @@ class AccountEntity(
 
 ): RootEntity<Long>() {
 
+    @Transient
     override val useSoftDelete: Boolean = true
 
     @OneToOne(mappedBy = "root", cascade = [CascadeType.ALL], orphanRemoval = true)

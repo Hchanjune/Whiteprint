@@ -5,4 +5,18 @@ import org.whiteprint.service.auth.adapter.out.persistence.jpa.entity.AccountEnt
 
 interface AccountJpaRepository: JpaRepository<AccountEntity, Long> {
 
+    fun existsByUsername(username: String): Boolean
+
+    fun existsByEmail(email: String): Boolean
+
+    fun existsByPhoneNumber(phoneNumber: String): Boolean
+
+    fun findByUsername(username: String): AccountEntity?
+
+    fun findByEmail(email: String): AccountEntity?
+
+    fun findByPhoneNumber(phoneNumber: String): AccountEntity?
+
+    fun findByUsernameOrEmailOrPhoneNumber(username: String, email: String, phoneNumber: String): AccountEntity?
+
 }

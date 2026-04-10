@@ -4,7 +4,7 @@ import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicy
 import org.whiteprint.service.auth.domain.accounts.policy.AccountValidationException
 
 @JvmInline
-value class Email(val value: String) {
+value class Email(override val value: String): AccountIdentifier {
 
     companion object {
         /**

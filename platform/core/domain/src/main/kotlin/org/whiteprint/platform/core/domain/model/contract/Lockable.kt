@@ -1,5 +1,5 @@
 package org.whiteprint.platform.core.domain.model.contract
 
 interface Lockable {
-    val lastFencingToken: String?
+    val lastFencingToken: Long
 }

@@ -1,12 +1,17 @@
 package org.whiteprint.service.auth.domain.accounts.aggregate
 
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.whiteprint.platform.core.domain.model.aggregate.Aggregate
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.service.auth.domain.accounts.model.Account
 import org.whiteprint.service.auth.domain.accounts.model.Credential
+import org.whiteprint.service.auth.domain.accounts.vo.AccountLock
 import org.whiteprint.service.auth.domain.accounts.vo.Email
+import org.whiteprint.service.auth.domain.accounts.vo.MultiFactorAuth
 import org.whiteprint.service.auth.domain.accounts.vo.PasswordHash
+import org.whiteprint.service.auth.domain.accounts.vo.PasswordHistory
 import org.whiteprint.service.auth.domain.accounts.vo.PhoneNumber
+import org.whiteprint.service.auth.domain.accounts.vo.RawPassword
 import org.whiteprint.service.auth.domain.accounts.vo.Username
 import java.time.Instant
 
@@ -42,6 +47,15 @@ class AccountAggregate (
     val mfa get() = credential.mfa
     val passwordHistory get() = credential.passwordHistory
 
+    fun login(rawPassword: RawPassword, passwordEncoder: PasswordEncoder): Boolean {
+        return if (passwordEncoder.matches(rawPassword.value, passwordHash.value)) {
+            credential.recordLoginSuccess()
+            true
+        } else {
+            credential.recordLoginFailure()
+            false
+        }
+    }
 
     companion object {
 
@@ -66,6 +80,16 @@ class AccountAggregate (
                 id = TsidGenerator.generate(),
                 accountId = account.id,
                 passwordHash = passwordHash,
+                passwordUpdatedAt = Instant.now(),
+                passwordExpiredAt = null,
+                failedAttempts = 0,
+                isLocked = false,
+                lockedReason = AccountLock.NONE,
+                lockedAt = null,
+                lastLoginAt = null,
+                lastFailedAt = null,
+                mfa = MultiFactorAuth(null),
+                passwordHistory = PasswordHistory()
             )
             return AccountAggregate(
                 account = account,

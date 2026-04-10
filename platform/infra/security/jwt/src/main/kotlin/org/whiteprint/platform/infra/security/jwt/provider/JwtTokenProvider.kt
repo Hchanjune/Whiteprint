@@ -1,15 +1,14 @@
 package org.whiteprint.platform.infra.security.jwt.provider
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SecureDigestAlgorithm
 import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.VerifySecureDigestRequest
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.platform.core.security.model.AccessToken
-import org.whiteprint.platform.core.security.model.AccessTokenClaims
+import org.whiteprint.platform.core.security.model.AccessTokenProfile
 import org.whiteprint.platform.core.security.model.RefreshToken
-import org.whiteprint.platform.core.security.model.RefreshTokenClaims
+import org.whiteprint.platform.core.security.model.RefreshTokenProfile
 import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.platform.core.security.policy.TokenPolicy
@@ -27,7 +26,7 @@ class JwtTokenProvider(
     private val refreshTokenKeyResolver: RefreshTokenKeyResolver,
 ): TokenProvider {
     override fun generateAccessToken(
-        claims: AccessTokenClaims,
+        profile: AccessTokenProfile,
     ): AccessToken {
         val now = Instant.now()
         val expiresAt = now.plusSeconds(policy.accessTokenPolicy.expirationSeconds)
@@ -38,13 +37,13 @@ class JwtTokenProvider(
             .type("JWT")
             .and()
             .id(TsidGenerator.generate().toString())
-            .subject(claims.subject)
+            .subject(profile.subject)
             .issuer(policy.accessTokenPolicy.issuer)
-            .audience().add(claims.audience)
+            .audience().add(profile.audience)
             .and()
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiresAt))
-            .claim("authorities", claims.authorities)
+            .claim("authorities", profile.authorities)
             .signWith(
                 dummyKey,
                 object: SecureDigestAlgorithm<Key, Key> {
@@ -64,7 +63,7 @@ class JwtTokenProvider(
     }
 
     override fun generateRefreshToken(
-        claims: RefreshTokenClaims
+        profile: RefreshTokenProfile
     ): RefreshToken {
         val refreshTokenKey = refreshTokenKeyResolver.resolve()
 
@@ -77,9 +76,9 @@ class JwtTokenProvider(
             .type("JWT")
             .and()
             .id(TsidGenerator.generate().toString())
-            .subject(claims.subject)
+            .subject(profile.subject)
             .issuer(policy.refreshTokenPolicy.issuer)
-            .audience().add(claims.audience)
+            .audience().add(profile.audience)
             .and()
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiresAt))

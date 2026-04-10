@@ -13,12 +13,24 @@ data class Credential(
     val passwordHash: PasswordHash,
     val passwordUpdatedAt: Instant,
     val passwordExpiredAt: Instant?,
-    val failedAttempts: Int,
+    var failedAttempts: Int,
     val isLocked: Boolean,
     val lockedReason: AccountLock,
     val lockedAt: Instant?,
-    val lastLoginAt: Instant?,
-    val lastFailedAt: Instant?,
+    var lastLoginAt: Instant?,
+    var lastFailedAt: Instant?,
     val mfa: MultiFactorAuth,
     val passwordHistory: PasswordHistory
-): Identifiable<Long>
+): Identifiable<Long> {
+
+    fun recordLoginFailure() {
+        failedAttempts++
+        lastFailedAt = Instant.now()
+    }
+
+    fun recordLoginSuccess() {
+        failedAttempts = 0
+        lastLoginAt = Instant.now()
+    }
+
+}

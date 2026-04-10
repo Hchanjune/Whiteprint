@@ -5,6 +5,12 @@ import org.springframework.stereotype.Repository
 import org.whiteprint.service.auth.adapter.out.persistence.jpa.mapper.AccountJpaMapper
 import org.whiteprint.service.auth.application.port.out.AccountRepository
 import org.whiteprint.service.auth.domain.accounts.aggregate.AccountAggregate
+import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicy
+import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicyException
+import org.whiteprint.service.auth.domain.accounts.vo.AccountIdentifier
+import org.whiteprint.service.auth.domain.accounts.vo.Email
+import org.whiteprint.service.auth.domain.accounts.vo.PhoneNumber
+import org.whiteprint.service.auth.domain.accounts.vo.Username
 
 @Repository
 class AccountRepositoryImpl(
@@ -14,7 +20,13 @@ class AccountRepositoryImpl(
 
     override fun findByIdOrThrow(id: Long): AccountAggregate {
         return jpaRepository.findByIdOrNull(id)?.let { mapper.toAggregate(it) }
-            ?: throw NoSuchElementException("")
+            ?: throw AccountPolicyException(
+                policy = AccountPolicy.ACCOUNT_NOT_FOUND,
+                attributes = mapOf(
+                    "key" to "id",
+                    "value" to id
+                )
+            )
     }
 
     override fun findByIdOrNull(id: Long): AccountAggregate? {
@@ -46,6 +58,69 @@ class AccountRepositoryImpl(
 
     override fun deleteAll(aggregates: Collection<AccountAggregate>) {
         aggregates.forEach { delete(it) }
+    }
+
+    override fun existsByUsername(username: Username): Boolean {
+        return jpaRepository.existsByUsername(username.value)
+    }
+
+    override fun existsByEmail(email: Email): Boolean {
+        return jpaRepository.existsByEmail(email.value)
+    }
+
+    override fun existsByPhoneNumber(phoneNumber: PhoneNumber): Boolean {
+        return jpaRepository.existsByPhoneNumber(phoneNumber.value)
+    }
+
+    override fun findByUsernameOrThrow(username: Username): AccountAggregate {
+        return jpaRepository.findByUsername(username.value)
+            ?.let { mapper.toAggregate(it) }
+            ?: throw AccountPolicyException(
+                policy = AccountPolicy.ACCOUNT_NOT_FOUND,
+                attributes = mapOf(
+                    "key" to "username",
+                    "value" to username.value
+                )
+            )
+    }
+
+    override fun findByEmailOrThrow(email: Email): AccountAggregate {
+        return jpaRepository.findByEmail(email.value)
+            ?.let { mapper.toAggregate(it) }
+            ?: throw AccountPolicyException(
+                policy = AccountPolicy.ACCOUNT_NOT_FOUND,
+                attributes = mapOf(
+                    "key" to "email",
+                    "value" to email.value
+                )
+            )
+    }
+
+    override fun findByPhoneNumberOrThrow(phoneNumber: PhoneNumber): AccountAggregate {
+        return jpaRepository.findByPhoneNumber(phoneNumber.value)
+            ?.let { mapper.toAggregate(it) }
+            ?: throw AccountPolicyException(
+                policy = AccountPolicy.ACCOUNT_NOT_FOUND,
+                attributes = mapOf(
+                    "key" to "phoneNumber",
+                    "value" to phoneNumber.value
+                )
+            )
+    }
+
+    override fun findByIdentifierOrThrow(identifier: AccountIdentifier): AccountAggregate {
+        return jpaRepository.findByUsernameOrEmailOrPhoneNumber(
+                username = identifier.value,
+                email = identifier.value,
+                phoneNumber = identifier.value
+            )?.let { mapper.toAggregate(it) }
+            ?: throw AccountPolicyException(
+                policy = AccountPolicy.ACCOUNT_NOT_FOUND,
+                attributes = mapOf(
+                    "key" to "identifier",
+                    "value" to identifier.value
+                )
+            )
     }
 
 }

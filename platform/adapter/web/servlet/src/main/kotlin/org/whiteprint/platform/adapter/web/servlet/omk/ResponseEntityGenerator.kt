@@ -9,10 +9,14 @@ import org.whiteprint.platform.core.kernel.policy.exception.StandardException
 
 object ResponseEntityGenerator {
 
-    fun <T: Any> generateFromOperation(operationResult: OperationResult<T>): ResponseEntity<ApiResponse<T>> {
+    fun <RESULT : Any, RESPONSE : Any> generateFromOperation(
+        operationResult: OperationResult<RESULT>,
+        mapper: (RESULT) -> RESPONSE
+    ): ResponseEntity<ApiResponse<RESPONSE>> {
+
         val apiResponse = ApiResponse.success(
             id = operationResult.context.traceId,
-            data = operationResult.data,
+            data = mapper(operationResult.data),
             traceId = operationResult.context.traceId,
             message = operationResult.context.message,
         )

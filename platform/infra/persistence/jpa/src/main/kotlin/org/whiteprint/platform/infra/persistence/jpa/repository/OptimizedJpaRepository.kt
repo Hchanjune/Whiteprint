@@ -5,15 +5,14 @@ import org.whiteprint.platform.infra.persistence.jpa.entity.contract.DeletableEn
 import jakarta.persistence.EntityManager
 import org.springframework.data.jpa.repository.support.JpaEntityInformation
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository
-import org.springframework.transaction.annotation.Transactional
 import java.io.Serializable
 
+@Suppress("SpringTransactionalMethodCallsInspection")
 class OptimizedJpaRepository<T: Any, ID: Serializable>(
     entityInformation: JpaEntityInformation<T, ID>,
     private val entityManager: EntityManager
 ): SimpleJpaRepository<T, ID>(entityInformation, entityManager) {
 
-    @Transactional
     override fun <S: T> save(entity: S): S {
         return if (entity is BaseEntity<out Serializable>) {
             if (entity.isNew) {
@@ -27,7 +26,6 @@ class OptimizedJpaRepository<T: Any, ID: Serializable>(
         }
     }
 
-    @Transactional
     override fun delete(entity: T) {
         if (entity is DeletableEntity) {
             if (entity.useSoftDelete) {
@@ -39,7 +37,6 @@ class OptimizedJpaRepository<T: Any, ID: Serializable>(
         super.delete(entity)
     }
 
-    @Transactional
     override fun deleteById(id: ID) {
         findById(id).ifPresent { this.delete(it) }
     }

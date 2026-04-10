@@ -9,10 +9,11 @@ CREATE TABLE accounts (
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     deleted_at TIMESTAMP WITH TIME ZONE,
     version BIGINT NOT NULL DEFAULT 0,
+    last_fencing_token BIGINT NOT NULL DEFAULT 0,
     CONSTRAINT pk_accounts PRIMARY KEY (id),
     CONSTRAINT unq_accounts_username UNIQUE (username),
     CONSTRAINT unq_accounts_email UNIQUE (email),
-    CONSTRAINT unq_accounts_phone_number UNIQUE (phone_number),
+    CONSTRAINT unq_accounts_phone_number UNIQUE (phone_number)
 );
 
 -- [Root:1]

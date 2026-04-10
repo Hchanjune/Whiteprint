@@ -30,7 +30,7 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, 
         protected set
 
     @Column(name = "last_fencing_token", nullable = true)
-    override var lastFencingToken: String? = null
+    override var lastFencingToken: Long = 0
 
     @PreUpdate
     override fun preUpdate() {

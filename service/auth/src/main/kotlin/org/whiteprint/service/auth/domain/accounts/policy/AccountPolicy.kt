@@ -69,5 +69,52 @@ enum class AccountPolicy(
         400,
         "PASSWORD_MISS_MATCH",
         "Password and password check must match.",
-    )
+    ),
+
+    /**
+     * Required Attributes
+     * - [key]
+     * - [value]
+     */
+    ACCOUNT_NOT_FOUND(
+        404,
+        "ACCOUNT_NOT_FOUND",
+        "Account not found. (Input: [[key]]-[[value]])",
+    ),
+
+    /**
+     * Required Attributes
+     * - [input]
+     */
+    ACCOUNT_USERNAME_DUPLICATED(
+        409,
+        "ACCOUNT_USERNAME_DUPLICATED",
+        "Account username duplicated. (Input: [[input]])",
+    ),
+
+    /**
+     * Required Attributes
+     * - [input]
+     */
+    ACCOUNT_EMAIL_DUPLICATED(
+        409,
+        "ACCOUNT_EMAIL_DUPLICATED",
+        "Account email duplicated. (Input: [[input]])",
+    ),
+
+    /**
+     * Required Attributes
+     * - [input]
+     */
+    ACCOUNT_PHONE_NUMBER_DUPLICATED(
+        409,
+        "ACCOUNT_PHONE_NUMBER_DUPLICATED",
+        "Account phone number duplicated. (Input: [[input]])",
+    ),
+
+    LOGIN_FAILURE(
+        403,
+        "LOGIN_FAILURE",
+        "Login failed. Please check your account identifier and password.",
+    ),
 }
