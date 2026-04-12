@@ -33,8 +33,13 @@ class AuthRestController(
     ): ResponseEntity<ApiResponse<LoginResponse>> {
         val command = loginRequest.toCommand()
         val operation = loginUseCase.handle(command)
-        if (operation.data.accessToken == null || operation.data.refreshToken == null) {
-            throw AccountPolicyException(AccountPolicy.LOGIN_FAILURE)
+        if (operation.data.accessToken.value == "LoginFailure" || operation.data.refreshToken.value == "LoginFailure") {
+            throw AccountPolicyException(
+                policy = AccountPolicy.LOGIN_FAILURE,
+                attributes = mapOf(
+                    "failedAttempts" to operation.data.failedAttempts
+                )
+            )
         }
         return ResponseEntityGenerator.generateFromOperation(operation) {
             operation.data.toResponse()

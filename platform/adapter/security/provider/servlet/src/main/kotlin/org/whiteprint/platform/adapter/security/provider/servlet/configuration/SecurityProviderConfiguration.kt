@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.whiteprint.platform.adapter.security.provider.servlet.key.RefreshTokenVerificationKeyResolverImpl
+import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.security.policy.TokenPolicy
 import org.whiteprint.platform.core.security.provider.AccessTokenSigner
@@ -31,10 +32,12 @@ class SecurityProviderConfiguration(
 
     @Bean
     fun tokenProvider(
+        serializer: Serializer,
         @Qualifier("providerAccessTokenSigner") accessTokenSigner: AccessTokenSigner,
         @Qualifier("providerRefreshTokenSigner") refreshTokenSigner: RefreshTokenSigner
     ): TokenProvider {
         return JwtTokenProvider(
+            serializer = serializer,
             policy = TokenPolicy(
                 accessTokenPolicy = TokenPolicy.AccessTokenPolicy(
                     issuer = properties.accessTokenPolicy.issuer,

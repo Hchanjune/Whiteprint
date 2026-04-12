@@ -62,10 +62,12 @@ class SecurityVerifierConfiguration(
 
     @Bean
     fun accessTokenVerifier(
+        serializer: Serializer,
         accessTokenKeyResolver: AccessTokenVerificationKeyResolver,
         revocationChecker: RevocationChecker
     ): AccessTokenVerifier
         = JwtAccessTokenVerifier(
+        serializer = serializer,
         keyResolver = accessTokenKeyResolver,
         revocationChecker = revocationChecker,
     )

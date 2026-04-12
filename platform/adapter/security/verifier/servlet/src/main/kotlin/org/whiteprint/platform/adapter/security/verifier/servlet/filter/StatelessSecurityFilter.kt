@@ -48,7 +48,7 @@ class StatelessSecurityFilter(
             val authentication = UsernamePasswordAuthenticationToken(
                 claims.subject,
                 null,
-                claims.authorities.map { SimpleGrantedAuthority(it) }
+                claims.permissions.map { SimpleGrantedAuthority(it) }
             )
             SecurityContextHolder.getContext().authentication = authentication
 

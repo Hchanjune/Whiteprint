@@ -7,7 +7,9 @@ import io.github.hchanjune.omk.webmvc.Operations
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.model.AccessTokenProfile
+import org.whiteprint.platform.core.security.model.RefreshToken
 import org.whiteprint.platform.core.security.model.RefreshTokenProfile
 import org.whiteprint.platform.core.security.provider.TokenProvider
 import org.whiteprint.service.auth.application.port.`in`.LoginCommand
@@ -65,15 +67,17 @@ class LoginService(
 
             LoginResult(
                 accessToken = accessToken,
-                refreshToken = refreshToken
+                refreshToken = refreshToken,
+                failedAttempts = accountAggregate.failedAttempts,
             ).apply {
                 repository.update(accountAggregate)
                 message = "Login successful."
             }
         } else {
             LoginResult(
-                accessToken = null,
-                refreshToken = null
+                accessToken = AccessToken("LoginFailure"),
+                refreshToken = RefreshToken("LoginFailure"),
+                failedAttempts = accountAggregate.failedAttempts,
             ).apply {
                 repository.update(accountAggregate)
                 message = "Login failed."

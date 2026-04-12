@@ -15,8 +15,9 @@ fun LoginRequest.toCommand() = LoginCommand(
 )
 
 fun LoginResult.toResponse() = LoginResponse(
-    accessToken = this.accessToken?.value?: "",
-    refreshToken = this.refreshToken?.value?: ""
+    accessToken = this.accessToken.value,
+    refreshToken = this.refreshToken.value,
+    failedAttempts = this.failedAttempts
 )
 
 fun SignupRequest.toCommand() = SignupCommand(

@@ -1,12 +1,14 @@
 package org.whiteprint.platform.infra.serializer.jackson
 
 import org.whiteprint.platform.core.kernel.serializer.Serializer
+import tools.jackson.databind.SerializationFeature
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
 
 class JacksonSerializer: Serializer {
 
     val jsonMapper: JsonMapper = JsonMapper.builder()
+        .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
         .addModule(KotlinModule.Builder().build())
         .build()
 

@@ -112,9 +112,13 @@ enum class AccountPolicy(
         "Account phone number duplicated. (Input: [[input]])",
     ),
 
+    /**
+     * Required Attributes
+     * - [failedAttempts]
+     */
     LOGIN_FAILURE(
         403,
         "LOGIN_FAILURE",
-        "Login failed. Please check your account identifier and password.",
+        "Login failed. Please check your account identifier and password. (failedAttempts: [[failedAttempts]])",
     ),
 }
