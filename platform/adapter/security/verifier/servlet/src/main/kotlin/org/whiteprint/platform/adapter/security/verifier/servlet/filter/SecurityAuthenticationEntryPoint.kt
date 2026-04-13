@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.security.verifier.servlet.security
+package org.whiteprint.platform.adapter.security.verifier.servlet.filter
 
 import io.github.hchanjune.omk.webmvc.Operations
 import jakarta.servlet.http.HttpServletRequest
@@ -20,7 +20,14 @@ class SecurityAuthenticationEntryPoint(
         response: HttpServletResponse,
         authException: AuthenticationException
     ) {
-        val exception = SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
+        val exception = request.getAttribute(StatelessSecurityFilter.SECURITY_EXCEPTION_KEY)
+                as? SecurityException
+            ?: SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
+
+        returnErrorResponse(response, exception)
+    }
+
+    private fun returnErrorResponse(response: HttpServletResponse, exception: SecurityException) {
         response.status = exception.status
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.characterEncoding = "UTF-8"
@@ -30,7 +37,9 @@ class SecurityAuthenticationEntryPoint(
             exception = exception,
             traceId = Operations.context.traceId,
         )
+
         response.writer.write(serializer.serializeToJson(errorBody))
         response.writer.flush()
     }
+
 }

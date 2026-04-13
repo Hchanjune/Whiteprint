@@ -3,6 +3,7 @@ package org.whiteprint.service.auth.adapter.`in`.web
 import io.github.hchanjune.omk.core.annotations.ManagedController
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -116,7 +117,8 @@ class AuthRestController(
     @PostMapping("/validate")
     fun validate(): ResponseEntity<ApiResponse<AccessTokenClaims>> {
         return ResponseEntityGenerator.generateInstantData(
-            data = SecurityContextSupport.getCurrentClaims()
+            data = SecurityContextSupport.getCurrentClaims(),
+            message = "Successfully validated"
         )
     }
 

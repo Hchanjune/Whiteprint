@@ -30,12 +30,12 @@ object ResponseEntityGenerator {
         return response.body(apiResponse)
     }
 
-    fun <T> generateInstantData(data: T): ResponseEntity<ApiResponse<T>> {
+    fun <T> generateInstantData(data: T, message: String = ""): ResponseEntity<ApiResponse<T>> {
         val response = ApiResponse.success(
             id = TsidGenerator.generate().toString(),
             data = data,
             traceId = Operations.context.traceId,
-            message = "",
+            message = message,
         )
         return ResponseEntity.ok(response)
     }

@@ -12,6 +12,8 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -19,7 +21,7 @@ import org.whiteprint.platform.adapter.security.verifier.servlet.filter.Stateles
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccessTokenVerificationKeyResolverImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.RevocationCheckerImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.PermittedEntryPointProvider
-import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityAuthenticationEntryPoint
+import org.whiteprint.platform.adapter.security.verifier.servlet.filter.SecurityAuthenticationEntryPoint
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
@@ -75,15 +77,19 @@ class SecurityVerifierConfiguration(
     )
 
     @Bean
+    fun securityContextRepository(): SecurityContextRepository =
+        RequestAttributeSecurityContextRepository()
+
+    @Bean
     fun statelessSecurityFilter(
-        serializer: Serializer,
+        securityContextRepository: SecurityContextRepository,
         permittedEntryPointProvider: PermittedEntryPointProvider,
         accessTokenVerifier: AccessTokenVerifier,
     ): StatelessSecurityFilter =
         StatelessSecurityFilter(
-            serializer = serializer,
             permittedEntryPointProvider = permittedEntryPointProvider,
-            accessTokenVerifier = accessTokenVerifier
+            accessTokenVerifier = accessTokenVerifier,
+            securityContextRepository = securityContextRepository
         )
 
     @Bean("securityAuthenticationEntryPoint")
@@ -99,6 +105,7 @@ class SecurityVerifierConfiguration(
         statelessSecurityFilter: StatelessSecurityFilter,
         corsConfigurationSource: CorsConfigurationSource,
         @Qualifier("securityAuthenticationEntryPoint") authenticationEntryPoint: AuthenticationEntryPoint,
+        securityContextRepository: SecurityContextRepository,
     ): SecurityFilterChain {
         return http
             .csrf { it.disable() }
@@ -119,6 +126,7 @@ class SecurityVerifierConfiguration(
             .headers { header ->
                 header.frameOptions { it.sameOrigin() }
             }
+            .securityContext { it.securityContextRepository(securityContextRepository) }
             .exceptionHandling { it.authenticationEntryPoint(authenticationEntryPoint) }
             .build()
     }

@@ -1,28 +1,28 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.filter
 
-import io.github.hchanjune.omk.webmvc.Operations
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.MediaType
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.web.filter.OncePerRequestFilter
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.PermittedEntryPointProvider
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.VerifiedUser
-import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
-import org.whiteprint.platform.core.kernel.model.ApiResponse
-import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
 
 class StatelessSecurityFilter(
-    private val serializer: Serializer,
+    private val securityContextRepository: SecurityContextRepository,
     private val permittedEntryPointProvider: PermittedEntryPointProvider,
     private val accessTokenVerifier: AccessTokenVerifier,
 ): OncePerRequestFilter() {
+
+    companion object {
+        const val SECURITY_EXCEPTION_KEY = "SECURITY_EXCEPTION"
+    }
 
     override fun shouldNotFilterErrorDispatch(): Boolean = true
 
@@ -43,7 +43,6 @@ class StatelessSecurityFilter(
                 ?: throw SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
 
             val claims = accessTokenVerifier.verifyOrThrow(AccessToken(token))
-
             val context = SecurityContextHolder.createEmptyContext().apply {
                 authentication = VerifiedUser(
                     claims = claims,
@@ -51,16 +50,16 @@ class StatelessSecurityFilter(
                 )
             }
             SecurityContextHolder.setContext(context)
-
-            filterChain.doFilter(request, response)
+            securityContextRepository.saveContext(context, request, response)
         } catch (exception: SecurityException) {
-            //returnErrorResponse(response, exception)
+            request.setAttribute(SECURITY_EXCEPTION_KEY, exception)
         } catch (exception: Exception) {
-//            returnErrorResponse(response, SecurityException(
-//                policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR,
-//                cause = exception
-//            ))
+            request.setAttribute(SECURITY_EXCEPTION_KEY, SecurityException(
+                policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR,
+                cause = exception
+            ))
         }
+        filterChain.doFilter(request, response)
     }
 
     private fun extractToken(request: HttpServletRequest): String? {
@@ -71,19 +70,6 @@ class StatelessSecurityFilter(
         return null
     }
 
-    private fun returnErrorResponse(response: HttpServletResponse, exception: SecurityException) {
-        response.status = exception.status
-        response.contentType = MediaType.APPLICATION_JSON_VALUE
-        response.characterEncoding = "UTF-8"
 
-        val errorBody = ApiResponse.error(
-            id = TsidGenerator.generate().toString(),
-            exception = exception,
-            traceId = Operations.context.traceId,
-        )
-
-        response.writer.write(serializer.serializeToJson(errorBody))
-        response.writer.flush()
-    }
 
 }
