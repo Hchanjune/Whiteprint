@@ -20,7 +20,7 @@ import java.util.Base64
 class VaultKeyMaterialProvider(
     private val vaultOperations: VaultOperations,
     private val keyCache: KeyCache,
-    private val transitPath: String = "transit"
+    private val transitPath: String
 ) : KeyMaterialProvider {
 
     override fun getKeyBundle(

@@ -5,5 +5,5 @@ import org.whiteprint.platform.core.security.model.AccessTokenSigningResult
 
 interface AccessTokenSigner {
     fun getLatestSigningKeyMetadata(): AccessTokenSigningKeyMetadata
-    fun sign(data: ByteArray): AccessTokenSigningResult
+    fun sign(rawText: String): AccessTokenSigningResult
 }

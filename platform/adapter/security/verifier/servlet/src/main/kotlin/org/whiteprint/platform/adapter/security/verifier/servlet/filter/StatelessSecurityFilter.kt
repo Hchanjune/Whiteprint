@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.filter
 
+import io.github.hchanjune.omk.webmvc.Operations
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -9,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityEntryPointProvider
+import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.platform.core.kernel.model.ApiResponse
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.security.model.AccessToken
@@ -56,7 +58,7 @@ class StatelessSecurityFilter(
         } catch (exception: SecurityException) {
             returnErrorResponse(response, exception)
         } catch (exception: Exception) {
-            returnErrorResponse(response, SecurityException(SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR))
+            returnErrorResponse(response, SecurityException(policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR, cause = exception))
         }
     }
 
@@ -74,9 +76,9 @@ class StatelessSecurityFilter(
         response.characterEncoding = "UTF-8"
 
         val errorBody = ApiResponse.error(
-            id = "-",
+            id = TsidGenerator.generate().toString(),
             exception = exception,
-            traceId = null,
+            traceId = Operations.context.traceId,
         )
 
         response.writer.write(serializer.serializeToJson(errorBody))

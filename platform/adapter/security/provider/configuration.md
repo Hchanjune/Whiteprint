@@ -31,7 +31,7 @@ adapter:
           key-alias: refresh-token-sig
           rotation-interval-seconds: 2592000
           overlap-seconds: 86400
-          algorithm: HMAC_SHA256
+          algorithm: RSA_2048
 ```
 
 ### build.gradle.kts

@@ -5,5 +5,5 @@ import org.whiteprint.platform.core.security.model.RefreshTokenSigningResult
 
 interface RefreshTokenSigner {
     fun getLatestSigningKeyMetadata(): RefreshTokenSigningKeyMetadata
-    fun sign(data: ByteArray): RefreshTokenSigningResult
+    fun sign(text: String): RefreshTokenSigningResult
 }

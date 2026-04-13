@@ -88,7 +88,6 @@ class SecurityVerifierConfiguration(
     fun statelessFilterChain(
         http: HttpSecurity,
         statelessSecurityFilter: StatelessSecurityFilter,
-        securityEntryPointProvider: SecurityEntryPointProvider,
         corsConfigurationSource: CorsConfigurationSource
     ): SecurityFilterChain {
         return http
@@ -97,16 +96,10 @@ class SecurityVerifierConfiguration(
             .httpBasic { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
-                auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS Preflight 허용
+                auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS Preflight
                 auth.requestMatchers(HttpMethod.HEAD, "/**").denyAll()
-
-                auth.requestMatchers(*securityEntryPointProvider.permitAllMatchers().toTypedArray()).permitAll()
-                auth.requestMatchers(*securityEntryPointProvider.denyAllMatchers().toTypedArray()).denyAll()
-                auth.requestMatchers(*securityEntryPointProvider.authenticateAllMatchers().toTypedArray()).authenticated()
-
                 auth.dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
-
-                auth.anyRequest().authenticated()
+                auth.anyRequest().permitAll()
             }
             .addFilterBefore(statelessSecurityFilter, UsernamePasswordAuthenticationFilter::class.java)
             .cors { it.configurationSource(corsConfigurationSource) }

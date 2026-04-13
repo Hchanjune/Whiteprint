@@ -3,11 +3,14 @@ package org.whiteprint.platform.core.kms.model
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
 
-fun KeyType.toJavaAlgorithm(): String = when (this) {
-    KeyType.RSA_2048, KeyType.RSA_4096 -> "RSA"
-    KeyType.EC_P256 -> "EC"
-    KeyType.AES_128_GCM, KeyType.AES_256_GCM -> "AES"
+fun KeyType.toSignatureAlgorithm(): String = when (this) {
+    KeyType.RSA_2048, KeyType.RSA_4096 -> "SHA256withRSA"   // pkcs1v15
+    KeyType.EC_P256 -> "SHA256withECDSA"
     KeyType.HMAC_SHA256 -> "HmacSHA256"
+    KeyType.AES_128_GCM, KeyType.AES_256_GCM -> throw KmsException(
+        KmsPolicy.KMS_NOT_SUPPORTED,
+        mapOf("reason" to "AES keys do not support signing: $this")
+    )
 }
 
 fun KeyType.toVaultType(): String = when (this) {
@@ -32,12 +35,12 @@ fun String.toKeyType(): KeyType = when (this.lowercase()) {
     )
 }
 
-fun KeyType.toJjwtAlgorithm(): String = when (this) {
+fun KeyType.toJwtAlgorithm(): String = when (this) {
     KeyType.RSA_2048, KeyType.RSA_4096 -> "RS256"
     KeyType.EC_P256 -> "ES256"
     KeyType.HMAC_SHA256 -> "HS256"
-    else -> throw KmsException(
+    KeyType.AES_128_GCM, KeyType.AES_256_GCM -> throw KmsException(
         KmsPolicy.KMS_NOT_SUPPORTED,
-        mapOf("reason" to "This KeyType does not support JWT signing: $this")
+        mapOf("reason" to "AES keys do not support JWT signing: $this")
     )
 }

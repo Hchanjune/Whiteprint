@@ -3,6 +3,8 @@ package org.whiteprint.platform.infra.security.jwt.verifier
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.model.AccessTokenClaims
+import org.whiteprint.platform.core.security.model.AccessTokenHeader
+import org.whiteprint.platform.core.security.model.AccessTokenPayload
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
 import org.whiteprint.platform.core.security.verifier.RevocationChecker
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
@@ -22,93 +24,80 @@ class JwtAccessTokenVerifier (
     }
 
     override fun verifyOrThrow(token: AccessToken): AccessTokenClaims {
+        val now = Instant.now()
         val parts = token.value.split(".")
 
-        require(parts.size == 3) {
+        if (parts.size != 3) {
             throw SecurityException(SecurityPolicy.TOKEN_INVALID)
         }
 
-        val encodedHeader = parts[0]
-        val encodedPayload = parts[1]
-        val encodedSignature = parts[2]
+        val base64Header = parts[0]
+        val base64Payload = parts[1]
+        val base64Signature = parts[2]
 
-        val headerBytes = decoder.decode(encodedHeader)
-        val payloadBytes = decoder.decode(encodedPayload)
-        val signatureBytes = decoder.decode(encodedSignature)
+        val headerBytes = decoder.decode(base64Header)
+        val payloadBytes = decoder.decode(base64Payload)
+        val signatureBytes = decoder.decode(base64Signature)
 
-        @Suppress("UNCHECKED_CAST")
-        val header = serializer.deserializeFromBytes(headerBytes, Map::class.java) as Map<String, Any>
+        val header = try {
+            serializer.deserializeFromBytes(headerBytes, AccessTokenHeader::class.java)
+        } catch (_: Exception) {
+            throw SecurityException(SecurityPolicy.TOKEN_INVALID)
+        }
 
-        @Suppress("UNCHECKED_CAST")
-        val payload = serializer.deserializeFromBytes(payloadBytes, Map::class.java) as Map<String, Any>
+        val accessTokenVerificationKey = keyResolver.resolve(header.kid, header.ver)
+
+        try {
+            val dataToVerify = "$base64Header.$base64Payload".toByteArray(Charsets.UTF_8)
+            val signature = java.security.Signature.getInstance("SHA256withRSA")
+            signature.initVerify(accessTokenVerificationKey.verifyKey)
+            signature.update(dataToVerify)
+            signature.verify(signatureBytes)
+        } catch (_: Exception) {
+            throw SecurityException(SecurityPolicy.TOKEN_INVALID)
+        }
+
+        val payload = try {
+            serializer.deserializeFromBytes(payloadBytes, AccessTokenPayload::class.java)
+        } catch (_: Exception) {
+            throw SecurityException(SecurityPolicy.TOKEN_INVALID)
+        }
+
+
+
+        if (Instant.ofEpochSecond(payload.iat).isAfter(now)) {
+            throw SecurityException(SecurityPolicy.TOKEN_INVALID)
+        }
+
+        if (Instant.ofEpochSecond(payload.exp).isBefore(now)) {
+            throw SecurityException(SecurityPolicy.TOKEN_EXPIRED)
+        }
+
+//        if (payload.iss != expectedIssuer) {
+//            throw SecurityException(SecurityPolicy.TOKEN_INVALID)
+//        }
+
+//        if (expectedAudience !in payload.aud) {
+//            throw SecurityException(SecurityPolicy.TOKEN_INVALID)
+//        }
 
         val accessTokenClaims = try {
             AccessTokenClaims(
-                tokenId = payload["jti"] as String,
-                subject = payload["sub"] as String,
-                issuer = payload["iss"] as String,
-                audience = when (val aud = payload["aud"]) {
-                    is String -> setOf(aud)
-                    is Collection<*> -> aud.map { it.toString() }.toSet()
-                    else -> emptySet()
-                },
-                issuedAt = Instant.ofEpochSecond((payload["iat"] as Number).toLong()),
-                expiresAt = Instant.ofEpochSecond((payload["exp"] as Number).toLong()),
-                permissions = (payload["prm"] as? Collection<*>)
-                    ?.map { it.toString() }
-                    ?.toSet()
-                    ?: emptySet()
+                tokenId = payload.jti,
+                subject = payload.sub,
+                issuer = payload.iss,
+                audience = payload.aud,
+                issuedAt = Instant.ofEpochSecond(payload.iat),
+                expiresAt = Instant.ofEpochSecond(payload.exp),
+                permissions = payload.prm
             )
         } catch (_: Exception) {
             throw SecurityException(SecurityPolicy.TOKEN_CLAIM_INVALID)
         }
 
-        println(accessTokenClaims.toString())
-
         revocationChecker.assertNotRevoked(accessTokenClaims)
 
         return accessTokenClaims
     }
-
-//    override fun verifyOrThrow(token: AccessToken): AccessTokenClaims {
-//        return try {
-//            val claims = Jwts.parser()
-//                .keyLocator { header: Header ->
-//                    val kid = header["kid"] as? String
-//                        ?: throw SecurityException(SecurityPolicy.TOKEN_KEY_ID_MISSING)
-//                    val ver = header["ver"] as? String
-//                    println("Debug: $kid")
-//                    println("Debug: $ver")
-//                    keyResolver.resolve(kid, ver).verifyKey.also {
-//                        println("Debug: $it")
-//                    }
-//                }
-//                .build()
-//                .parseSignedClaims(token.value)
-//                .payload
-//
-//            val accessTokenClaims = AccessTokenClaims(
-//                tokenId = claims.id,
-//                subject = claims.subject,
-//                issuer = claims.issuer,
-//                audience = claims.audience,
-//                issuedAt = claims.issuedAt.toInstant(),
-//                expiresAt = claims.expiration.toInstant(),
-//                authorities = (claims["prm"] as? Iterable<*>)?.map { it.toString() }?.toSet() ?: emptySet()
-//            )
-//
-//            revocationChecker.assertNotRevoked(accessTokenClaims)
-//
-//            accessTokenClaims
-//
-//        } catch (exception: Exception) {
-//            exception.printStackTrace()
-//            if (exception is JwtException) {
-//                throw JwtExceptionMapper.mapFrom(exception)
-//            } else {
-//                throw exception
-//            }
-//        }
-//    }
 
 }

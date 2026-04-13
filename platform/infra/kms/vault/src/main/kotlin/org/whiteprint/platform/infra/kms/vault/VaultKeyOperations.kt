@@ -16,10 +16,76 @@ import java.util.Base64
 
 class VaultKeyOperations(
     private val vaultOperations: VaultOperations,
-    private val transitPath: String = "transit"
+    private val transitPath: String
 ) : KeyOperations {
 
-    override fun sign(keyAlias: String, data: ByteArray): SigningResult {
+    /**
+     * RS256 (pkcs1v15)
+     */
+    override fun sign(keyAlias: String, rawText: String): SigningResult {
+        val base64Input = Base64.getEncoder()
+            .encodeToString(rawText.toByteArray(Charsets.UTF_8))
+
+        val response = try {
+            vaultOperations.write(
+                "$transitPath/sign/$keyAlias",
+                mapOf(
+                    "input" to base64Input,
+                    "signature_algorithm" to "pkcs1v15",
+                )
+            )
+        } catch (exception: HttpClientErrorException.NotFound) {
+            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyAlias), exception)
+        } catch (exception: HttpServerErrorException) {
+            throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap(), exception)
+        }
+
+        val vaultSig = response?.data?.get("signature") as? String
+            ?: throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap())
+
+        val parts = vaultSig.split(":")
+        val version = parts[1].removePrefix("v")
+        val signatureBytes = Base64.getDecoder().decode(parts[2].trim())
+
+        return SigningResult(
+            keyId = KeyId(keyAlias, version),
+            signature = signatureBytes
+        )
+    }
+
+    /**
+     * RS256 (pkcs1v15)
+     */
+    override fun verify(keyId: KeyId, rawText: String, signature: ByteArray): Boolean {
+        val base64Input = Base64.getEncoder()
+            .encodeToString(rawText.toByteArray(Charsets.UTF_8))
+        val vaultSig = "vault:v${keyId.version}:${Base64.getEncoder().encodeToString(signature)}"
+
+        val response = try {
+            vaultOperations.write(
+                "$transitPath/verify/${keyId.alias}",
+                mapOf(
+                    "input" to base64Input,
+                    "signature" to vaultSig,
+                    "signature_algorithm" to "pkcs1v15",
+                )
+            )
+        } catch (exception: HttpClientErrorException.NotFound) {
+            throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyId.toString()), exception)
+        } catch (exception: HttpServerErrorException) {
+            throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap(), exception)
+        }
+
+        return response?.data?.get("valid") as? Boolean
+            ?: throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap())
+    }
+
+    /**
+     * Signs binary data using RSA-PSS (salt=MAX_LENGTH).
+     * Verification must be done via Vault only, as the salt length
+     * is incompatible with standard JWT libraries (e.g., jwt.io expects salt=32).
+     */
+    override fun signBinary(keyAlias: String, data: ByteArray): SigningResult {
         val ops = vaultOperations.opsForTransit(transitPath)
         val plaintext = Plaintext.of(data)
 
@@ -35,17 +101,18 @@ class VaultKeyOperations(
         val version = parts[1].removePrefix("v")
         val signatureBytes = Base64.getDecoder().decode(parts[2].trim())
 
-        println("Debug parts: $parts")
-        println("Debug version: $version")
-        println("Debug signatureBytes: $signatureBytes")
-
         return SigningResult(
             keyId = KeyId(keyAlias, version),
             signature = signatureBytes
         )
     }
 
-    override fun verify(keyId: KeyId, data: ByteArray, signature: ByteArray): Boolean {
+    /**
+     * Verifies binary data using RSA-PSS (salt=MAX_LENGTH).
+     * Signing must be done via Vault only, as the salt length
+     * is incompatible with standard JWT libraries (e.g., jwt.io expects salt=32).
+     */
+    override fun verifyBinary(keyId: KeyId, data: ByteArray, signature: ByteArray): Boolean {
         val ops = vaultOperations.opsForTransit(transitPath)
 
         val plaintext = Plaintext.of(data)

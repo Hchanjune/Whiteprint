@@ -12,7 +12,7 @@ import java.time.Instant
 class VaultKeyAdminOperations(
     private val vaultOperations: VaultOperations,
     private val keyMaterialProvider: KeyMaterialProvider,
-    private val transitPath: String = "transit"
+    private val transitPath: String
 ) : KeyAdminOperations {
 
     override fun createKey(alias: String, type: KeyType): KeyBundle {

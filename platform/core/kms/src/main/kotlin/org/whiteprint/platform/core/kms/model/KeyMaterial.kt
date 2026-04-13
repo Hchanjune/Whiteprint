@@ -26,11 +26,11 @@ data class KeyMaterial(
 
     fun toPublicKey(): PublicKey {
         val spec = X509EncodedKeySpec(encoded)
-        return KeyFactory.getInstance(type.toJavaAlgorithm()).generatePublic(spec)
+        return KeyFactory.getInstance(type.toSignatureAlgorithm()).generatePublic(spec)
     }
 
     fun toSecretKey(): SecretKey {
-        return SecretKeySpec(encoded, type.toJavaAlgorithm())
+        return SecretKeySpec(encoded, type.toSignatureAlgorithm())
     }
 
     override fun equals(other: Any?): Boolean {

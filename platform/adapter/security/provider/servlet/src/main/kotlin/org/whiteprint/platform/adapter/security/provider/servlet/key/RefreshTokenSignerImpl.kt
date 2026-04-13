@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.security.provider.servlet.key
 
 import org.whiteprint.platform.adapter.security.provider.servlet.configuration.SecurityProviderKmsConfigurationProperties
-import org.whiteprint.platform.core.kms.model.toJjwtAlgorithm
+import org.whiteprint.platform.core.kms.model.toJwtAlgorithm
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
 import org.whiteprint.platform.core.kms.service.KeyAdminOperations
@@ -33,16 +33,16 @@ class RefreshTokenSignerImpl(
                         "keyId" to refreshTokenPolicy.keyAlias,
                     )
                 ),
-            algorithm = refreshTokenPolicy.algorithm.toJjwtAlgorithm()
+            algorithm = refreshTokenPolicy.algorithm.toJwtAlgorithm()
         )
     }
 
-    override fun sign(data: ByteArray): RefreshTokenSigningResult {
-        val signingResult = keyOperations.sign(refreshTokenPolicy.keyAlias, data)
+    override fun sign(text: String): RefreshTokenSigningResult {
+        val signingResult = keyOperations.sign(refreshTokenPolicy.keyAlias, text)
         return RefreshTokenSigningResult(
             keyAlias = signingResult.keyId.alias,
             keyVersion = signingResult.keyId.version,
-            algorithm = refreshTokenPolicy.algorithm.toJjwtAlgorithm(),
+            algorithm = refreshTokenPolicy.algorithm.toJwtAlgorithm(),
             signature = signingResult.signature
         )
     }
