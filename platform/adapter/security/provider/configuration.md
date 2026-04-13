@@ -16,6 +16,7 @@ adapter:
         refresh-token-policy:
           issuer: Sample
           expiration-seconds: 3600
+          cookie-header: refresh
       kms:
         datasource:
           host: localhost

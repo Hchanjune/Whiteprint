@@ -16,6 +16,7 @@ data class SecurityProviderConfigurationProperties (
     data class RefreshTokenPolicy(
         var issuer: String = "Sample",
         var expirationSeconds: Long = 3600,
+        var cookieHeader: String = "refresh"
     )
 
 }

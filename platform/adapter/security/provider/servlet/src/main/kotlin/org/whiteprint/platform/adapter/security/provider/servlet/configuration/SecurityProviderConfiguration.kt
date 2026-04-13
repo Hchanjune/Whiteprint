@@ -45,7 +45,8 @@ class SecurityProviderConfiguration(
                 ),
                 refreshTokenPolicy = TokenPolicy.RefreshTokenPolicy(
                     issuer = properties.refreshTokenPolicy.issuer,
-                    expirationSeconds = properties.refreshTokenPolicy.expirationSeconds
+                    expirationSeconds = properties.refreshTokenPolicy.expirationSeconds,
+                    cookieHeader = properties.refreshTokenPolicy.cookieHeader
                 )
             ),
             accessTokenSigner = accessTokenSigner,

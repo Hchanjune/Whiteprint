@@ -3,9 +3,11 @@ package org.whiteprint.service.auth.adapter.`in`.web.mapper
 import org.whiteprint.service.auth.adapter.`in`.web.request.LoginRequest
 import org.whiteprint.service.auth.adapter.`in`.web.request.SignupRequest
 import org.whiteprint.service.auth.adapter.`in`.web.response.LoginResponse
+import org.whiteprint.service.auth.adapter.`in`.web.response.RefreshResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.SignupResponse
 import org.whiteprint.service.auth.application.port.`in`.LoginCommand
 import org.whiteprint.service.auth.application.port.`in`.LoginResult
+import org.whiteprint.service.auth.application.port.`in`.RefreshResult
 import org.whiteprint.service.auth.application.port.`in`.SignupCommand
 import org.whiteprint.service.auth.application.port.`in`.SignupResult
 
@@ -34,4 +36,9 @@ fun SignupResult.toResponse() = SignupResponse(
     email = this.email.value,
     phoneNumber = this.phoneNumber.value,
     signedUpAt = this.signedUpAt
+)
+
+fun RefreshResult.toResponse() = RefreshResponse(
+    accessToken = this.accessToken.value,
+    refreshToken = this.refreshToken.value,
 )

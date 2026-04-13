@@ -5,11 +5,11 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.MediaType
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
-import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityEntryPointProvider
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.PermittedEntryPointProvider
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.VerifiedUser
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.platform.core.kernel.model.ApiResponse
 import org.whiteprint.platform.core.kernel.serializer.Serializer
@@ -20,7 +20,7 @@ import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
 
 class StatelessSecurityFilter(
     private val serializer: Serializer,
-    private val securityEntryPointProvider: SecurityEntryPointProvider,
+    private val permittedEntryPointProvider: PermittedEntryPointProvider,
     private val accessTokenVerifier: AccessTokenVerifier,
 ): OncePerRequestFilter() {
 
@@ -31,7 +31,7 @@ class StatelessSecurityFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val permitAllMatchers = securityEntryPointProvider.permitAllMatchers()
+        val permitAllMatchers = permittedEntryPointProvider.matchers()
 
         if (permitAllMatchers.any { it.matches(request) }) {
             filterChain.doFilter(request, response)
@@ -40,25 +40,26 @@ class StatelessSecurityFilter(
 
         try {
             val token = extractToken(request)
-
-            require(token != null) {
-                throw SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
-            }
+                ?: throw SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
 
             val claims = accessTokenVerifier.verifyOrThrow(AccessToken(token))
 
-            val authentication = UsernamePasswordAuthenticationToken(
-                claims.subject,
-                null,
-                claims.permissions.map { SimpleGrantedAuthority(it) }
-            )
-            SecurityContextHolder.getContext().authentication = authentication
+            val context = SecurityContextHolder.createEmptyContext().apply {
+                authentication = VerifiedUser(
+                    claims = claims,
+                    authorities = claims.permissions.map { SimpleGrantedAuthority(it) }
+                )
+            }
+            SecurityContextHolder.setContext(context)
 
             filterChain.doFilter(request, response)
         } catch (exception: SecurityException) {
-            returnErrorResponse(response, exception)
+            //returnErrorResponse(response, exception)
         } catch (exception: Exception) {
-            returnErrorResponse(response, SecurityException(policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR, cause = exception))
+//            returnErrorResponse(response, SecurityException(
+//                policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR,
+//                cause = exception
+//            ))
         }
     }
 

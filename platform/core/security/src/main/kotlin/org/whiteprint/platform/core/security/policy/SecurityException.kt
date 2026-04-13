@@ -6,6 +6,4 @@ class SecurityException (
     policy: SecurityPolicy,
     attributes: Map<String, Any> = emptyMap(),
     cause: Throwable? = null
-): StandardException(policy, attributes, cause) {
-
-}
+): StandardException(policy, attributes, cause)

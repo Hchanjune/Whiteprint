@@ -45,20 +45,15 @@ class JwtRefreshTokenVerifier (
             throw SecurityException(SecurityPolicy.TOKEN_INVALID)
         }
 
-        val accessTokenVerificationKey = keyResolver.resolve(header.kid, header.ver)
+        val refreshTokenVerificationKey = keyResolver.resolve(header.kid, header.ver)
 
-        val dataToVerify = "$base64Header.$base64Payload".toByteArray(Charsets.UTF_8)
-
-        val isValid = try {
+        try {
+            val dataToVerify = "$base64Header.$base64Payload".toByteArray(Charsets.UTF_8)
             val signature = java.security.Signature.getInstance("SHA256withRSA")
-            signature.initVerify(accessTokenVerificationKey.verifyKey)
+            signature.initVerify(refreshTokenVerificationKey.verifyKey)
             signature.update(dataToVerify)
             signature.verify(signatureBytes)
-        } catch (e: Exception) {
-            false
-        }
-
-        if (!isValid) {
+        } catch (_: Exception) {
             throw SecurityException(SecurityPolicy.TOKEN_INVALID)
         }
 

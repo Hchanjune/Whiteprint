@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
@@ -17,7 +18,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.whiteprint.platform.adapter.security.verifier.servlet.filter.StatelessSecurityFilter
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccessTokenVerificationKeyResolverImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.RevocationCheckerImpl
-import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityEntryPointProvider
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.PermittedEntryPointProvider
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityAuthenticationEntryPoint
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
@@ -40,8 +42,8 @@ class SecurityVerifierConfiguration(
     fun serializer(): Serializer = JacksonSerializer()
 
     @Bean
-    fun securityEntryPointProvider(): SecurityEntryPointProvider =
-        SecurityEntryPointProvider(verificationProperties)
+    fun securityEntryPointProvider(): PermittedEntryPointProvider =
+        PermittedEntryPointProvider(verificationProperties)
 
     @Bean
     fun revocationChecker(
@@ -75,20 +77,28 @@ class SecurityVerifierConfiguration(
     @Bean
     fun statelessSecurityFilter(
         serializer: Serializer,
-        securityEntryPointProvider: SecurityEntryPointProvider,
+        permittedEntryPointProvider: PermittedEntryPointProvider,
         accessTokenVerifier: AccessTokenVerifier,
     ): StatelessSecurityFilter =
         StatelessSecurityFilter(
             serializer = serializer,
-            securityEntryPointProvider = securityEntryPointProvider,
+            permittedEntryPointProvider = permittedEntryPointProvider,
             accessTokenVerifier = accessTokenVerifier
         )
+
+    @Bean("securityAuthenticationEntryPoint")
+    fun securityAuthenticationEntryPoint(
+        serializer: Serializer,
+    ): AuthenticationEntryPoint
+        = SecurityAuthenticationEntryPoint(serializer)
 
     @Bean
     fun statelessFilterChain(
         http: HttpSecurity,
+        permittedEntryPointProvider: PermittedEntryPointProvider,
         statelessSecurityFilter: StatelessSecurityFilter,
-        corsConfigurationSource: CorsConfigurationSource
+        corsConfigurationSource: CorsConfigurationSource,
+        @Qualifier("securityAuthenticationEntryPoint") authenticationEntryPoint: AuthenticationEntryPoint,
     ): SecurityFilterChain {
         return http
             .csrf { it.disable() }
@@ -99,13 +109,17 @@ class SecurityVerifierConfiguration(
                 auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS Preflight
                 auth.requestMatchers(HttpMethod.HEAD, "/**").denyAll()
                 auth.dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
-                auth.anyRequest().permitAll()
+                permittedEntryPointProvider.matchers().forEach {
+                    auth.requestMatchers(it).permitAll()
+                }
+                auth.anyRequest().authenticated()
             }
             .addFilterBefore(statelessSecurityFilter, UsernamePasswordAuthenticationFilter::class.java)
             .cors { it.configurationSource(corsConfigurationSource) }
             .headers { header ->
                 header.frameOptions { it.sameOrigin() }
             }
+            .exceptionHandling { it.authenticationEntryPoint(authenticationEntryPoint) }
             .build()
     }
 

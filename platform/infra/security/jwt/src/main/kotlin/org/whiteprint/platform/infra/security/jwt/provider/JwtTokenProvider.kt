@@ -20,7 +20,7 @@ import java.time.Instant
 import java.util.Base64
 
 class JwtTokenProvider(
-    private val policy: TokenPolicy,
+    override val policy: TokenPolicy,
     private val accessTokenSigner: AccessTokenSigner,
     private val refreshTokenSigner: RefreshTokenSigner,
     private val serializer: Serializer,

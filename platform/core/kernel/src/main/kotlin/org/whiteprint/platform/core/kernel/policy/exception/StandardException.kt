@@ -7,7 +7,7 @@ abstract class StandardException(
     val attributes: Map<String, Any> = emptyMap(),
     cause: Throwable? = null
 ): RuntimeException(
-    interpolate(policy.message, attributes),
+    interpolate(policy.message, attributes, cause),
     cause
 ) {
 
@@ -19,7 +19,8 @@ abstract class StandardException(
 
         private const val MISSING_VALUE_MARKER = "N/A"
 
-        private fun interpolate(template: String, attributes: Map<String, Any>): String {
+        private fun interpolate(template: String, attributes: Map<String, Any>, cause: Throwable?): String {
+            cause?.printStackTrace()
             if (!template.contains("[[")) return template
             return ATTRIBUTE_PATTERN.replace(template) { match ->
                 val key = match.groupValues[1].trim()

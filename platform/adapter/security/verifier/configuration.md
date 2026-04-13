@@ -16,13 +16,11 @@ adapter:
           - Whiteprint
       
       # 2. Api EntryPonts Policy 엔트리 포인트 (보안 필터 예외 및 인가 정책)
-      entry-points:
-        - path: /api/auth/**
-          method: ANY
-          decision: PERMIT_ALL
-        - path: /api/v1/**
-          method: ANY
-          decision: AUTHENTICATED
+      permitted-entry-points:
+        - path: /api/auth/permit
+          method: POST
+        - path: /api/v1/permit
+          method: POST
 
       # 3. KMS Config (Recommended Implement: infra:kms:vault)
       kms:

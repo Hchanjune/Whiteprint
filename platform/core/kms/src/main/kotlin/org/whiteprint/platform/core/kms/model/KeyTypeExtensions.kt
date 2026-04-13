@@ -13,6 +13,13 @@ fun KeyType.toSignatureAlgorithm(): String = when (this) {
     )
 }
 
+fun KeyType.toKeyAlgorithm(): String = when (this) {
+    KeyType.RSA_2048, KeyType.RSA_4096 -> "RSA"
+    KeyType.EC_P256 -> "EC"
+    KeyType.HMAC_SHA256 -> "HmacSHA256"
+    KeyType.AES_128_GCM, KeyType.AES_256_GCM -> "AES"
+}
+
 fun KeyType.toVaultType(): String = when (this) {
     KeyType.RSA_2048 -> "rsa-2048"
     KeyType.RSA_4096 -> "rsa-4096"

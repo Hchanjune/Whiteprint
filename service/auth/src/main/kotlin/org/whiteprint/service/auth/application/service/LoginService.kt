@@ -67,7 +67,10 @@ class LoginService(
 
             LoginResult(
                 accessToken = accessToken,
+                accessTokenExpiration = tokenProvider.policy.accessTokenPolicy.expirationSeconds,
                 refreshToken = refreshToken,
+                refreshTokenExpiration = tokenProvider.policy.refreshTokenPolicy.expirationSeconds,
+                refreshTokenCookieHeader = tokenProvider.policy.refreshTokenPolicy.cookieHeader,
                 failedAttempts = accountAggregate.failedAttempts,
             ).apply {
                 repository.update(accountAggregate)
@@ -76,7 +79,10 @@ class LoginService(
         } else {
             LoginResult(
                 accessToken = AccessToken("LoginFailure"),
+                accessTokenExpiration = 0,
                 refreshToken = RefreshToken("LoginFailure"),
+                refreshTokenExpiration = 0,
+                refreshTokenCookieHeader = tokenProvider.policy.refreshTokenPolicy.cookieHeader,
                 failedAttempts = accountAggregate.failedAttempts,
             ).apply {
                 repository.update(accountAggregate)

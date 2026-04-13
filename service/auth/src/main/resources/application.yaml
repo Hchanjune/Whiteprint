@@ -9,16 +9,13 @@ adapter:
         key-alias: access-token-sig
         expected-issuers:
           - Whiteprint
-      entry-points:
+      permitted-entry-points:
         - path: /api/v1/auth/login
           method: POST
-          decision: PERMIT
         - path: /api/v1/auth/signup
           method: POST
-          decision: PERMIT
         - path: /api/v1/auth/refresh
           method: POST
-          decision: PERMIT
       kms:
         datasource:
           host: 192.168.0.12
@@ -51,6 +48,7 @@ adapter:
         refresh-token-policy:
           issuer: Sample
           expiration-seconds: 3600
+          cookie-header: refresh
       kms:
         datasource:
           host: 192.168.0.12

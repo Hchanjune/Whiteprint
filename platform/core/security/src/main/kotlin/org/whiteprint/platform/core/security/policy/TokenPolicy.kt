@@ -1,18 +1,19 @@
 package org.whiteprint.platform.core.security.policy
 
 data class TokenPolicy (
-    val accessTokenPolicy: AccessTokenPolicy = AccessTokenPolicy(),
-    val refreshTokenPolicy: RefreshTokenPolicy = RefreshTokenPolicy()
+    val accessTokenPolicy: AccessTokenPolicy,
+    val refreshTokenPolicy: RefreshTokenPolicy
 ) {
 
     data class AccessTokenPolicy(
-        val issuer: String = "Not Implemented",
-        val expirationSeconds: Long = 0L
+        val issuer: String,
+        val expirationSeconds: Long
     )
 
     data class RefreshTokenPolicy (
-        val issuer: String = "Not Implemented",
-        val expirationSeconds: Long = 0L
+        val issuer: String,
+        val expirationSeconds: Long,
+        val cookieHeader: String
     )
 
 }
