@@ -45,7 +45,9 @@ class RefreshService(
             refreshToken = refreshToken,
             refreshTokenExpiration = tokenProvider.policy.refreshTokenPolicy.expirationSeconds,
             refreshTokenCookieHeader = tokenProvider.policy.refreshTokenPolicy.cookieHeader
-        )
+        ).apply {
+            message = "Successfully refreshed tokens"
+        }
     }
 
 }

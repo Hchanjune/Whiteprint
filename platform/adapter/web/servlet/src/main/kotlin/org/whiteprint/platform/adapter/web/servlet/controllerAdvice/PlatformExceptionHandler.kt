@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.whiteprint.platform.adapter.web.servlet.omk.ResponseEntityGenerator
 import org.whiteprint.platform.core.kernel.policy.exception.DomainPolicyException
 import org.whiteprint.platform.core.kernel.policy.exception.DomainValidationException
+import org.whiteprint.platform.core.kernel.policy.exception.StandardException
 
 @RestControllerAdvice
 class PlatformExceptionHandler {
@@ -15,6 +16,10 @@ class PlatformExceptionHandler {
 
     @ExceptionHandler(DomainPolicyException::class)
     fun handleValidationException(exception: DomainPolicyException) =
+        ResponseEntityGenerator.generateFromHandledException(exception)
+
+    @ExceptionHandler(StandardException::class)
+    fun handleStandardException(exception: StandardException) =
         ResponseEntityGenerator.generateFromHandledException(exception)
 
 }
