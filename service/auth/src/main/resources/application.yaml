@@ -9,6 +9,8 @@ adapter:
         key-alias: access-token-sig
         expected-issuers:
           - Whiteprint
+        header-name: Authorization
+        scheme: Bearer
       permitted-entry-points:
         - path: /api/v1/auth/login
           method: POST

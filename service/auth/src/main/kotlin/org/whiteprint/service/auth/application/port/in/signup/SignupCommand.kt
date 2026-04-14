@@ -1,4 +1,4 @@
-package org.whiteprint.service.auth.application.port.`in`
+package org.whiteprint.service.auth.application.port.`in`.signup
 
 data class SignupCommand (
     val username: String,

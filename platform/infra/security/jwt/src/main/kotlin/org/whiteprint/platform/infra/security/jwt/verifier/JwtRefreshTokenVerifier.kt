@@ -1,10 +1,10 @@
 package org.whiteprint.platform.infra.security.jwt.verifier
 
 import org.whiteprint.platform.core.kernel.serializer.Serializer
-import org.whiteprint.platform.core.security.model.AccessTokenHeader
-import org.whiteprint.platform.core.security.model.AccessTokenPayload
 import org.whiteprint.platform.core.security.model.RefreshToken
 import org.whiteprint.platform.core.security.model.RefreshTokenClaims
+import org.whiteprint.platform.core.security.model.RefreshTokenHeader
+import org.whiteprint.platform.core.security.model.RefreshTokenPayload
 import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.platform.core.security.verifier.RefreshTokenVerificationKeyResolver
@@ -40,7 +40,7 @@ class JwtRefreshTokenVerifier (
         val signatureBytes = decoder.decode(base64Signature)
 
         val header = try {
-            serializer.deserializeFromBytes(headerBytes, AccessTokenHeader::class.java)
+            serializer.deserializeFromBytes(headerBytes, RefreshTokenHeader::class.java)
         } catch (_: Exception) {
             throw SecurityException(SecurityPolicy.TOKEN_INVALID)
         }
@@ -59,7 +59,7 @@ class JwtRefreshTokenVerifier (
 
 
         val payload = try {
-            serializer.deserializeFromBytes(payloadBytes, AccessTokenPayload::class.java)
+            serializer.deserializeFromBytes(payloadBytes, RefreshTokenPayload::class.java)
         } catch (_: Exception) {
             throw SecurityException(SecurityPolicy.TOKEN_INVALID)
         }

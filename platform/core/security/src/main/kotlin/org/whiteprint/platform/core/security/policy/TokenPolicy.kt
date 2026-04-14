@@ -7,7 +7,7 @@ data class TokenPolicy (
 
     data class AccessTokenPolicy(
         val issuer: String,
-        val expirationSeconds: Long
+        val expirationSeconds: Long,
     )
 
     data class RefreshTokenPolicy (

@@ -1,4 +1,4 @@
-package org.whiteprint.service.auth.application.port.`in`
+package org.whiteprint.service.auth.application.port.`in`.signup
 
 import org.whiteprint.service.auth.domain.accounts.vo.Email
 import org.whiteprint.service.auth.domain.accounts.vo.PhoneNumber

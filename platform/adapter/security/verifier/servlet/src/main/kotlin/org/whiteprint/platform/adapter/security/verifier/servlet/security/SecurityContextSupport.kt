@@ -9,8 +9,6 @@ object SecurityContextSupport {
     fun getCurrentClaims(): AccessTokenClaims {
         val auth = SecurityContextHolder.getContext().authentication
 
-        println(auth)
-
         if (auth is VerifiedUser) {
             return auth.claims
         }

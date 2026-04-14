@@ -1,4 +1,4 @@
-package org.whiteprint.service.auth.application.port.`in`
+package org.whiteprint.service.auth.application.port.`in`.refresh
 
 import io.github.hchanjune.omk.core.OperationResult
 

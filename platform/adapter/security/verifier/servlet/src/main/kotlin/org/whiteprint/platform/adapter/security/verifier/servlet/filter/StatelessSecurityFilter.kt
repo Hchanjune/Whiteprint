@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.filter
 
+import com.google.common.net.HttpHeaders
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -63,10 +64,18 @@ class StatelessSecurityFilter(
     }
 
     private fun extractToken(request: HttpServletRequest): String? {
-        val header = request.getHeader("Authorization") ?: return null
-        if (header.startsWith("Bearer ", ignoreCase = true)) {
-            return header.substring(7).trim().takeIf { it.isNotBlank() }
+        val headerValue = request.getHeader(accessTokenVerifier.headerName) ?: return null
+
+        val scheme = accessTokenVerifier.scheme
+        val prefix = "$scheme "
+
+        if (headerValue.startsWith(prefix, ignoreCase = true)) {
+            return headerValue
+                .substring(prefix.length)
+                .trim()
+                .takeIf { it.isNotBlank() }
         }
+
         return null
     }
 

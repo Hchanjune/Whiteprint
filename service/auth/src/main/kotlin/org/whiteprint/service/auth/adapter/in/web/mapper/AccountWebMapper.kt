@@ -3,13 +3,15 @@ package org.whiteprint.service.auth.adapter.`in`.web.mapper
 import org.whiteprint.service.auth.adapter.`in`.web.request.LoginRequest
 import org.whiteprint.service.auth.adapter.`in`.web.request.SignupRequest
 import org.whiteprint.service.auth.adapter.`in`.web.response.LoginResponse
+import org.whiteprint.service.auth.adapter.`in`.web.response.LogoutResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.RefreshResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.SignupResponse
-import org.whiteprint.service.auth.application.port.`in`.LoginCommand
-import org.whiteprint.service.auth.application.port.`in`.LoginResult
-import org.whiteprint.service.auth.application.port.`in`.RefreshResult
-import org.whiteprint.service.auth.application.port.`in`.SignupCommand
-import org.whiteprint.service.auth.application.port.`in`.SignupResult
+import org.whiteprint.service.auth.application.port.`in`.login.LoginCommand
+import org.whiteprint.service.auth.application.port.`in`.login.LoginResult
+import org.whiteprint.service.auth.application.port.`in`.logout.LogoutResult
+import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshResult
+import org.whiteprint.service.auth.application.port.`in`.signup.SignupCommand
+import org.whiteprint.service.auth.application.port.`in`.signup.SignupResult
 
 fun LoginRequest.toCommand() = LoginCommand(
     identifier = this.identifier,
@@ -41,4 +43,8 @@ fun SignupResult.toResponse() = SignupResponse(
 fun RefreshResult.toResponse() = RefreshResponse(
     accessToken = this.accessToken.value,
     refreshToken = this.refreshToken.value,
+)
+
+fun LogoutResult.toResponse() = LogoutResponse(
+    result = this.result
 )

@@ -7,9 +7,9 @@ import io.github.hchanjune.omk.webmvc.Operations
 import jakarta.transaction.Transactional
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.whiteprint.service.auth.application.port.`in`.SignupCommand
-import org.whiteprint.service.auth.application.port.`in`.SignupResult
-import org.whiteprint.service.auth.application.port.`in`.SignupUseCase
+import org.whiteprint.service.auth.application.port.`in`.signup.SignupCommand
+import org.whiteprint.service.auth.application.port.`in`.signup.SignupResult
+import org.whiteprint.service.auth.application.port.`in`.signup.SignupUseCase
 import org.whiteprint.service.auth.application.port.out.AccountRepository
 import org.whiteprint.service.auth.domain.accounts.aggregate.AccountAggregate
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicy

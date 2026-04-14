@@ -1,9 +1,9 @@
 package org.whiteprint.service.auth.adapter.`in`.web
 
 import io.github.hchanjune.omk.core.annotations.ManagedController
+import io.github.hchanjune.omk.core.annotations.ManagedOperation
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -19,15 +19,19 @@ import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.service.auth.adapter.`in`.web.mapper.toCommand
 import org.whiteprint.service.auth.adapter.`in`.web.mapper.toResponse
 import org.whiteprint.service.auth.adapter.`in`.web.request.LoginRequest
+import org.whiteprint.service.auth.adapter.`in`.web.request.LogoutRequest
 import org.whiteprint.service.auth.adapter.`in`.web.request.RefreshRequest
 import org.whiteprint.service.auth.adapter.`in`.web.request.SignupRequest
 import org.whiteprint.service.auth.adapter.`in`.web.response.LoginResponse
+import org.whiteprint.service.auth.adapter.`in`.web.response.LogoutResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.RefreshResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.SignupResponse
-import org.whiteprint.service.auth.application.port.`in`.LoginUseCase
-import org.whiteprint.service.auth.application.port.`in`.RefreshCommand
-import org.whiteprint.service.auth.application.port.`in`.RefreshUseCase
-import org.whiteprint.service.auth.application.port.`in`.SignupUseCase
+import org.whiteprint.service.auth.application.port.`in`.login.LoginUseCase
+import org.whiteprint.service.auth.application.port.`in`.logout.LogoutCommand
+import org.whiteprint.service.auth.application.port.`in`.logout.LogoutUseCase
+import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshCommand
+import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshUseCase
+import org.whiteprint.service.auth.application.port.`in`.signup.SignupUseCase
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicy
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicyException
 import java.time.Duration
@@ -38,6 +42,7 @@ import java.time.Duration
 class AuthRestController(
     private val signupUserCase: SignupUseCase,
     private val loginUseCase: LoginUseCase,
+    private val logoutUseCase: LogoutUseCase,
     private val refreshUseCase: RefreshUseCase
 ) {
 
@@ -60,7 +65,7 @@ class AuthRestController(
             .secure(true)
             .httpOnly(true)
             .sameSite("None")
-            .path("/api/v1/auth/refresh")
+            .path("/api/v1/auth/")
             .build()
         return ResponseEntityGenerator.generateFromOperation(
             cookie = responseCookie,
@@ -72,8 +77,34 @@ class AuthRestController(
 
     @PostMapping("/logout")
     fun logout(
-    ) {
-
+        @CookieValue("refresh") cookieRefreshToken: String?,
+        @RequestBody(required = false) logoutRequest: LogoutRequest?,
+    ): ResponseEntity<ApiResponse<LogoutResponse>> {
+        val claims = SecurityContextSupport.getCurrentClaims()
+        println(claims)
+        val refreshToken = cookieRefreshToken
+            ?: logoutRequest?.refreshToken
+            ?: throw SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
+        val command = LogoutCommand(
+            accessTokenId = claims.tokenId,
+            accessTokenExpiresAt = claims.expiresAt,
+            subject = claims.subject,
+            refreshToken = RefreshToken(refreshToken),
+        )
+        val operation = logoutUseCase.handle(command)
+        val expiredCookie = ResponseCookie.from("refresh", "")
+            .maxAge(0)
+            .secure(true)
+            .httpOnly(true)
+            .path("/")
+            .sameSite("None")
+            .build()
+        return ResponseEntityGenerator.generateFromOperation(
+            cookie = expiredCookie,
+            operationResult = operation
+        ) {
+            operation.data.toResponse()
+        }
     }
 
     @PostMapping("/signup")
@@ -103,7 +134,7 @@ class AuthRestController(
             .maxAge(operation.data.refreshTokenExpiration)
             .secure(true)
             .httpOnly(true)
-            .path("/api/v1/auth/refresh")
+            .path("/api/v1/auth/")
             .sameSite("None")
             .build()
         return ResponseEntityGenerator.generateFromOperation(
@@ -114,6 +145,7 @@ class AuthRestController(
         }
     }
 
+    @ManagedOperation("validate")
     @PostMapping("/validate")
     fun validate(): ResponseEntity<ApiResponse<AccessTokenClaims>> {
         return ResponseEntityGenerator.generateInstantData(

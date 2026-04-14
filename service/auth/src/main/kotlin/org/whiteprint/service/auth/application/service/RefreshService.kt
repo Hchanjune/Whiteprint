@@ -9,9 +9,9 @@ import org.whiteprint.platform.core.security.model.AccessTokenProfile
 import org.whiteprint.platform.core.security.model.RefreshTokenProfile
 import org.whiteprint.platform.core.security.provider.TokenProvider
 import org.whiteprint.platform.core.security.verifier.RefreshTokenVerifier
-import org.whiteprint.service.auth.application.port.`in`.RefreshCommand
-import org.whiteprint.service.auth.application.port.`in`.RefreshResult
-import org.whiteprint.service.auth.application.port.`in`.RefreshUseCase
+import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshCommand
+import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshResult
+import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshUseCase
 
 @ManagedService
 @Service

@@ -1,4 +1,4 @@
-package org.whiteprint.service.auth.application.port.`in`
+package org.whiteprint.service.auth.application.port.`in`.login
 
 import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.model.RefreshToken

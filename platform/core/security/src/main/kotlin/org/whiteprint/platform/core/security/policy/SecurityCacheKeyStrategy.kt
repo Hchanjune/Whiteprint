@@ -7,7 +7,7 @@ interface SecurityCacheKeyStrategy {
         return "${p}security:revocation:token:$tokenId"
     }
 
-    fun revocationUser(userId: String, prefix: String = ""): String {
+    fun revocationAccount(userId: String, prefix: String = ""): String {
         val p = prefix.takeIf { it.isNotBlank() }?.let { "$it:" } ?: ""
         return "${p}security:revocation:user:$userId"
     }

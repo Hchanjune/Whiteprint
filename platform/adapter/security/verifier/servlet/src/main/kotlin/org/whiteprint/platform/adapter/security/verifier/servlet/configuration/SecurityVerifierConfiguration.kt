@@ -22,10 +22,12 @@ import org.whiteprint.platform.adapter.security.verifier.servlet.security.Access
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.RevocationCheckerImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.PermittedEntryPointProvider
 import org.whiteprint.platform.adapter.security.verifier.servlet.filter.SecurityAuthenticationEntryPoint
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.TokenRevokerImpl
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
 import org.whiteprint.platform.core.security.policy.SecurityCacheKeyStrategy
+import org.whiteprint.platform.core.security.provider.TokenRevoker
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
 import org.whiteprint.platform.core.security.verifier.RevocationChecker
@@ -48,11 +50,21 @@ class SecurityVerifierConfiguration(
         PermittedEntryPointProvider(verificationProperties)
 
     @Bean
-    fun revocationChecker(
+    fun revoker(
         @Qualifier("securityCacheValueOperations") securityCache: ValueOperations
+    ): TokenRevoker = TokenRevokerImpl(
+        cache = securityCache,
+        revocationKeyStrategy = object : SecurityCacheKeyStrategy {},
+        servicePrefix = verificationCacheProperties.cachePrefix
+    )
+
+    @Bean
+    fun revocationChecker(
+        @Qualifier("securityCacheValueOperations")
+        securityCache: ValueOperations
     ): RevocationChecker = RevocationCheckerImpl(
         cache = securityCache,
-        keyStrategy = object : SecurityCacheKeyStrategy {},
+        revocationKeyStrategy = object : SecurityCacheKeyStrategy {},
         servicePrefix = verificationCacheProperties.cachePrefix
     )
 
@@ -71,6 +83,8 @@ class SecurityVerifierConfiguration(
         revocationChecker: RevocationChecker
     ): AccessTokenVerifier
         = JwtAccessTokenVerifier(
+        headerName = verificationProperties.policy.headerName,
+        scheme = verificationProperties.policy.scheme,
         serializer = serializer,
         keyResolver = accessTokenKeyResolver,
         revocationChecker = revocationChecker,

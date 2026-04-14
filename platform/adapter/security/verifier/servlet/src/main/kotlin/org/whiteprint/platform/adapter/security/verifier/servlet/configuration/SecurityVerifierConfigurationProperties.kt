@@ -11,7 +11,9 @@ data class SecurityVerifierConfigurationProperties(
 
     data class AccessTokenVerifierPolicy(
         var keyAlias: String = "access-token-sig",
-        var expectedIssuers: List<String> = listOf("Whiteprint", "Sample-Auth")
+        var expectedIssuers: List<String> = listOf("Whiteprint", "Sample-Auth"),
+        var headerName: String = "Authorization",
+        var scheme: String = "Bearer",
     )
 
     data class Rule(

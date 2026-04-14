@@ -14,9 +14,11 @@ import java.time.Instant
 import java.util.Base64
 
 class JwtAccessTokenVerifier (
+    override val headerName: String,
+    override val scheme: String,
     private val serializer: Serializer,
     private val keyResolver: AccessTokenVerificationKeyResolver,
-    private val revocationChecker: RevocationChecker
+    private val revocationChecker: RevocationChecker,
 ): AccessTokenVerifier {
 
     private companion object {

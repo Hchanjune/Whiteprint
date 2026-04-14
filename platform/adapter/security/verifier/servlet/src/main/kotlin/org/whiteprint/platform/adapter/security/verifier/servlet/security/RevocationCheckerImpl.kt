@@ -13,7 +13,7 @@ import org.whiteprint.platform.core.security.verifier.RevocationChecker
 
 class RevocationCheckerImpl(
     private val cache: ValueOperations,
-    private val keyStrategy: SecurityCacheKeyStrategy,
+    private val revocationKeyStrategy: SecurityCacheKeyStrategy,
     private val servicePrefix: String = ""
 ): RevocationChecker {
 
@@ -23,10 +23,10 @@ class RevocationCheckerImpl(
 
     private fun check(claims: TokenClaims) {
         // TokenKey
-        verifyKey(keyStrategy.revocationToken(claims.tokenId, servicePrefix))
+        verifyKey(revocationKeyStrategy.revocationToken(claims.tokenId, servicePrefix))
 
         // UserKey
-        verifyKey(keyStrategy.revocationUser(claims.subject, servicePrefix))
+        verifyKey(revocationKeyStrategy.revocationAccount(claims.subject, servicePrefix))
     }
 
     private fun verifyKey(key: String) {

@@ -41,7 +41,7 @@ class SecurityProviderConfiguration(
             policy = TokenPolicy(
                 accessTokenPolicy = TokenPolicy.AccessTokenPolicy(
                     issuer = properties.accessTokenPolicy.issuer,
-                    expirationSeconds = properties.accessTokenPolicy.expirationSeconds
+                    expirationSeconds = properties.accessTokenPolicy.expirationSeconds,
                 ),
                 refreshTokenPolicy = TokenPolicy.RefreshTokenPolicy(
                     issuer = properties.refreshTokenPolicy.issuer,
