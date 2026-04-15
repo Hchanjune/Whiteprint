@@ -1,6 +1,11 @@
 package org.whiteprint.service.auth.adapter.`in`.web.mapper
 
+import org.whiteprint.platform.core.security.model.AccessTokenClaims
+import org.whiteprint.platform.core.security.model.RefreshToken
+import org.whiteprint.platform.core.security.policy.SecurityException
+import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.service.auth.adapter.`in`.web.request.LoginRequest
+import org.whiteprint.service.auth.adapter.`in`.web.request.LogoutRequest
 import org.whiteprint.service.auth.adapter.`in`.web.request.SignupRequest
 import org.whiteprint.service.auth.adapter.`in`.web.response.LoginResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.LogoutResponse
@@ -8,6 +13,7 @@ import org.whiteprint.service.auth.adapter.`in`.web.response.RefreshResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.SignupResponse
 import org.whiteprint.service.auth.application.port.`in`.login.LoginCommand
 import org.whiteprint.service.auth.application.port.`in`.login.LoginResult
+import org.whiteprint.service.auth.application.port.`in`.logout.LogoutCommand
 import org.whiteprint.service.auth.application.port.`in`.logout.LogoutResult
 import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshResult
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupCommand
@@ -44,6 +50,30 @@ fun RefreshResult.toResponse() = RefreshResponse(
     accessToken = this.accessToken.value,
     refreshToken = this.refreshToken.value,
 )
+
+fun LogoutRequest.toCommand(
+    claims: AccessTokenClaims,
+    cookieRefreshToken: String?,
+): LogoutCommand = when (logoutScope) {
+    LogoutRequest.Scope.CURRENT_DEVICE -> {
+        val token = cookieRefreshToken
+            ?: refreshToken
+            ?: throw SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
+        LogoutCommand.CurrentDevice(
+            accessTokenId = claims.tokenId,
+            accessTokenExpiresAt = claims.expiresAt,
+            subject = claims.subject,
+            refreshToken = RefreshToken(token),
+        )
+    }
+    LogoutRequest.Scope.ALL_DEVICES -> {
+        LogoutCommand.AllDevices(
+            accessTokenId = claims.tokenId,
+            accessTokenExpiresAt = claims.expiresAt,
+            subject = claims.subject,
+        )
+    }
+}
 
 fun LogoutResult.toResponse() = LogoutResponse(
     result = this.result

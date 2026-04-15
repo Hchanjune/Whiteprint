@@ -4,12 +4,14 @@ import org.whiteprint.platform.core.cache.model.CacheKey
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.security.policy.RevocationReason
 import org.whiteprint.platform.core.security.policy.SecurityCacheKeyStrategy
-import org.whiteprint.platform.core.security.provider.TokenRevoker
+import org.whiteprint.platform.core.security.verifier.RevocationValue
+import org.whiteprint.platform.core.security.verifier.TokenRevoker
 import java.time.Duration
+import java.time.Instant
 
 class TokenRevokerImpl(
     private val cache: ValueOperations,
-    private val revocationKeyStrategy: SecurityCacheKeyStrategy,
+    private val keyStrategy: SecurityCacheKeyStrategy,
     private val servicePrefix: String = ""
 ): TokenRevoker {
 
@@ -18,9 +20,10 @@ class TokenRevokerImpl(
         reason: RevocationReason,
         duration: Duration
     ) {
+        val value = RevocationValue.Token(reason).serialize()
         cache.setWithTtl(
-            key = CacheKey(revocationKeyStrategy.revocationToken(tokenId, servicePrefix)),
-            value = reason.name,
+            key = CacheKey(keyStrategy.revocationToken(tokenId, servicePrefix)),
+            value = value,
             ttl = duration
         )
     }
@@ -30,9 +33,10 @@ class TokenRevokerImpl(
         reason: RevocationReason,
         duration: Duration
     ) {
+        val value = RevocationValue.Account(reason, Instant.now().toEpochMilli()).serialize()
         cache.setWithTtl(
-            key = CacheKey(revocationKeyStrategy.revocationAccount(subject, servicePrefix)),
-            value = reason.name,
+            key = CacheKey(keyStrategy.revocationAccount(subject, servicePrefix)),
+            value = value,
             ttl = duration
         )
     }

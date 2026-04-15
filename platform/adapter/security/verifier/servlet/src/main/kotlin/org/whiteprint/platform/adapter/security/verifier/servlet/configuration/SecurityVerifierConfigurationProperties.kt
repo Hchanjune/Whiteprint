@@ -14,6 +14,14 @@ data class SecurityVerifierConfigurationProperties(
         var expectedIssuers: List<String> = listOf("Whiteprint", "Sample-Auth"),
         var headerName: String = "Authorization",
         var scheme: String = "Bearer",
+        var revocation: Revocation = Revocation()
+    )
+
+    data class Revocation(
+        /**
+         * RefreshToken Exp Recommended Longer, The Safer
+         */
+        var accountRevocationMillis: Long = 604800000,
     )
 
     data class Rule(

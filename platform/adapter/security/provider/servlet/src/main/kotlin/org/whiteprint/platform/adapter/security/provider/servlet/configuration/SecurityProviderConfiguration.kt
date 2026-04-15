@@ -66,12 +66,12 @@ class SecurityProviderConfiguration(
     fun refreshTokenVerifier(
         serializer: Serializer,
         @Qualifier("providerRefreshTokenVerificationKeyResolver") refreshTokenVerificationKeyResolver: RefreshTokenVerificationKeyResolver,
-        revocationChecker: RevocationChecker
+        revocationChecker: RevocationChecker,
     ): RefreshTokenVerifier =
             JwtRefreshTokenVerifier(
                 serializer = serializer,
                 keyResolver = refreshTokenVerificationKeyResolver,
-                revocationChecker = revocationChecker
+                revocationChecker = revocationChecker,
             )
 
 }

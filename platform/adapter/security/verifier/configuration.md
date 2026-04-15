@@ -16,6 +16,8 @@ adapter:
           - Whiteprint
         header-name: Authorization
         scheme: Bearer
+        revocation:
+          account-revocation-millis: 604800000
       
       # 2. Api EntryPonts Policy 엔트리 포인트 (보안 필터 예외 및 인가 정책)
       permitted-entry-points:

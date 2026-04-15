@@ -22,23 +22,27 @@ import org.whiteprint.platform.adapter.security.verifier.servlet.security.Access
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.RevocationCheckerImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.PermittedEntryPointProvider
 import org.whiteprint.platform.adapter.security.verifier.servlet.filter.SecurityAuthenticationEntryPoint
+import org.whiteprint.platform.adapter.security.verifier.servlet.security.AccountTokenStatusManagerImpl
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.TokenRevokerImpl
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
+import org.whiteprint.platform.core.security.policy.RevocationPolicy
 import org.whiteprint.platform.core.security.policy.SecurityCacheKeyStrategy
-import org.whiteprint.platform.core.security.provider.TokenRevoker
+import org.whiteprint.platform.core.security.verifier.TokenRevoker
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerificationKeyResolver
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
+import org.whiteprint.platform.core.security.verifier.AccountTokenStatusManager
 import org.whiteprint.platform.core.security.verifier.RevocationChecker
 import org.whiteprint.platform.infra.security.jwt.verifier.JwtAccessTokenVerifier
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
+import java.time.Duration
 
 @Configuration
 @EnableWebSecurity
 class SecurityVerifierConfiguration(
     private val verificationProperties: SecurityVerifierConfigurationProperties,
-    private val verificationCacheProperties: SecurityCacheConfigurationProperties
+    private val verificationCacheProperties: SecurityCacheConfigurationProperties,
 ) {
 
     @Bean
@@ -50,21 +54,44 @@ class SecurityVerifierConfiguration(
         PermittedEntryPointProvider(verificationProperties)
 
     @Bean
+    fun revocationPolicy(): RevocationPolicy =
+        RevocationPolicy(
+            accountRevocationDuration = Duration.ofMillis(verificationProperties.policy.revocation.accountRevocationMillis)
+        )
+
+    @Bean fun securityCacheKeyStrategy(): SecurityCacheKeyStrategy =
+            object : SecurityCacheKeyStrategy {}
+
+    @Bean
+    fun accountTokenStatusManager(
+        @Qualifier("securityCacheValueOperations") securityCache: ValueOperations,
+        securityCacheKeyStrategy: SecurityCacheKeyStrategy,
+    ): AccountTokenStatusManager =
+        AccountTokenStatusManagerImpl(
+            cache = securityCache,
+            keyStrategy = securityCacheKeyStrategy,
+            servicePrefix = verificationCacheProperties.cachePrefix,
+            forceUpdateExpiration = Duration.ofMillis(verificationProperties.policy.revocation.accountRevocationMillis)
+        )
+
+    @Bean
     fun revoker(
-        @Qualifier("securityCacheValueOperations") securityCache: ValueOperations
+        @Qualifier("securityCacheValueOperations") securityCache: ValueOperations,
+        securityCacheKeyStrategy: SecurityCacheKeyStrategy,
     ): TokenRevoker = TokenRevokerImpl(
         cache = securityCache,
-        revocationKeyStrategy = object : SecurityCacheKeyStrategy {},
+        keyStrategy = securityCacheKeyStrategy,
         servicePrefix = verificationCacheProperties.cachePrefix
     )
 
     @Bean
     fun revocationChecker(
         @Qualifier("securityCacheValueOperations")
-        securityCache: ValueOperations
+        securityCache: ValueOperations,
+        securityCacheKeyStrategy: SecurityCacheKeyStrategy,
     ): RevocationChecker = RevocationCheckerImpl(
         cache = securityCache,
-        revocationKeyStrategy = object : SecurityCacheKeyStrategy {},
+        revocationKeyStrategy = securityCacheKeyStrategy,
         servicePrefix = verificationCacheProperties.cachePrefix
     )
 
@@ -128,7 +155,7 @@ class SecurityVerifierConfiguration(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS Preflight
-                auth.requestMatchers(HttpMethod.HEAD, "/**").denyAll()
+                //auth.requestMatchers(HttpMethod.HEAD, "/**").denyAll()
                 auth.dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                 permittedEntryPointProvider.matchers().forEach {
                     auth.requestMatchers(it).permitAll()
@@ -149,7 +176,7 @@ class SecurityVerifierConfiguration(
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
             allowedOriginPatterns = listOf("*")
-            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS")
             allowedHeaders = listOf("Authorization", "Content-Type", "traceparent")
         }
         val source = UrlBasedCorsConfigurationSource()

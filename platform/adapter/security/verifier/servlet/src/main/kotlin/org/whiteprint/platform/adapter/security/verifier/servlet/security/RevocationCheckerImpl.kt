@@ -6,10 +6,11 @@ import org.whiteprint.platform.core.cache.operation.get
 import org.whiteprint.platform.core.security.model.AccessTokenClaims
 import org.whiteprint.platform.core.security.model.RefreshTokenClaims
 import org.whiteprint.platform.core.security.model.TokenClaims
-import org.whiteprint.platform.core.security.policy.RevocationReason
 import org.whiteprint.platform.core.security.policy.SecurityCacheKeyStrategy
 import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.verifier.RevocationChecker
+import org.whiteprint.platform.core.security.verifier.RevocationValue
+import java.time.Instant
 
 class RevocationCheckerImpl(
     private val cache: ValueOperations,
@@ -22,17 +23,23 @@ class RevocationCheckerImpl(
     override fun assertNotRevoked(claims: RefreshTokenClaims) = check(claims)
 
     private fun check(claims: TokenClaims) {
-        // TokenKey
-        verifyKey(revocationKeyStrategy.revocationToken(claims.tokenId, servicePrefix))
-
-        // UserKey
-        verifyKey(revocationKeyStrategy.revocationAccount(claims.subject, servicePrefix))
+        verifyTokenKey(revocationKeyStrategy.revocationToken(claims.tokenId, servicePrefix))
+        verifyAccountKey(revocationKeyStrategy.revocationAccount(claims.subject, servicePrefix), claims.issuedAt)
     }
 
-    private fun verifyKey(key: String) {
+    private fun verifyTokenKey(key: String) {
         cache.get<String>(CacheKey(key))?.let { value ->
-            val reason = RevocationReason.valueOf(value)
-            throw SecurityException(policy = reason.toPolicy())
+            val revocation = RevocationValue.deserializeToken(value)
+            throw SecurityException(policy = revocation.reason.toPolicy())
+        }
+    }
+
+    private fun verifyAccountKey(key: String, issuedAt: Instant) {
+        cache.get<String>(CacheKey(key))?.let { value ->
+            val revocation = RevocationValue.deserializeAccount(value)
+            if (issuedAt.toEpochMilli() < revocation.revokedAt) {
+                throw SecurityException(policy = revocation.reason.toPolicy())
+            }
         }
     }
 

@@ -16,7 +16,7 @@ import java.util.Base64
 class JwtRefreshTokenVerifier (
     private val serializer: Serializer,
     private val keyResolver: RefreshTokenVerificationKeyResolver,
-    private val revocationChecker: RevocationChecker
+    private val revocationChecker: RevocationChecker,
 ): RefreshTokenVerifier {
 
     private companion object {
@@ -90,6 +90,7 @@ class JwtRefreshTokenVerifier (
                 audience = payload.aud,
                 issuedAt = Instant.ofEpochSecond(payload.iat),
                 expiresAt = Instant.ofEpochSecond(payload.exp),
+                permissions = payload.prm
             )
         } catch (_: Exception) {
             throw SecurityException(SecurityPolicy.TOKEN_CLAIM_INVALID)

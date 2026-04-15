@@ -7,4 +7,5 @@ interface TokenPayload {
     val aud: Set<String>
     val iat: Long
     val exp: Long
+    val prm: Set<String>
 }

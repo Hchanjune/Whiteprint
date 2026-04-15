@@ -7,9 +7,14 @@ interface SecurityCacheKeyStrategy {
         return "${p}security:revocation:token:$tokenId"
     }
 
-    fun revocationAccount(userId: String, prefix: String = ""): String {
+    fun revocationAccount(subject: String, prefix: String = ""): String {
         val p = prefix.takeIf { it.isNotBlank() }?.let { "$it:" } ?: ""
-        return "${p}security:revocation:user:$userId"
+        return "${p}security:revocation:user:$subject"
+    }
+
+    fun forceUpdate(subject: String, prefix: String = ""): String {
+        val p = prefix.takeIf { it.isNotBlank() }?.let { "$it:" } ?: ""
+        return "${p}security:force-update:$subject"
     }
 
     fun refreshToken(userId: String, prefix: String = ""): String {

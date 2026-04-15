@@ -9,5 +9,5 @@ data class AccessTokenClaims(
     override val audience: Set<String>,
     override val issuedAt: Instant,
     override val expiresAt: Instant,
-    val permissions: Set<String>,
+    override val permissions: Set<String>,
 ): TokenClaims

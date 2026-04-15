@@ -56,6 +56,21 @@ data class ApiResponse<out T>(
             )
         }
 
+        fun clientError(
+            id: String?,
+            message: String,
+            traceId: String?,
+        ): ApiResponse<Any?> {
+            return ApiResponse(
+                id = id?: "-",
+                isSuccess = false,
+                message = message,
+                data = null,
+                timestamp = Instant.now(),
+                traceId = traceId?: "-",
+            )
+        }
+
     }
 
 

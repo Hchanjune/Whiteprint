@@ -6,5 +6,6 @@ data class RefreshTokenPayload(
     override val iss: String,
     override val aud: Set<String>,
     override val iat: Long,
-    override val exp: Long
+    override val exp: Long,
+    override val prm: Set<String>
 ): TokenPayload

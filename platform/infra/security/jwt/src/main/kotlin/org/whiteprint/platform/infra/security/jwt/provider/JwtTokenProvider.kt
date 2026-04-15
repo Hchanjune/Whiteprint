@@ -82,6 +82,7 @@ class JwtTokenProvider(
             aud = profile.audience,
             iat = now.epochSecond,
             exp = expiresAt.epochSecond,
+            prm = emptySet()
         )
 
         val headerBytes = serializer.serializeToBytes(header)

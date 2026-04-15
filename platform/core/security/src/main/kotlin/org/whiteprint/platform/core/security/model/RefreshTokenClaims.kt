@@ -9,4 +9,5 @@ data class RefreshTokenClaims(
     override val audience: Set<String>,
     override val issuedAt: Instant,
     override val expiresAt: Instant,
+    override val permissions: Set<String>,
 ): TokenClaims

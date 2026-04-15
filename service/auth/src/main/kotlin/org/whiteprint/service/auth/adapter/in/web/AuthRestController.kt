@@ -27,7 +27,6 @@ import org.whiteprint.service.auth.adapter.`in`.web.response.LogoutResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.RefreshResponse
 import org.whiteprint.service.auth.adapter.`in`.web.response.SignupResponse
 import org.whiteprint.service.auth.application.port.`in`.login.LoginUseCase
-import org.whiteprint.service.auth.application.port.`in`.logout.LogoutCommand
 import org.whiteprint.service.auth.application.port.`in`.logout.LogoutUseCase
 import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshCommand
 import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshUseCase
@@ -80,17 +79,12 @@ class AuthRestController(
         @CookieValue("refresh") cookieRefreshToken: String?,
         @RequestBody(required = false) logoutRequest: LogoutRequest?,
     ): ResponseEntity<ApiResponse<LogoutResponse>> {
-        val claims = SecurityContextSupport.getCurrentClaims()
-        println(claims)
-        val refreshToken = cookieRefreshToken
-            ?: logoutRequest?.refreshToken
-            ?: throw SecurityException(SecurityPolicy.TOKEN_NOT_FOUND)
-        val command = LogoutCommand(
-            accessTokenId = claims.tokenId,
-            accessTokenExpiresAt = claims.expiresAt,
-            subject = claims.subject,
-            refreshToken = RefreshToken(refreshToken),
+        val request = logoutRequest ?: LogoutRequest(
+            logoutScope = LogoutRequest.Scope.CURRENT_DEVICE,
+            refreshToken = null
         )
+        val claims = SecurityContextSupport.getCurrentClaims()
+        val command = request.toCommand(claims, cookieRefreshToken)
         val operation = logoutUseCase.handle(command)
         val expiredCookie = ResponseCookie.from("refresh", "")
             .maxAge(0)

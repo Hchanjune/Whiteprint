@@ -9,4 +9,5 @@ interface TokenClaims {
     val audience: Set<String>
     val issuedAt: Instant
     val expiresAt: Instant
+    val permissions: Set<String>
 }

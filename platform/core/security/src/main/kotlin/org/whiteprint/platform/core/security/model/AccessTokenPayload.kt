@@ -7,5 +7,5 @@ data class AccessTokenPayload(
     override val aud: Set<String>,
     override val iat: Long,
     override val exp: Long,
-    val prm: Set<String>
+    override val prm: Set<String>
 ): TokenPayload
