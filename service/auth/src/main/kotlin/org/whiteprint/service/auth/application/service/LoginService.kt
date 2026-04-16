@@ -15,7 +15,7 @@ import org.whiteprint.platform.core.security.provider.TokenProvider
 import org.whiteprint.service.auth.application.port.`in`.login.LoginCommand
 import org.whiteprint.service.auth.application.port.`in`.login.LoginResult
 import org.whiteprint.service.auth.application.port.`in`.login.LoginUseCase
-import org.whiteprint.service.auth.application.port.out.AccountRepository
+import org.whiteprint.service.auth.application.port.out.persistence.AccountRepository
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicy
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicyException
 import org.whiteprint.service.auth.domain.accounts.vo.AccountIdentifier

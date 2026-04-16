@@ -3,6 +3,8 @@ package org.whiteprint.service.auth.domain.accounts.aggregate
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.whiteprint.platform.core.domain.model.aggregate.Aggregate
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
+import org.whiteprint.platform.core.messaging.model.Event
+import org.whiteprint.platform.core.messaging.outbox.EventRecorder
 import org.whiteprint.service.auth.domain.accounts.model.Account
 import org.whiteprint.service.auth.domain.accounts.model.Credential
 import org.whiteprint.service.auth.domain.accounts.vo.AccountLock
@@ -17,8 +19,16 @@ import java.time.Instant
 
 class AccountAggregate (
     private val account: Account,
-    private val credential: Credential
-): Aggregate<Account>() {
+    private val credential: Credential,
+): Aggregate<Account>(), EventRecorder {
+
+    private val _events: MutableList<Event> = mutableListOf()
+    override fun record(event: Event) { _events.add(event) }
+    override fun pullEvents(): List<Event> {
+        val pulled = _events.toList()
+        _events.clear()
+        return pulled
+    }
 
     override val schemaVersion get() = "ALPHA"
     override val id get() = account.id

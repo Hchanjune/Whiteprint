@@ -15,6 +15,7 @@ include("platform:adapter:persistence:servlet")
 include("platform:adapter:persistence:reactive")
 
 include("platform:adapter:event:outbox")
+include("platform:adapter:event:inbox")
 include("platform:adapter:event:publisher")
 include("platform:adapter:event:subscriber")
 

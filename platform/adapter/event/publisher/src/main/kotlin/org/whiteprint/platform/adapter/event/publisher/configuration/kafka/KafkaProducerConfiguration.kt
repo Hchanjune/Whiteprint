@@ -11,22 +11,29 @@ import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.whiteprint.platform.adapter.event.publisher.poller.ScheduledEventPoller
 import org.whiteprint.platform.core.kernel.serializer.Serializer
+import org.whiteprint.platform.core.messaging.contract.EventEnveloper
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import org.whiteprint.platform.core.messaging.contract.TopicResolver
+import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
+import org.whiteprint.platform.core.messaging.producer.EventPoller
+import org.whiteprint.platform.core.messaging.producer.EventProducer
+import org.whiteprint.platform.infra.messaging.kafka.provider.KafkaEventProducer
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 import java.util.concurrent.TimeUnit
 
 @Configuration
-@ConditionalOnProperty(prefix = "adapter.event.publisher", name = ["infrastructureImplementation"], havingValue = "kafka", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "adapter.event.publisher", name = ["infrastructure-implementation"], havingValue = "kafka", matchIfMissing = false)
 class KafkaProducerConfiguration(
     private val kafkaProperties: KafkaProducerConfigurationProperties
 ) {
@@ -35,7 +42,7 @@ class KafkaProducerConfiguration(
     @ConditionalOnMissingBean(Serializer::class)
     fun serializer(): Serializer = JacksonSerializer()
 
-    @Bean
+    @Bean("producerTopicResolver")
     fun topicResolver(): TopicResolver {
         val topicPartRegex = Regex("^[a-z0-9-]+$")
         val producer = kafkaProperties.topicPolicy
@@ -60,7 +67,7 @@ class KafkaProducerConfiguration(
     }
 
     @Bean("producerConnectionValidator")
-    fun kafkaConnectionValidator(kafkaProperties: KafkaProducerConfigurationProperties) =
+    fun kafkaConnectionValidator() =
         SmartInitializingSingleton {
             val props = mapOf<String, Any>(
                 AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG to
@@ -77,7 +84,7 @@ class KafkaProducerConfiguration(
 
     @Bean
     fun autoCreateTopic(
-        topicResolver: TopicResolver,
+        @Qualifier("producerTopicResolver") topicResolver: TopicResolver,
     ): NewTopic? {
         if (!kafkaProperties.topicPolicy.autoCreate) return null
         return TopicBuilder.name(topicResolver.resolve())
@@ -124,5 +131,29 @@ class KafkaProducerConfiguration(
     ): KafkaTemplate<Long, EventEnvelope> {
         return KafkaTemplate(producerFactory)
     }
+
+    @Bean
+    fun eventProducer(
+        @Qualifier("producerTopicResolver")topicResolver: TopicResolver,
+        @Qualifier("producerKafkaTemplate") kafkaTemplate: KafkaTemplate<Long, EventEnvelope>,
+        eventPublisher: ApplicationEventPublisher
+    ): EventProducer =
+        KafkaEventProducer(
+            topicResolver = topicResolver,
+            kafkaTemplate = kafkaTemplate,
+            eventPublisher = eventPublisher,
+        )
+
+    @Bean("producerKafkaEventPoller")
+    fun eventPoller(
+        outboxEventStore: EventOutboxStore,
+        eventEnveloper: EventEnveloper,
+        producer: EventProducer,
+    ): EventPoller =
+        ScheduledEventPoller(
+            outboxEventStore = outboxEventStore,
+            eventEnveloper = eventEnveloper,
+            producer = producer
+        )
 
 }

@@ -7,10 +7,12 @@ import io.github.hchanjune.omk.webmvc.Operations
 import jakarta.transaction.Transactional
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.whiteprint.platform.core.messaging.outbox.EventPublisher
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupCommand
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupResult
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupUseCase
-import org.whiteprint.service.auth.application.port.out.AccountRepository
+import org.whiteprint.service.auth.application.port.out.event.AccountCreatedEvent
+import org.whiteprint.service.auth.application.port.out.persistence.AccountRepository
 import org.whiteprint.service.auth.domain.accounts.aggregate.AccountAggregate
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicy
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicyException
@@ -26,6 +28,7 @@ import org.whiteprint.service.auth.domain.accounts.vo.Username
 class SignupService(
     private val passwordEncoder: PasswordEncoder,
     private val repository: AccountRepository,
+    private val eventPublisher: EventPublisher
 ): SignupUseCase {
 
     @ManagedOperation(useCase = "Signup")
@@ -65,8 +68,6 @@ class SignupService(
             "Password encoding failed and returned null"
         }
 
-        println(encodedPassword)
-
         val passwordHash = PasswordHash(encodedPassword)
 
         val accountAggregate = AccountAggregate.signup(
@@ -86,6 +87,11 @@ class SignupService(
             signedUpAt = accountAggregate.insertedAt
         ).also {
             message = "Successfully signed up"
+            eventPublisher.publish(
+                AccountCreatedEvent(
+                    accountId = accountAggregate.id,
+                )
+            )
         }
     }
 

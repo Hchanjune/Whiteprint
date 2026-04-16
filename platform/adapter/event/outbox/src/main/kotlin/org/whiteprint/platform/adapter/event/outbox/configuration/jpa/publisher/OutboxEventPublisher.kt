@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher
 
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.entity.EventOutboxEntity
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
@@ -25,7 +26,7 @@ open class OutboxEventPublisher(
     private val topicResolver: TopicResolver
 ): EventPublisher {
 
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     override fun publish(event: Event) {
         val eventContext = eventContextProvider.current()
 

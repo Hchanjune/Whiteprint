@@ -1,4 +1,4 @@
-package org.whiteprint.service.auth.application.port.out
+package org.whiteprint.service.auth.application.port.out.persistence
 
 import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.whiteprint.platform.core.domain.repository.AggregateRepository

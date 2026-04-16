@@ -157,6 +157,6 @@ adapter:
         default-batch-fetch-size: 100
       options:
         entity-packages-to-scan:
-          - "org.whiteprint.service.user"
+          - "org.whiteprint.service.auth"
         show-sql: false
         generate-ddl: false

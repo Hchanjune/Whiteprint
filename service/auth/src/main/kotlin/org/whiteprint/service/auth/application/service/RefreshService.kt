@@ -16,7 +16,7 @@ import org.whiteprint.platform.core.security.verifier.TokenRevoker
 import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshCommand
 import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshResult
 import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshUseCase
-import org.whiteprint.service.auth.application.port.out.AccountRepository
+import org.whiteprint.service.auth.application.port.out.persistence.AccountRepository
 import java.time.Duration
 import java.time.Instant
 

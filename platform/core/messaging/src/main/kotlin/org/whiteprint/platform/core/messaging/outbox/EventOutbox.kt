@@ -10,7 +10,7 @@ interface  EventOutbox {
 
     val traceId: String
 
-    val causationId: String
+    val causationId: String?
 
     val occurredAt: Instant
 
@@ -32,6 +32,10 @@ interface  EventOutbox {
 
     val metadataJson: String
 
-    var status: EventStatus
+    val status: EventStatus
+
+    val attemptCount: Int
+
+    val lastAttemptedAt: Instant?
 
 }

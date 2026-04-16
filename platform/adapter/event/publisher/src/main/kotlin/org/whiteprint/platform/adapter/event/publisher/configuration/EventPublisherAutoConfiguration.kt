@@ -8,7 +8,7 @@ import org.whiteprint.platform.adapter.event.publisher.configuration.kafka.Kafka
 
 @AutoConfiguration
 @Import(
-    KafkaProducerConfiguration::class
+    KafkaProducerConfiguration::class,
 )
 @EnableConfigurationProperties(
     EventPublisherAutoConfigurationProperties::class,
