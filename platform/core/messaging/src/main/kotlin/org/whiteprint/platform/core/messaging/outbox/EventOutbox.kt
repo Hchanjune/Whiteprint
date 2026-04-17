@@ -1,7 +1,6 @@
 package org.whiteprint.platform.core.messaging.outbox
 
 import org.whiteprint.platform.core.messaging.model.event.EventScope
-import org.whiteprint.platform.core.messaging.model.event.EventStatus
 import java.time.Instant
 
 interface  EventOutbox {
@@ -32,7 +31,7 @@ interface  EventOutbox {
 
     val metadataJson: String
 
-    val status: EventStatus
+    val status: EventOutboxStatus
 
     val attemptCount: Int
 

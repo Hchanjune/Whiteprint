@@ -8,7 +8,7 @@ import org.whiteprint.platform.core.messaging.contract.EventSerializer
 import org.whiteprint.platform.core.messaging.contract.TopicResolver
 import org.whiteprint.platform.core.messaging.model.Event
 import org.whiteprint.platform.core.messaging.model.event.EventScope
-import org.whiteprint.platform.core.messaging.model.event.EventStatus
+import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
 import org.whiteprint.platform.core.messaging.model.event.PartitionedEvent
 import org.whiteprint.platform.core.messaging.model.event.external.ExternalEvent
 import org.whiteprint.platform.core.messaging.model.event.internal.InternalEvent
@@ -55,7 +55,7 @@ open class OutboxEventPublisher(
             payload = eventSerializer.toByteArray(event),
             payloadJson = eventSerializer.toJson(event),
             metadataJson = eventSerializer.metadataToJson(eventContext.metadata),
-            status = EventStatus.PENDING,
+            status = EventOutboxStatus.PENDING,
         )
 
         outboxStore.save(entity)

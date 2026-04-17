@@ -1,5 +1,23 @@
 package org.whiteprint.platform.core.messaging.inbox
 
+import java.time.Instant
+
 interface EventInbox {
-    fun tryAcquire(eventId: String): Boolean
+    val eventId: String
+    val traceId: String
+    val causationId: String?
+    val occurredAt: Instant
+    val issuer: String
+    val producer: String
+    val schemaVersion: String
+    val eventType: String
+    val payload: ByteArray
+    val payloadJson: String
+    val metadataJson: String
+    val status: EventInboxStatus
+    val receivedAt: Instant
+    val processedAt: Instant?
+    val attemptCount: Int
+    val lastAttemptedAt: Instant?
+    val errorMessage: String?
 }

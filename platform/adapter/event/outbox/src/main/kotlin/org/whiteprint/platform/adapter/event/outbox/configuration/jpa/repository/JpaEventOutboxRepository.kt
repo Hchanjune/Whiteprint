@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import org.whiteprint.platform.core.messaging.model.event.EventStatus
+import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
 import java.time.Instant
 
 @Repository
@@ -36,7 +36,7 @@ interface JpaEventOutboxRepository: JpaRepository<EventOutboxEntity, Long> {
     )
     fun bulkClaimProcess(
         @Param("eventIds") eventIds: List<Long>,
-        @Param("status") status: EventStatus,
+        @Param("status") status: EventOutboxStatus,
         @Param("now") now: Instant,
     ): Int
 
@@ -48,7 +48,7 @@ interface JpaEventOutboxRepository: JpaRepository<EventOutboxEntity, Long> {
 """)
     fun updateStatus(
         @Param("eventId") eventId: Long,
-        @Param("status") status: EventStatus,
+        @Param("status") status: EventOutboxStatus,
     ): Int
 
 }

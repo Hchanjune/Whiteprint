@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.entity
 
 import org.whiteprint.platform.core.messaging.outbox.EventOutbox
-import org.whiteprint.platform.core.messaging.model.event.EventStatus
+import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
 import org.whiteprint.platform.core.messaging.model.event.EventScope
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -57,7 +57,7 @@ class EventOutboxEntity(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    override var status: EventStatus,
+    override var status: EventOutboxStatus,
 
     @Column(name = "attempt_count")
     override var attemptCount: Int = 0,

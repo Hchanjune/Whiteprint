@@ -4,7 +4,7 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.entity.EventOutboxEntity
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.repository.JpaEventOutboxRepository
-import org.whiteprint.platform.core.messaging.model.event.EventStatus
+import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
 import org.whiteprint.platform.core.messaging.outbox.EventOutbox
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
 import java.time.Instant
@@ -27,18 +27,18 @@ open class JpaEventOutboxStore(
 
         val ids = entities.map { it.eventId }
         val now = Instant.now()
-        repository.bulkClaimProcess(ids, EventStatus.PROCESSING, now)
+        repository.bulkClaimProcess(ids, EventOutboxStatus.PROCESSING, now)
         return entities
     }
 
     @Transactional
     override fun markPublished(eventId: Long) {
-        repository.updateStatus(eventId, EventStatus.PUBLISHED)
+        repository.updateStatus(eventId, EventOutboxStatus.PUBLISHED)
     }
 
     @Transactional
     override fun markFailed(eventId: Long) {
-        repository.updateStatus(eventId, EventStatus.FAILED)
+        repository.updateStatus(eventId, EventOutboxStatus.FAILED)
     }
 
 }
