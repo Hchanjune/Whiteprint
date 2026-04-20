@@ -2,7 +2,8 @@ package org.whiteprint.platform.core.messaging.inbox
 
 enum class EventInboxStatus {
     RECEIVED,
-    PROGRESSING,
+    PROCESSING,
     COMPLETED,
-    FAILED
+    FAILED,
+    DEAD
 }
