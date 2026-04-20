@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.context.OutboxEventContextProvider
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher.JpaEventOutboxStore
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher.OutboxEventEnveloper
-import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher.OutboxEventPublisher
+import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher.OutboxEventProducer
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.repository.JpaEventOutboxRepository
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.serializer.OutboxEventSerializer
 import org.whiteprint.platform.core.kernel.serializer.Serializer
@@ -16,7 +16,7 @@ import org.whiteprint.platform.core.messaging.contract.EventSerializer
 import org.whiteprint.platform.core.messaging.contract.TopicResolver
 import org.whiteprint.platform.core.messaging.outbox.EventContextProvider
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
-import org.whiteprint.platform.core.messaging.outbox.EventPublisher
+import org.whiteprint.platform.core.messaging.outbox.EventProducer
 
 @Configuration
 @ConditionalOnProperty(
@@ -52,13 +52,13 @@ class JpaEventOutboxConfiguration {
         )
 
     @Bean
-    fun eventPublisher(
+    fun eventProducer(
         outboxStore: EventOutboxStore,
         eventContextProvider: EventContextProvider,
         eventSerializer: EventSerializer,
         topicResolver: TopicResolver
-    ): EventPublisher =
-        OutboxEventPublisher(
+    ): EventProducer =
+        OutboxEventProducer(
             outboxStore = outboxStore,
             eventContextProvider = eventContextProvider,
             eventSerializer = eventSerializer,

@@ -5,15 +5,15 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.whiteprint.platform.core.messaging.model.event.EventScope
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.contract.TopicResolver
-import org.whiteprint.platform.core.messaging.producer.EventProducer
+import org.whiteprint.platform.core.messaging.publisher.EventPublisher
 
-class KafkaEventProducer(
+class KafkaEventPublisher(
     private val topicResolver: TopicResolver,
     private val kafkaTemplate: KafkaTemplate<Long, EventEnvelope>,
     private val eventPublisher: ApplicationEventPublisher
-): EventProducer {
+): EventPublisher {
 
-    override fun produce(envelope: EventEnvelope) {
+    override fun publish(envelope: EventEnvelope) {
         when (envelope.eventScope) {
             EventScope.INTERNAL -> {
                 sendInternal(envelope)

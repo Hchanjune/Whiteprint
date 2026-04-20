@@ -4,13 +4,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.whiteprint.platform.core.messaging.contract.EventEnveloper
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
-import org.whiteprint.platform.core.messaging.producer.EventPoller
-import org.whiteprint.platform.core.messaging.producer.EventProducer
+import org.whiteprint.platform.core.messaging.publisher.EventPoller
+import org.whiteprint.platform.core.messaging.publisher.EventPublisher
 
 open class ScheduledEventPoller(
     private val outboxEventStore: EventOutboxStore,
     private val eventEnveloper: EventEnveloper,
-    private val producer: EventProducer,
+    private val producer: EventPublisher,
 ) : EventPoller {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -22,7 +22,7 @@ open class ScheduledEventPoller(
         events.forEach { event ->
             try {
                 val envelope = eventEnveloper.envelope(event)
-                producer.produce(envelope)
+                producer.publish(envelope)
                 markPublishedWithRetry(event.eventId)
             } catch (e: Exception) {
                 logger.warn("이벤트 발행 실패: ${event.eventId}", e)

@@ -14,20 +14,20 @@ import org.whiteprint.platform.core.messaging.model.event.external.ExternalEvent
 import org.whiteprint.platform.core.messaging.model.event.internal.InternalEvent
 import org.whiteprint.platform.core.messaging.outbox.EventContextProvider
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
-import org.whiteprint.platform.core.messaging.outbox.EventPublisher
+import org.whiteprint.platform.core.messaging.outbox.EventProducer
 import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import java.time.Instant
 
-open class OutboxEventPublisher(
+open class OutboxEventProducer(
     private val outboxStore: EventOutboxStore,
     private val eventContextProvider: EventContextProvider,
     private val eventSerializer: EventSerializer,
     private val topicResolver: TopicResolver
-): EventPublisher {
+): EventProducer {
 
     @Transactional(propagation = Propagation.MANDATORY)
-    override fun publish(event: Event) {
+    override fun produce(event: Event) {
         val eventContext = eventContextProvider.current()
 
         val eventScope = when (event) {

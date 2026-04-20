@@ -26,9 +26,9 @@ import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import org.whiteprint.platform.core.messaging.contract.TopicResolver
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
-import org.whiteprint.platform.core.messaging.producer.EventPoller
-import org.whiteprint.platform.core.messaging.producer.EventProducer
-import org.whiteprint.platform.infra.messaging.kafka.provider.KafkaEventProducer
+import org.whiteprint.platform.core.messaging.publisher.EventPoller
+import org.whiteprint.platform.core.messaging.publisher.EventPublisher
+import org.whiteprint.platform.infra.messaging.kafka.provider.KafkaEventPublisher
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 import java.util.concurrent.TimeUnit
 
@@ -133,12 +133,12 @@ class KafkaProducerConfiguration(
     }
 
     @Bean
-    fun eventProducer(
+    fun eventPublisher(
         @Qualifier("producerTopicResolver")topicResolver: TopicResolver,
         @Qualifier("producerKafkaTemplate") kafkaTemplate: KafkaTemplate<Long, EventEnvelope>,
         eventPublisher: ApplicationEventPublisher
-    ): EventProducer =
-        KafkaEventProducer(
+    ): EventPublisher =
+        KafkaEventPublisher(
             topicResolver = topicResolver,
             kafkaTemplate = kafkaTemplate,
             eventPublisher = eventPublisher,
@@ -148,7 +148,7 @@ class KafkaProducerConfiguration(
     fun eventPoller(
         outboxEventStore: EventOutboxStore,
         eventEnveloper: EventEnveloper,
-        producer: EventProducer,
+        producer: EventPublisher,
     ): EventPoller =
         ScheduledEventPoller(
             outboxEventStore = outboxEventStore,

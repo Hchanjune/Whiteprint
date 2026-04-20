@@ -5,5 +5,6 @@ interface EventInboxStore {
     fun tryAcquire(eventId: String): Boolean
     fun markCompleted(eventId: String)
     fun markFailed(eventId: String, error: String)
+    fun markDead(eventId: String)
     fun findById(eventId: String): EventInbox?
 }

@@ -7,7 +7,7 @@ import io.github.hchanjune.omk.webmvc.Operations
 import jakarta.transaction.Transactional
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.whiteprint.platform.core.messaging.outbox.EventPublisher
+import org.whiteprint.platform.core.messaging.outbox.EventProducer
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupCommand
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupResult
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupUseCase
@@ -28,7 +28,7 @@ import org.whiteprint.service.auth.domain.accounts.vo.Username
 class SignupService(
     private val passwordEncoder: PasswordEncoder,
     private val repository: AccountRepository,
-    private val eventPublisher: EventPublisher
+    private val eventProducer: EventProducer
 ): SignupUseCase {
 
     @ManagedOperation(useCase = "Signup")
@@ -87,7 +87,7 @@ class SignupService(
             signedUpAt = accountAggregate.insertedAt
         ).also {
             message = "Successfully signed up"
-            eventPublisher.publish(
+            eventProducer.produce(
                 AccountCreatedEvent(
                     accountId = accountAggregate.id,
                 )
