@@ -2,12 +2,13 @@ package org.whiteprint.platform.infra.messaging.kafka.provider
 
 import org.whiteprint.platform.core.messaging.contract.EventSerializer
 import org.whiteprint.platform.core.messaging.inbox.EventConsumer
-import org.whiteprint.platform.core.messaging.subscriber.EventSource
+import org.whiteprint.platform.core.messaging.subscriber.EventSubscriber
 
-class KafkaEventSource(
+class KafkaEventSubscriber(
     private val consumer: EventConsumer,
     private val serializer: EventSerializer,
-): EventSource {
+): EventSubscriber {
+
     override fun start() {
         TODO("Not yet implemented")
     }
@@ -15,4 +16,5 @@ class KafkaEventSource(
     override fun stop() {
         TODO("Not yet implemented")
     }
+
 }
