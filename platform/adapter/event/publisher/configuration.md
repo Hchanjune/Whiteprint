@@ -17,13 +17,19 @@ adapter:
         topic-policy:
           auto-create: true
           prefix: wp
-          topic: topic
           separator: .
           version: v1
-          default-partitions: 3
-          default-replication-factor: 1
-          retention-millis: 604800000
-          cleanup-policy: delete
+          topics:
+            "[user.created]":
+              partitions: 3
+              replication-factor: 1
+              retention-millis: 604800000
+              cleanup-policy: delete
+            "[user.deleted]":
+              partitions: 3
+              replication-factor: 1
+              retention-millis: 604800000
+              cleanup-policy: delete
         producer:
           acks: all
           batch-size: 16384

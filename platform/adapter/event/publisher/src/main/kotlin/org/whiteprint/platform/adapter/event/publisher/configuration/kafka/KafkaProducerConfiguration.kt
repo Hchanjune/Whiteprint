@@ -42,15 +42,37 @@ class KafkaProducerConfiguration(
     @ConditionalOnMissingBean(Serializer::class)
     fun serializer(): Serializer = JacksonSerializer()
 
+    @Bean("producerAllowedTopics")
+    fun topics(): List<NewTopic> {
+        val policy = kafkaProperties.topicPolicy
+
+        if (!policy.autoCreate) return emptyList()
+
+        return policy.topics.map { (eventType, spec) ->
+            val topicName = listOf(
+                policy.prefix,
+                eventType,
+                policy.version
+            ).joinToString(policy.separator)
+
+            TopicBuilder.name(topicName)
+                .partitions(spec.partitions)
+                .replicas(spec.replicationFactor)
+                .configs(
+                    mapOf(
+                        "retention.ms" to spec.retentionMillis.toString(),
+                        "cleanup.policy" to spec.cleanupPolicy
+                    )
+                )
+                .build()
+        }
+    }
+
     @Bean("producerTopicResolver")
     fun topicResolver(): TopicResolver {
         val topicPartRegex = Regex("^[a-z0-9-]+$")
         val producer = kafkaProperties.topicPolicy
-        val parts = listOf(producer.prefix, producer.topic, producer.version)
-
-        if (producer.topic.isBlank() || producer.topic == "topic") {
-            throw EventException(EventPolicy.TOPIC_NOT_CONFIGURED)
-        }
+        val parts = listOf(producer.prefix, producer.version)
 
         parts.filter { it.isNotBlank() }.forEach { part ->
             if (!topicPartRegex.matches(part)) {
@@ -59,8 +81,8 @@ class KafkaProducerConfiguration(
         }
 
         return KafkaTopicResolver(
+            allowedTopics = kafkaProperties.topicPolicy.topics.keys.toSet(),
             prefix = producer.prefix.lowercase(),
-            topic = producer.topic.lowercase(),
             version = producer.version.lowercase(),
             separator = producer.separator,
         )
@@ -81,21 +103,6 @@ class KafkaProducerConfiguration(
                 cluster.nodes().get(3, TimeUnit.SECONDS)
             }
         }
-
-    @Bean
-    fun autoCreateTopic(
-        @Qualifier("producerTopicResolver") topicResolver: TopicResolver,
-    ): NewTopic? {
-        if (!kafkaProperties.topicPolicy.autoCreate) return null
-        return TopicBuilder.name(topicResolver.resolve())
-            .partitions(kafkaProperties.topicPolicy.defaultPartitions)
-            .replicas(kafkaProperties.topicPolicy.defaultReplicationFactor)
-            .configs(mapOf(
-                "retention.ms" to kafkaProperties.topicPolicy.retentionMillis.toString(),
-                "cleanup.policy" to kafkaProperties.topicPolicy.cleanupPolicy
-            ))
-            .build()
-    }
 
     @Bean("producerProducerFactory")
     fun producerFactory(

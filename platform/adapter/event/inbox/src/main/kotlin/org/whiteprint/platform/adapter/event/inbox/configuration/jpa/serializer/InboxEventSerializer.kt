@@ -16,7 +16,7 @@ class InboxEventSerializer(
     }
 
     override fun payloadToJson(payload: ByteArray): String {
-        return serializer.serializeToJson(payload)
+        return String(payload, Charsets.UTF_8)
     }
 
     override fun metadataToJson(metadata: Map<String, String>): String {

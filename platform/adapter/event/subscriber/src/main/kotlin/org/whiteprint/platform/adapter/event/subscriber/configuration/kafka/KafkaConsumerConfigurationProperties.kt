@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class KafkaConsumerConfigurationProperties(
     var datasource: DataSourceProperties = DataSourceProperties(),
     var consumer: Consumer = Consumer(),
-    var subscription: Subscription = Subscription(),
+    var subscriptionPolicy: SubscriptionPolicy = SubscriptionPolicy(),
     var errorHandling: ErrorHandling = ErrorHandling(),
 ) {
 
@@ -23,8 +23,11 @@ data class KafkaConsumerConfigurationProperties(
         var isolationLevel: String = "read_committed",
     )
 
-    data class Subscription(
-        var topics: List<String> = emptyList(),
+    data class SubscriptionPolicy(
+        var prefix: String = "wp",
+        var version: String = "v1",
+        var separator: String = ".",
+        var eventTypes: Set<String> = emptySet(),
     )
 
     data class ErrorHandling(

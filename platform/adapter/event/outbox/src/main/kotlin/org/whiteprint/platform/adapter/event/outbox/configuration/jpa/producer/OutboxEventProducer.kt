@@ -47,7 +47,7 @@ open class OutboxEventProducer(
             causationId = eventContext.causationId,
             occurredAt = Instant.now(),
             issuer = eventContext.issuer,
-            producer = topicResolver.resolve(),
+            producer = "Auth",
             schemaVersion = event.schemaVersion,
             partitionKey = partitionKey,
             eventScope = eventScope,

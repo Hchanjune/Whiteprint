@@ -18,12 +18,14 @@ data class KafkaProducerConfigurationProperties(
     data class TopicPolicy(
         var autoCreate: Boolean = true,
         var prefix: String = "wp",
-        var topic: String = "topic",
         var version: String = "v1",
         var separator: String = ".",
+        var topics: Map<String, TopicSpec> = emptyMap()
+    )
 
-        var defaultPartitions: Int = 3,
-        var defaultReplicationFactor: Int = 1,
+    data class TopicSpec(
+        var partitions: Int = 3,
+        var replicationFactor: Int = 1,
         var retentionMillis: Long = 604800000,
         var cleanupPolicy: String = "delete",
     )

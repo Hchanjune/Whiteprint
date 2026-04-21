@@ -28,7 +28,6 @@ import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.inbox.EventConsumer
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.subscriber.EventSubscriber
-import org.whiteprint.platform.core.messaging.subscriber.SubscribingTopics
 import org.whiteprint.platform.infra.messaging.kafka.provider.KafkaEventSubscriber
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 import java.util.concurrent.TimeUnit
@@ -37,7 +36,7 @@ import kotlin.String
 import kotlin.use
 
 @Configuration
-@ConditionalOnProperty(prefix = "adapter.event.subscriber", name = ["infrastructureImplementation"], havingValue = "kafka", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "adapter.event.subscriber", name = ["infrastructure-implementation"], havingValue = "kafka", matchIfMissing = true)
 class KafkaConsumerConfiguration(
     private val kafkaProperties: KafkaConsumerConfigurationProperties
 ) {
@@ -145,20 +144,21 @@ class KafkaConsumerConfiguration(
         KafkaTemplate(producerFactory)
 
     @Bean
-    fun subscribingTopics(): SubscribingTopics =
-        SubscribingTopics(
-            topics = kafkaProperties.subscription.topics
-        )
-
-    @Bean
     fun kafkaEventSubscriber(
         consumer: EventConsumer,
-        subscribingTopics: SubscribingTopics,
         containerFactory: ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope>,
-    ): EventSubscriber = KafkaEventSubscriber(
-        consumer = consumer,
-        subscribingTopics = subscribingTopics,
-        containerFactory = containerFactory,
-    )
+    ): EventSubscriber {
+        val prefix = kafkaProperties.subscriptionPolicy.prefix
+        val version = kafkaProperties.subscriptionPolicy.version
+        val separator = kafkaProperties.subscriptionPolicy.separator
+        val subscribingTopics = kafkaProperties.subscriptionPolicy.eventTypes.map {
+            listOf(prefix, it, version).joinToString(separator)
+        }.toSet()
+        return KafkaEventSubscriber(
+            consumer = consumer,
+            subscribingTopics = subscribingTopics,
+            containerFactory = containerFactory,
+        )
+    }
 
 }

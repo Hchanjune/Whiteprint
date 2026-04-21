@@ -20,6 +20,13 @@ adapter:
         concurrency: 3
         enable-auto-commit: false
         isolation-level: read_committed
+      subscription-policy:
+        prefix: test
+        version: v1
+        separator: .
+        event-types:
+          - user.created
+          - user.deleted
       error-handling:
         retry:
           max-attempts: 3

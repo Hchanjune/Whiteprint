@@ -12,7 +12,11 @@ enum class EventPolicy(
 
     INVALID_TOPIC_FORMAT(500, "EVENT_INVALID_TOPIC_FORMAT", "Invalid topic format."),
 
-    TOPIC_NOT_CONFIGURED(500, "EVENT_TOPIC_NOT_CONFIGURED", "EVENT_TOPIC_NOT_CONFIGURED, Please config topic in application.yml "),
+    /**
+     * Required Attributes
+     * - [[topicName]]
+     */
+    TOPIC_NOT_CONFIGURED(500, "EVENT_TOPIC_NOT_CONFIGURED", "EVENT_TOPIC_NOT_CONFIGURED(input: [[topicName]]), Please config topic in application.yml"),
 
     /**
      * Require Stacktrace

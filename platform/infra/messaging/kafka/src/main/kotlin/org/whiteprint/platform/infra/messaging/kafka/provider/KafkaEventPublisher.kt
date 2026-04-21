@@ -27,7 +27,7 @@ class KafkaEventPublisher(
 
     private fun sendExternal(envelope: EventEnvelope) {
         kafkaTemplate.send(
-            topicResolver.resolve(),
+            topicResolver.resolve(envelope),
             envelope.partitionKey,
             envelope
         ).whenComplete { result, exception ->

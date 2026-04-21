@@ -77,13 +77,14 @@ adapter:
         topic-policy:
           auto-create: true
           prefix: test
-          topic: user
           version: v1
           separator: .
-          default-partitions: 3
-          default-replication-factor: 1
-          retention-millis: 604800000
-          cleanup-policy: delete
+          topics:
+            "[account.created]":
+              partitions: 3
+              replication-factor: 1
+              retention-millis: 604800000
+              cleanup-policy: delete
         producer:
           acks: all
           batch-size: 16384
@@ -110,6 +111,12 @@ adapter:
           concurrency: 3
           enable-auto-commit: false
           isolation-level: read_committed
+        subscription-policy:
+          prefix: test
+          version: v1
+          separator: .
+          event-types:
+            - account.created
         error-handling:
           retry:
             max-attempts: 3
@@ -123,6 +130,10 @@ adapter:
               linger-millis: 5
               compression-type: lz4
               retries: 2147483647
+
+    inbox:
+      infrastructure-implementation: jpa
+
   persistence:
     infrastructure-implementation: jpa
     jpa:
