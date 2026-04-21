@@ -1,13 +1,14 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.jpa
 
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.context.OutboxEventContextProvider
-import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher.JpaEventOutboxStore
-import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher.OutboxEventEnveloper
-import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher.OutboxEventProducer
+import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer.JpaEventOutboxStore
+import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer.OutboxEventEnveloper
+import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer.OutboxEventProducer
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.repository.JpaEventOutboxRepository
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.serializer.OutboxEventSerializer
 import org.whiteprint.platform.core.kernel.serializer.Serializer
@@ -37,13 +38,15 @@ class JpaEventOutboxConfiguration {
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         jpaEventOutboxRepository: JpaEventOutboxRepository
     ): EventOutboxStore =
-        JpaEventOutboxStore(jpaEventOutboxRepository)
+        JpaEventOutboxStore(
+            repository = jpaEventOutboxRepository
+        )
 
     @Bean
     fun eventContextProvider(): EventContextProvider =
         OutboxEventContextProvider()
 
-    @Bean
+    @Bean("outboxEventSerializer")
     fun eventSerializer(
         serializer: Serializer,
     ): EventSerializer =
@@ -55,7 +58,7 @@ class JpaEventOutboxConfiguration {
     fun eventProducer(
         outboxStore: EventOutboxStore,
         eventContextProvider: EventContextProvider,
-        eventSerializer: EventSerializer,
+        @Qualifier("outboxEventSerializer") eventSerializer: EventSerializer,
         topicResolver: TopicResolver
     ): EventProducer =
         OutboxEventProducer(

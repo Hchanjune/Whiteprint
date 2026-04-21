@@ -17,7 +17,7 @@ dependencies {
     api(project(":platform:core:messaging"))
     api(project(":platform:infra:persistence:jpa"))
 
-    api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.5.5")
+    api(project(":platform:infra:observability:servlet"))
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

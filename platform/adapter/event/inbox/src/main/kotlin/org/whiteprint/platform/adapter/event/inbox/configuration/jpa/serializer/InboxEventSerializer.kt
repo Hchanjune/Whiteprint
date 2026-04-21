@@ -1,10 +1,10 @@
-package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.serializer
+package org.whiteprint.platform.adapter.event.inbox.configuration.jpa.serializer
 
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EventSerializer
 import org.whiteprint.platform.core.messaging.model.Event
 
-class OutboxEventSerializer(
+class InboxEventSerializer(
     private val serializer: Serializer
 ): EventSerializer {
     override fun toByteArray(event: Event): ByteArray {

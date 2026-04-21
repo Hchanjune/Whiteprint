@@ -1,20 +1,35 @@
 package org.whiteprint.platform.infra.messaging.kafka.provider
 
-import org.whiteprint.platform.core.messaging.contract.EventSerializer
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
+import org.springframework.kafka.listener.MessageListener
 import org.whiteprint.platform.core.messaging.inbox.EventConsumer
+import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import org.whiteprint.platform.core.messaging.subscriber.EventSubscriber
+import org.whiteprint.platform.core.messaging.subscriber.SubscribingTopics
 
 class KafkaEventSubscriber(
     private val consumer: EventConsumer,
-    private val serializer: EventSerializer,
+    private val subscribingTopics: SubscribingTopics,
+    private val containerFactory: ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope>,
 ): EventSubscriber {
 
+    private var container: ConcurrentMessageListenerContainer<Long, EventEnvelope>? = null
+
     override fun start() {
-        TODO("Not yet implemented")
+        val container = containerFactory.createContainer(*subscribingTopics.asList().toTypedArray())
+        container.setupMessageListener(
+            MessageListener<Long, EventEnvelope> { record ->
+                consumer.consume(record.value())
+            }
+        )
+        container.start()
+        this.container = container
     }
 
     override fun stop() {
-        TODO("Not yet implemented")
+        container?.stop()
+        container = null
     }
 
 }

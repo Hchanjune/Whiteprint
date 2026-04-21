@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher
+package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer
 
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional

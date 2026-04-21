@@ -25,7 +25,11 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.util.backoff.FixedBackOff
 import org.whiteprint.platform.core.kernel.serializer.Serializer
+import org.whiteprint.platform.core.messaging.inbox.EventConsumer
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
+import org.whiteprint.platform.core.messaging.subscriber.EventSubscriber
+import org.whiteprint.platform.core.messaging.subscriber.SubscribingTopics
+import org.whiteprint.platform.infra.messaging.kafka.provider.KafkaEventSubscriber
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 import java.util.concurrent.TimeUnit
 import kotlin.Any
@@ -137,8 +141,24 @@ class KafkaConsumerConfiguration(
     @Bean("deadLetterKafkaTemplate")
     fun deadLetterKafkaTemplate(
         @Qualifier("deadLetterProducerFactory")producerFactory: ProducerFactory<Long, EventEnvelope>,
-    ): KafkaTemplate<Long, EventEnvelope> {
-        return KafkaTemplate(producerFactory)
-    }
+    ): KafkaTemplate<Long, EventEnvelope> =
+        KafkaTemplate(producerFactory)
+
+    @Bean
+    fun subscribingTopics(): SubscribingTopics =
+        SubscribingTopics(
+            topics = kafkaProperties.subscription.topics
+        )
+
+    @Bean
+    fun kafkaEventSubscriber(
+        consumer: EventConsumer,
+        subscribingTopics: SubscribingTopics,
+        containerFactory: ConcurrentKafkaListenerContainerFactory<Long, EventEnvelope>,
+    ): EventSubscriber = KafkaEventSubscriber(
+        consumer = consumer,
+        subscribingTopics = subscribingTopics,
+        containerFactory = containerFactory,
+    )
 
 }

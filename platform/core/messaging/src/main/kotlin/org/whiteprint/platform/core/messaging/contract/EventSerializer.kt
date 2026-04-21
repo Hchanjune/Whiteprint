@@ -8,6 +8,8 @@ interface EventSerializer {
 
     fun toJson(event: Event): String
 
+    fun payloadToJson(payload: ByteArray): String
+
     fun metadataToJson(metadata: Map<String, String>): String
 
     fun<T: Event> deserialize(bytes: ByteArray, type: Class<T>): T

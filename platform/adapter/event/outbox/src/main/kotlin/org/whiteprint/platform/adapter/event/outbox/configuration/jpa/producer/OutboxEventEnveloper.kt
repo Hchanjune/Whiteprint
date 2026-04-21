@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.publisher
+package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer
 
 import org.whiteprint.platform.core.messaging.contract.EventEnveloper
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
