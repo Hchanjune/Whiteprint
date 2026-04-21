@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.entity.EventOutboxEntity
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.platform.core.messaging.contract.EventSerializer
-import org.whiteprint.platform.core.messaging.contract.TopicResolver
 import org.whiteprint.platform.core.messaging.model.Event
 import org.whiteprint.platform.core.messaging.model.event.EventScope
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
@@ -20,10 +19,10 @@ import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import java.time.Instant
 
 open class OutboxEventProducer(
+    private val producer: String,
     private val outboxStore: EventOutboxStore,
     private val eventContextProvider: EventContextProvider,
     private val eventSerializer: EventSerializer,
-    private val topicResolver: TopicResolver
 ): EventProducer {
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -47,7 +46,7 @@ open class OutboxEventProducer(
             causationId = eventContext.causationId,
             occurredAt = Instant.now(),
             issuer = eventContext.issuer,
-            producer = "Auth",
+            producer = producer,
             schemaVersion = event.schemaVersion,
             partitionKey = partitionKey,
             eventScope = eventScope,
