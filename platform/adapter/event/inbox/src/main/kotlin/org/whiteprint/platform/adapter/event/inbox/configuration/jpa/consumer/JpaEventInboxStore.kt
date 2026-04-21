@@ -4,6 +4,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.entity.EventInboxEntity
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.repository.JpaEventInboxRepository
 import org.whiteprint.platform.core.messaging.inbox.EventInbox
+import org.whiteprint.platform.core.messaging.inbox.EventInboxStatus
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 
 open class JpaEventInboxStore(
@@ -17,23 +18,31 @@ open class JpaEventInboxStore(
         return inbox
     }
 
-    override fun tryAcquire(eventId: String): Boolean {
+    override fun tryAcquire(eventId: Long): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun markCompleted(eventId: String) {
+    override fun markCompleted(eventId: Long) {
         TODO("Not yet implemented")
     }
 
-    override fun markFailed(eventId: String, error: String) {
+    override fun markFailed(eventId: Long, error: String) {
         TODO("Not yet implemented")
     }
 
-    override fun markDead(eventId: String) {
+    override fun markDead(eventId: Long) {
         TODO("Not yet implemented")
     }
 
-    override fun findById(eventId: String): EventInbox? {
+    override fun findById(eventId: Long): EventInbox? {
+        TODO("Not yet implemented")
+    }
+
+    override fun findAllByEventTypeAndStatus(
+        eventType: String,
+        status: EventInboxStatus,
+        limit: Int
+    ): List<EventInbox> {
         TODO("Not yet implemented")
     }
 }
