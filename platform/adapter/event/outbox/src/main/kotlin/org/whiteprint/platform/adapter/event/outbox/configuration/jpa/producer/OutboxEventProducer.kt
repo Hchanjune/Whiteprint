@@ -4,7 +4,6 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.entity.EventOutboxEntity
 import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
-import org.whiteprint.platform.core.messaging.contract.EventSerializer
 import org.whiteprint.platform.core.messaging.model.Event
 import org.whiteprint.platform.core.messaging.model.event.EventScope
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
@@ -14,6 +13,7 @@ import org.whiteprint.platform.core.messaging.model.event.internal.InternalEvent
 import org.whiteprint.platform.core.messaging.outbox.EventContextProvider
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
 import org.whiteprint.platform.core.messaging.outbox.EventProducer
+import org.whiteprint.platform.core.messaging.outbox.OutboxEventSerializer
 import org.whiteprint.platform.core.messaging.policy.EventException
 import org.whiteprint.platform.core.messaging.policy.EventPolicy
 import java.time.Instant
@@ -22,7 +22,7 @@ open class OutboxEventProducer(
     private val producer: String,
     private val outboxStore: EventOutboxStore,
     private val eventContextProvider: EventContextProvider,
-    private val eventSerializer: EventSerializer,
+    private val eventSerializer: OutboxEventSerializer,
 ): EventProducer {
 
     @Transactional(propagation = Propagation.MANDATORY)

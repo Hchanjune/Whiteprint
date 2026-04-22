@@ -1,6 +1,5 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.jpa
 
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,12 +8,12 @@ import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.In
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEventConsumer
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.JpaEventInboxStore
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.repository.JpaEventInboxRepository
-import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.serializer.InboxEventSerializer
+import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.serializer.InboxEventSerializerImpl
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EnvelopeOpener
-import org.whiteprint.platform.core.messaging.contract.EventSerializer
 import org.whiteprint.platform.core.messaging.inbox.EventConsumer
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
+import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer
 
 @Configuration
 @ConditionalOnProperty(
@@ -26,17 +25,17 @@ import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 @EnableJpaRepositories(basePackageClasses = [JpaEventInboxRepository::class])
 class JpaEventInboxConfiguration {
 
-    @Bean("inboxEventSerializer")
+    @Bean
     fun eventSerializer(
         serializer: Serializer,
-    ): EventSerializer =
-        InboxEventSerializer(
+    ): InboxEventSerializer =
+        InboxEventSerializerImpl(
             serializer = serializer
         )
 
     @Bean
     fun envelopeOpener(
-        @Qualifier("inboxEventSerializer") eventSerializer: EventSerializer,
+        eventSerializer: InboxEventSerializer,
     ): EnvelopeOpener =
         InboxEnvelopeOpener(
             eventSerializer = eventSerializer

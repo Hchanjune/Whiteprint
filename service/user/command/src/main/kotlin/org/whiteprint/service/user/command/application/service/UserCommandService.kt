@@ -5,10 +5,10 @@ import io.github.hchanjune.omk.core.annotations.ManagedService
 import io.github.hchanjune.omk.webmvc.Operations
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.whiteprint.service.user.command.application.port.`in`.SignupCommand
-import org.whiteprint.service.user.command.application.port.`in`.SignupUseCase
-import org.whiteprint.service.user.command.application.port.out.UserRepository
-import org.whiteprint.service.user.command.domain.model.user.UserAggregate
+import org.whiteprint.service.user.command.application.port.`in`.command.SignupCommand
+import org.whiteprint.service.user.command.application.port.`in`.usecase.SignupUseCase
+import org.whiteprint.service.user.command.application.port.out.persistence.UserRepository
+import org.whiteprint.service.user.command.domain.user.aggregate.UserAggregate
 
 @Service
 @ManagedService

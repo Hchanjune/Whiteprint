@@ -29,6 +29,7 @@ dependencies {
 
 	implementation(project(":platform:adapter:event:outbox"))
 	implementation(project(":platform:adapter:event:publisher"))
+	implementation(project(":platform:adapter:event:inbox"))
 	implementation(project(":platform:adapter:event:subscriber"))
 
 	implementation("org.mockito.kotlin:mockito-kotlin:5.2.1")

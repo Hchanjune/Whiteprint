@@ -9,7 +9,7 @@ import org.whiteprint.service.user.command.adapter.`in`.web.mapper.toCommand
 import org.whiteprint.service.user.command.adapter.`in`.web.mapper.toResponse
 import org.whiteprint.service.user.command.adapter.`in`.web.request.SignupRequest
 import org.whiteprint.service.user.command.adapter.`in`.web.response.UserResponse
-import org.whiteprint.service.user.command.application.port.`in`.SignupUseCase
+import org.whiteprint.service.user.command.application.port.`in`.usecase.SignupUseCase
 
 @RestController
 @RequestMapping("/api/v1/users")

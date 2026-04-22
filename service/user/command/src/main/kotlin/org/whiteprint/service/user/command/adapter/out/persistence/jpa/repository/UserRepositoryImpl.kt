@@ -4,10 +4,10 @@ import org.springframework.stereotype.Repository
 import org.whiteprint.service.user.command.adapter.out.persistence.jpa.mapper.createEntity
 import org.whiteprint.service.user.command.adapter.out.persistence.jpa.mapper.toAggregate
 import org.whiteprint.service.user.command.adapter.out.persistence.jpa.mapper.updateEntity
-import org.whiteprint.service.user.command.application.port.out.UserRepository
-import org.whiteprint.service.user.command.domain.model.user.UserAggregate
-import org.whiteprint.service.user.command.domain.policy.user.UserPolicy
-import org.whiteprint.service.user.command.domain.policy.user.UserPolicyException
+import org.whiteprint.service.user.command.application.port.out.persistence.UserRepository
+import org.whiteprint.service.user.command.domain.user.aggregate.UserAggregate
+import org.whiteprint.service.user.command.domain.user.policy.UserPolicy
+import org.whiteprint.service.user.command.domain.user.policy.UserPolicyException
 import kotlin.jvm.optionals.getOrNull
 
 @Repository

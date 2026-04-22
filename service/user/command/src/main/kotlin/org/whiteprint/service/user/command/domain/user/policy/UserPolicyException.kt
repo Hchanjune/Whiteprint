@@ -1,4 +1,4 @@
-package org.whiteprint.service.user.command.domain.policy.user
+package org.whiteprint.service.user.command.domain.user.policy
 
 import org.whiteprint.platform.core.kernel.policy.exception.DomainPolicyException
 

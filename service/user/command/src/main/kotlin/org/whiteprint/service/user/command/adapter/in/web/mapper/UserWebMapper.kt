@@ -2,8 +2,8 @@ package org.whiteprint.service.user.command.adapter.`in`.web.mapper
 
 import org.whiteprint.service.user.command.adapter.`in`.web.request.SignupRequest
 import org.whiteprint.service.user.command.adapter.`in`.web.response.UserResponse
-import org.whiteprint.service.user.command.application.port.`in`.SignupCommand
-import org.whiteprint.service.user.command.domain.model.user.UserAggregate
+import org.whiteprint.service.user.command.application.port.`in`.command.SignupCommand
+import org.whiteprint.service.user.command.domain.user.aggregate.UserAggregate
 
 
 fun SignupRequest.General.toCommand(): SignupCommand.General {

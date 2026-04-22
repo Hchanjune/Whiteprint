@@ -1,4 +1,4 @@
-package org.whiteprint.service.user.command.domain.event
+package org.whiteprint.service.user.command.application.port.out.event
 
 import org.whiteprint.platform.core.messaging.model.event.external.IntegrationEvent
 

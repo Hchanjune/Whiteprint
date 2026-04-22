@@ -6,11 +6,11 @@ import org.whiteprint.service.user.command.adapter.out.persistence.jpa.entity.Us
 import org.whiteprint.service.user.command.adapter.out.persistence.jpa.entity.UserEntity
 import org.whiteprint.service.user.command.adapter.out.persistence.jpa.entity.UserOauthIdentityEntity
 import org.whiteprint.service.user.command.adapter.out.persistence.jpa.entity.UserProfileEntity
-import org.whiteprint.service.user.command.domain.model.user.User
-import org.whiteprint.service.user.command.domain.model.user.UserAggregate
-import org.whiteprint.service.user.command.domain.model.user.UserCredential
-import org.whiteprint.service.user.command.domain.model.user.UserOauthIdentity
-import org.whiteprint.service.user.command.domain.model.user.UserProfile
+import org.whiteprint.service.user.command.domain.user.model.User
+import org.whiteprint.service.user.command.domain.user.aggregate.UserAggregate
+import org.whiteprint.service.user.command.domain.user.model.UserCredential
+import org.whiteprint.service.user.command.domain.user.model.UserOauthIdentity
+import org.whiteprint.service.user.command.domain.user.model.UserProfile
 
 
 fun UserAggregate.createEntity(): UserEntity {

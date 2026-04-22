@@ -16,25 +16,25 @@ import java.time.Instant
 class EventInboxEntity(
     @Id
     @Column(name = "event_id")
-    override val eventId: Long,
+    override var eventId: Long,
 
     @Column(name = "trace_id")
-    override val traceId: String,
+    override var traceId: String,
 
     @Column(name = "causation_id", nullable = true)
-    override val causationId: String?,
+    override var causationId: String?,
 
     @Column(name = "occurred_at")
-    override val occurredAt: Instant,
+    override var occurredAt: Instant,
 
     @Column(name = "issuer")
-    override val issuer: String,
+    override var issuer: String,
 
     @Column(name = "producer")
-    override val producer: String,
+    override var producer: String,
 
     @Column(name = "schema_version")
-    override val schemaVersion: String,
+    override var schemaVersion: String,
 
     @Column(name = "partition_key")
     override var partitionKey: Long,
@@ -44,35 +44,35 @@ class EventInboxEntity(
     override var eventScope: EventScope,
 
     @Column(name = "event_type")
-    override val eventType: String,
+    override var eventType: String,
 
     @Column(name = "payload")
-    override val payload: ByteArray,
+    override var payload: ByteArray,
 
     @Column(name = "payload_json")
-    override val payloadJson: String,
+    override var payloadJson: String,
 
     @Column(name = "metadata_json")
-    override val metadataJson: String,
+    override var metadataJson: String,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    override val status: EventInboxStatus,
+    override var status: EventInboxStatus,
 
     @Column(name = "received_at", nullable = true)
-    override val receivedAt: Instant,
+    override var receivedAt: Instant,
 
     @Column(name = "processed_at", nullable = true)
-    override val processedAt: Instant?,
+    override var processedAt: Instant?,
 
     @Column(name = "attempt_count")
-    override val attemptCount: Int,
+    override var attemptCount: Int,
 
     @Column(name = "last_attempted_at", nullable = true)
-    override val lastAttemptedAt: Instant?,
+    override var lastAttemptedAt: Instant?,
 
     @Column(name = "error_message", nullable = true)
-    override val errorMessage: String?
+    override var errorMessage: String?
 ): EventInbox {
 
     companion object {

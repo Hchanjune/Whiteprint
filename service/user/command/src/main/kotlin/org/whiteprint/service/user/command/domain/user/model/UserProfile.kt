@@ -1,4 +1,4 @@
-package org.whiteprint.service.user.command.domain.model.user
+package org.whiteprint.service.user.command.domain.user.model
 
 import org.whiteprint.platform.core.domain.model.contract.Identifiable
 import java.time.LocalDate

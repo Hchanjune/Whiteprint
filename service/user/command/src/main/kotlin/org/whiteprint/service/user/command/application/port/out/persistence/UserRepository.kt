@@ -1,7 +1,7 @@
-package org.whiteprint.service.user.command.application.port.out
+package org.whiteprint.service.user.command.application.port.out.persistence
 
 import org.whiteprint.platform.core.domain.repository.AggregateRepository
-import org.whiteprint.service.user.command.domain.model.user.UserAggregate
+import org.whiteprint.service.user.command.domain.user.aggregate.UserAggregate
 
 interface UserRepository: AggregateRepository<Long, UserAggregate> {
 
