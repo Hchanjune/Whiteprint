@@ -1,12 +1,9 @@
 package org.whiteprint.service.user.command.domain.user.aggregate
 
 import org.whiteprint.platform.core.domain.model.aggregate.Aggregate
-import org.whiteprint.platform.core.kernel.identifier.TsidGenerator
 import org.whiteprint.service.user.command.domain.user.model.User
 import org.whiteprint.service.user.command.domain.user.model.UserProfile
 import java.io.Serializable
-import java.time.Instant
-import java.time.LocalDate
 
 class UserAggregate private constructor(
     private val user: User,
