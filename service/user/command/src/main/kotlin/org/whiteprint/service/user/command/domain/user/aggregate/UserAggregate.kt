@@ -40,6 +40,7 @@ class UserAggregate private constructor(
 
     companion object {
 
+        fun create(){}
 
     }
 
