@@ -1,5 +1,6 @@
 package org.whiteprint.service.auth.adapter.`in`.web.mapper
 
+import org.whiteprint.platform.core.kernel.clientContext.ClientContext
 import org.whiteprint.platform.core.security.model.AccessTokenClaims
 import org.whiteprint.platform.core.security.model.RefreshToken
 import org.whiteprint.platform.core.security.policy.SecurityException
@@ -19,9 +20,10 @@ import org.whiteprint.service.auth.application.port.`in`.refresh.RefreshResult
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupCommand
 import org.whiteprint.service.auth.application.port.`in`.signup.SignupResult
 
-fun LoginRequest.toCommand() = LoginCommand(
+fun LoginRequest.toCommand(clientContext: ClientContext) = LoginCommand(
     identifier = this.identifier,
-    rawPassword = this.password
+    rawPassword = this.password,
+    clientContext = clientContext,
 )
 
 fun LoginResult.toResponse() = LoginResponse(

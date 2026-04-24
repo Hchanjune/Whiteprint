@@ -7,6 +7,7 @@ import io.github.hchanjune.omk.webmvc.Operations
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.whiteprint.platform.core.messaging.outbox.EventProducer
 import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.model.AccessTokenProfile
 import org.whiteprint.platform.core.security.model.RefreshToken
@@ -15,18 +16,21 @@ import org.whiteprint.platform.core.security.provider.TokenProvider
 import org.whiteprint.service.auth.application.port.`in`.login.LoginCommand
 import org.whiteprint.service.auth.application.port.`in`.login.LoginResult
 import org.whiteprint.service.auth.application.port.`in`.login.LoginUseCase
+import org.whiteprint.service.auth.application.port.out.event.LoginCommittedEvent
 import org.whiteprint.service.auth.application.port.out.persistence.AccountRepository
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicy
 import org.whiteprint.service.auth.domain.accounts.policy.AccountPolicyException
 import org.whiteprint.service.auth.domain.accounts.vo.AccountIdentifier
 import org.whiteprint.service.auth.domain.accounts.vo.RawPassword
+import org.whiteprint.service.auth.domain.audit.vo.LoginLogStatus
 
 @ManagedService
 @Service
 class LoginService(
     private val tokenProvider: TokenProvider,
     private val passwordEncoder: PasswordEncoder,
-    private val repository: AccountRepository
+    private val repository: AccountRepository,
+    private val eventProducer: EventProducer
 ): LoginUseCase {
 
     @ManagedOperation(useCase = "Login")
@@ -75,6 +79,15 @@ class LoginService(
             ).apply {
                 repository.update(accountAggregate)
                 message = "Login successful."
+                eventProducer.produce(
+                    LoginCommittedEvent(
+                        status = LoginLogStatus.SUCCESS,
+                        attemptedIdentifier = command.identifier,
+                        ip = command.clientContext.ip,
+                        client = command.clientContext.type,
+                        platform = command.clientContext.platform,
+                    )
+                )
             }
         } else {
             LoginResult(
@@ -87,6 +100,15 @@ class LoginService(
             ).apply {
                 repository.update(accountAggregate)
                 message = "Login failed."
+                eventProducer.produce(
+                    LoginCommittedEvent(
+                        status = LoginLogStatus.FAIL,
+                        attemptedIdentifier = command.identifier,
+                        ip = command.clientContext.ip,
+                        client = command.clientContext.type,
+                        platform = command.clientContext.platform,
+                    )
+                )
             }
         }
 

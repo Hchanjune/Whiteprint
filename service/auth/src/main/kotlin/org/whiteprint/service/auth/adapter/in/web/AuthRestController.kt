@@ -2,6 +2,7 @@ package org.whiteprint.service.auth.adapter.`in`.web
 
 import io.github.hchanjune.omk.core.annotations.ManagedController
 import io.github.hchanjune.omk.core.annotations.ManagedOperation
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CookieValue
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.whiteprint.platform.adapter.security.verifier.servlet.security.SecurityContextSupport
 import org.whiteprint.platform.adapter.web.servlet.omk.ResponseEntityGenerator
+import org.whiteprint.platform.adapter.web.servlet.request.ClientContextResolver
 import org.whiteprint.platform.core.kernel.model.ApiResponse
 import org.whiteprint.platform.core.security.model.AccessTokenClaims
 import org.whiteprint.platform.core.security.model.RefreshToken
@@ -42,14 +44,16 @@ class AuthRestController(
     private val signupUserCase: SignupUseCase,
     private val loginUseCase: LoginUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val refreshUseCase: RefreshUseCase
+    private val refreshUseCase: RefreshUseCase,
+    private val clientContextResolver: ClientContextResolver,
 ) {
 
     @PostMapping("/login")
     fun login(
+        request: HttpServletRequest,
         @RequestBody loginRequest: LoginRequest
     ): ResponseEntity<ApiResponse<LoginResponse>> {
-        val command = loginRequest.toCommand()
+        val command = loginRequest.toCommand(clientContextResolver.resolve(request))
         val operation = loginUseCase.handle(command)
         if (operation.data.accessToken.value == "LoginFailure" || operation.data.refreshToken.value == "LoginFailure") {
             throw AccountPolicyException(
