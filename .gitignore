@@ -36,3 +36,5 @@ Thumbs.db
 
 ### infra - redis ###
 ./infra/redis/data/
+
+.claude/

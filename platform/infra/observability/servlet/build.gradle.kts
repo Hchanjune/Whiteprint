@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.6.6")
+    api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.6.9")
 }

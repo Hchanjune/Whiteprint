@@ -1,5 +1,6 @@
 package org.whiteprint.service.auth.adapter.out.persistence.jpa.repository
 
+import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 import org.whiteprint.service.auth.adapter.out.persistence.jpa.mapper.AccountJpaMapper
@@ -13,6 +14,7 @@ import org.whiteprint.service.auth.domain.accounts.vo.PhoneNumber
 import org.whiteprint.service.auth.domain.accounts.vo.Username
 
 @Repository
+@ManagedRepository
 class AccountRepositoryImpl(
     private val jpaRepository: AccountJpaRepository,
     private val mapper: AccountJpaMapper,

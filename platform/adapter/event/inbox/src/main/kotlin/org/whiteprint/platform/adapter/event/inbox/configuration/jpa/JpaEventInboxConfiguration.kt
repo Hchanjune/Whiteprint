@@ -26,7 +26,7 @@ import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer
 class JpaEventInboxConfiguration {
 
     @Bean
-    fun eventSerializer(
+    fun inboxEventSerializer(
         serializer: Serializer,
     ): InboxEventSerializer =
         InboxEventSerializerImpl(

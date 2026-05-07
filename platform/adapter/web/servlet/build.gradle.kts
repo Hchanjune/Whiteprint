@@ -16,9 +16,7 @@ repositories {
 dependencies {
     // Cores
     api(project(":platform:core:kernel"))
-
-    //OperationManagerKit
-    api("com.github.Hchanjune.operation-manager-kit:spring-webmvc:0.5.5")
+    api(project(":platform:infra:observability:servlet"))
 
     // Spring WebMVC
     api("org.springframework.boot:spring-boot-starter-web")

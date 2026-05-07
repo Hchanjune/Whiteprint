@@ -171,3 +171,19 @@ adapter:
           - "org.whiteprint.service.auth"
         show-sql: false
         generate-ddl: false
+
+operation-manager:
+  webmvc:
+    logging:
+      enabled: true
+      pretty: true
+      spans: true
+    context-aspect:
+      enabled: true
+    context-filter:
+      enabled: true
+    async-propagation:
+      enabled: true
+    telemetry:
+      propagation:
+        mode: w3c_standard

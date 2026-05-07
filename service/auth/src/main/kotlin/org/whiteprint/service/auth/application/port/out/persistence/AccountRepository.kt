@@ -1,6 +1,5 @@
 package org.whiteprint.service.auth.application.port.out.persistence
 
-import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.whiteprint.platform.core.domain.repository.AggregateRepository
 import org.whiteprint.service.auth.domain.accounts.aggregate.AccountAggregate
 import org.whiteprint.service.auth.domain.accounts.vo.AccountIdentifier
@@ -8,7 +7,6 @@ import org.whiteprint.service.auth.domain.accounts.vo.Email
 import org.whiteprint.service.auth.domain.accounts.vo.PhoneNumber
 import org.whiteprint.service.auth.domain.accounts.vo.Username
 
-@ManagedRepository
 interface AccountRepository: AggregateRepository<Long, AccountAggregate> {
 
     fun existsByUsername(username: Username): Boolean

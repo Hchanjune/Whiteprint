@@ -46,7 +46,7 @@ class JpaEventOutboxConfiguration {
         OutboxEventContextProvider()
 
     @Bean
-    fun eventSerializer(
+    fun outBoxEventSerializer(
         serializer: Serializer,
     ): OutboxEventSerializer =
         OutboxEventSerializerImpl(
