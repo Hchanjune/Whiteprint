@@ -3,9 +3,12 @@ package org.whiteprint.service.user.command
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.whiteprint.platform.infra.persistence.jpa.repository.OptimizedJpaRepository
 
 @SpringBootApplication
-@EnableJpaRepositories
+@EnableScheduling
+@EnableJpaRepositories(repositoryBaseClass = OptimizedJpaRepository::class)
 class UserCommandApplication
 
 fun main(args: Array<String>) {

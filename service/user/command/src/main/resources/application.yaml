@@ -10,16 +10,11 @@ adapter:
         key-alias: access-token-sig
         expected-issuers:
           - Whiteprint
-      entry-points:
-        - path: /test
+        header-name: Authorization
+        scheme: Bearer
+      permitted-entry-points:
+        - path: /api/v1/auth/login
           method: GET
-          decision: PERMIT
-        - path: /test
-          method: POST
-          decision: PERMIT
-        - path: /api/v1/users/signup
-          method: POST
-          decision: PERMIT
       kms:
         datasource:
           host: 192.168.0.12
@@ -55,13 +50,14 @@ adapter:
         topic-policy:
           auto-create: true
           prefix: test
-          topic: user
           version: v1
           separator: .
-          default-partitions: 3
-          default-replication-factor: 1
-          retention-millis: 604800000
-          cleanup-policy: delete
+          topics:
+            "[account.created]":
+              partitions: 3
+              replication-factor: 1
+              retention-millis: 604800000
+              cleanup-policy: delete
         producer:
           acks: all
           batch-size: 16384
@@ -119,7 +115,7 @@ adapter:
         driver-class-name: ~ #Automatically Configured. Skip Recommended
         host: 192.168.0.12
         port: 5432
-        database-name: postgres
+        database-name: auth
         #parameters:
         username: postgres
         password: postgres
@@ -164,13 +160,16 @@ management:
 
 operation-manager:
   webmvc:
-    mdc-service-aspect:
-      enabled: true
-    micrometer:
-      enabled: true
     logging:
       enabled: true
       pretty: true
-      json: true
-      success-level: INFO
-      failure-level: ERROR
+      spans: true
+    context-aspect:
+      enabled: true
+    context-filter:
+      enabled: true
+    async-propagation:
+      enabled: true
+    telemetry:
+      propagation:
+        mode: w3c_standard

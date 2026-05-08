@@ -2,14 +2,14 @@ package org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer
 
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.entity.EventInboxEntity
 import org.whiteprint.platform.core.messaging.contract.EnvelopeOpener
-import org.whiteprint.platform.core.messaging.contract.EventSerializer
 import org.whiteprint.platform.core.messaging.inbox.EventInbox
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStatus
+import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer
 import org.whiteprint.platform.core.messaging.model.EventEnvelope
 import java.time.Instant
 
 class InboxEnvelopeOpener(
-    private val eventSerializer: EventSerializer,
+    private val eventSerializer: InboxEventSerializer,
 ): EnvelopeOpener {
 
     override fun open(envelope: EventEnvelope): EventInbox {
