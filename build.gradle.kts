@@ -11,7 +11,7 @@ plugins {
 
 allprojects {
     group = "org.whiteprint"
-    version = "0.0.1-SNAPSHOT"
+    version = "ALPHA"
 
     repositories {
         mavenLocal()
