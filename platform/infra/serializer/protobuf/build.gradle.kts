@@ -4,7 +4,6 @@ plugins {
 }
 
 group = "org.whiteprint.platform.infra.serializer"
-version = "0.0.1-SNAPSHOT"
 
 dependencies {
     api(project(":platform:core:kernel"))

@@ -6,7 +6,6 @@ plugins {
 }
 
 group = "org.whiteprint.platform.infra.cache"
-version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()

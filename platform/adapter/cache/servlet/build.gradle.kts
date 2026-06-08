@@ -5,8 +5,7 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "org.whitepring.platform.adapter.cache.servlet"
-version = "0.0.1-SNAPSHOT"
+group = "org.whiteprint.platform.adapter.cache.servlet"
 
 dependencies {
     api(project(":platform:infra:cache:redis"))

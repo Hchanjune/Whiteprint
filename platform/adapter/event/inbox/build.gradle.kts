@@ -7,7 +7,6 @@ plugins {
 }
 
 group = "org.whiteprint.platform.adapter.messaging"
-version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()

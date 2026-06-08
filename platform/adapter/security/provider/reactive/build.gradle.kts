@@ -2,8 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "com.hc"
-version = "0.0.1-SNAPSHOT"
+group = "org.whiteprint.platform.adapter.security.provider"
 
 repositories {
     mavenCentral()

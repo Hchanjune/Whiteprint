@@ -2,8 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "org.whitepring.platform.adapter.security.verifier"
-version = "0.0.1-SNAPSHOT"
+group = "org.whiteprint.platform.adapter.security.verifier"
 
 dependencies {
     testImplementation(kotlin("test"))

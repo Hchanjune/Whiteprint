@@ -5,8 +5,7 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "org.whitepring.platform.adapter.security.verifier"
-version = "0.0.1-SNAPSHOT"
+group = "org.whiteprint.platform.adapter.security.verifier"
 
 dependencies {
     api(project(":platform:core:kernel"))

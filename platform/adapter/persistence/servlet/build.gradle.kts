@@ -7,7 +7,6 @@ plugins {
 }
 
 group = "org.whiteprint.platform.adapter.persistence"
-version = "0.0.1-SNAPSHOT"
 
 dependencies {
     api(project(":platform:core:kernel"))

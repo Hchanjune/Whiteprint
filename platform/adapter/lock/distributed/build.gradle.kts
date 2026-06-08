@@ -6,7 +6,6 @@ plugins {
 }
 
 group = "org.whiteprint.platform.adapter.lock"
-version = "0.0.1-SNAPSHOT"
 
 dependencies {
     api(project(":platform:core:cache"))

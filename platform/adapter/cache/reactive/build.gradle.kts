@@ -5,8 +5,7 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "org.whitepring.platform.adapter.cache.reactive"
-version = "0.0.1-SNAPSHOT"
+group = "org.whiteprint.platform.adapter.cache.reactive"
 
 kotlin {
     jvmToolchain(21)

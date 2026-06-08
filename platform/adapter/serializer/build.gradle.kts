@@ -5,8 +5,7 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "org.whitepring.platform.adapter.serializer"
-version = "0.0.1-SNAPSHOT"
+group = "org.whiteprint.platform.adapter.serializer"
 dependencies {
     api(project(":platform:infra:serializer:jackson"))
     api(project(":platform:infra:serializer:protobuf"))
