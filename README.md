@@ -124,8 +124,10 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Hchanjune.Whiteprint:<module-name>:<version>")
+    implementation("com.github.Hchanjune.Whiteprint:core-kernel:<version>")
+    implementation("com.github.Hchanjune.Whiteprint:adapter-web-servlet:<version>")
+    implementation("com.github.Hchanjune.Whiteprint:infra-messaging-kafka:<version>")
 }
 ```
 
-Pick whichever `platform:*` modules your service needs — there's no single monolithic dependency to pull in. A complete reference implementation (an auth service built entirely on this platform) lives under [`sample/`](./sample).
+Artifact names are the module's Gradle path with the `platform:` prefix dropped and `:` replaced by `-` — e.g. `platform:adapter:web:servlet` becomes `adapter-web-servlet` (see the Module Reference tables above for the full list). Pick whichever `platform:*` modules your service needs — there's no single monolithic dependency to pull in. A complete reference implementation (an auth service built entirely on this platform) lives under [`sample/`](./sample).

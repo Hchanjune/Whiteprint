@@ -124,8 +124,10 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Hchanjune.Whiteprint:<module-name>:<version>")
+    implementation("com.github.Hchanjune.Whiteprint:core-kernel:<version>")
+    implementation("com.github.Hchanjune.Whiteprint:adapter-web-servlet:<version>")
+    implementation("com.github.Hchanjune.Whiteprint:infra-messaging-kafka:<version>")
 }
 ```
 
-서비스에 필요한 `platform:*` 모듈만 골라 쓰면 되며, 하나의 거대한 의존성을 통째로 끌어올 필요가 없습니다. 이 플랫폼 위에서 동작하는 완전한 레퍼런스 구현체(인증 서비스)는 [`sample/`](./sample) 디렉터리에서 확인할 수 있습니다.
+아티팩트 이름은 모듈의 Gradle 경로에서 `platform:` 접두사를 떼고 `:`을 `-`로 바꾼 형태입니다 — 예를 들어 `platform:adapter:web:servlet`은 `adapter-web-servlet`이 됩니다 (전체 목록은 위 모듈 구성 표 참고). 서비스에 필요한 `platform:*` 모듈만 골라 쓰면 되며, 하나의 거대한 의존성을 통째로 끌어올 필요가 없습니다. 이 플랫폼 위에서 동작하는 완전한 레퍼런스 구현체(인증 서비스)는 [`sample/`](./sample) 디렉터리에서 확인할 수 있습니다.
