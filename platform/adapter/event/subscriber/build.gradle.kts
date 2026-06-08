@@ -5,7 +5,7 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "org.whiteprint.platform.adapter.event"
+group = "org.whiteprint.platform.adapter.messaging"
 
 dependencies {
     api(project(":platform:core:messaging"))

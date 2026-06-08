@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "org.whiteprint.platform.infra.persistence"
+group = "org.whiteprint.platform.infra.security"
 
 dependencies {
     api(project(":platform:core:security"))

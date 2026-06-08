@@ -1,3 +1,4 @@
+import org.gradle.api.plugins.BasePluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.Jar
@@ -33,6 +34,18 @@ subprojects {
     // java plugin actually being applied so only real leaf modules get configured.
     if (project.path.startsWith(":platform:")) {
         plugins.withId("java") {
+            // Gradle defaults both the jar's archive base name and the Maven artifactId to the
+            // leaf project name, which collides across modules that share a leaf directory name
+            // (e.g. five different ":...:servlet" projects all producing "servlet-<version>.jar").
+            // That collision breaks more than just publishing — bundling two same-named jars into
+            // a service's bootJar fails with "BOOT-INF/lib/servlet-<version>.jar is a duplicate".
+            // Deriving a unique name from the full module path fixes both at once.
+            val uniqueModuleName = project.path.removePrefix(":platform:").replace(":", "-")
+
+            extensions.configure<BasePluginExtension> {
+                archivesName.set(uniqueModuleName)
+            }
+
             apply(plugin = "maven-publish")
 
             // Spring Boot disables the plain `jar` task in favor of the executable `bootJar`;
@@ -53,10 +66,7 @@ subprojects {
                     publications {
                         create<MavenPublication>("maven") {
                             from(components["java"])
-                            // Gradle defaults artifactId to the leaf project name, which collides
-                            // across modules (e.g. multiple ":...:servlet" projects). Derive a
-                            // unique, predictable id from the full module path instead.
-                            artifactId = project.path.removePrefix(":platform:").replace(":", "-")
+                            artifactId = uniqueModuleName
                         }
                     }
                 }

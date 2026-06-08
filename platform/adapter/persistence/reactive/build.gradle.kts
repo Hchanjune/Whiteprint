@@ -5,4 +5,4 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "org.whiteprint.platform.adapter.web"
+group = "org.whiteprint.platform.adapter.persistence"
