@@ -1,6 +1,0 @@
-package org.whiteprint.service.auth.domain.accounts.vo
-
-enum class AccountLock {
-    NONE,
-    ADMIN_LOCK
-}

@@ -1,12 +1,10 @@
 rootProject.name = "Whiteprint"
 
-// Application
-include("service:auth")
+// Application Sample
+include("sample:auth")
 
-include("service:user:command")
-include("service:user:query")
-
-include("service:test")
+include("sample:user:command")
+include("sample:user:query")
 
 // Platform Adapter
 include("platform:adapter:serializer")
@@ -40,6 +38,7 @@ include("platform:infra:cache:redis")
 include("platform:infra:messaging:kafka")
 
 include("platform:infra:observability:servlet")
+include("platform:infra:observability:reactive")
 
 include("platform:infra:client:armeria")
 

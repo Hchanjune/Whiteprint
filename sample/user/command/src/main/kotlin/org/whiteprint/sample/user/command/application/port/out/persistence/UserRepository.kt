@@ -1,0 +1,14 @@
+package org.whiteprint.sample.user.command.application.port.out.persistence
+
+import org.whiteprint.platform.core.domain.repository.AggregateRepository
+import org.whiteprint.sample.user.command.domain.user.aggregate.UserAggregate
+
+interface UserRepository: AggregateRepository<Long, UserAggregate> {
+
+    fun findByEmailOrThrow(email: String): UserAggregate
+
+    fun existsByUsername(username: String): Boolean
+
+    fun existsByEmail(email: String): Boolean
+
+}

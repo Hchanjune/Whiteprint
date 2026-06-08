@@ -1,0 +1,14 @@
+package org.whiteprint.sample.auth.application.port.`in`.signup
+
+import org.whiteprint.sample.auth.domain.accounts.vo.Email
+import org.whiteprint.sample.auth.domain.accounts.vo.PhoneNumber
+import org.whiteprint.sample.auth.domain.accounts.vo.Username
+import java.time.Instant
+
+data class SignupResult (
+    val id: Long,
+    val username: Username,
+    val email: Email,
+    val phoneNumber: PhoneNumber,
+    val signedUpAt: Instant,
+)
