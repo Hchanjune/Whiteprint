@@ -13,7 +13,6 @@ dependencies {
     api(project(":platform:infra:observability:servlet"))
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
 
 kotlin {

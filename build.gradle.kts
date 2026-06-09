@@ -10,6 +10,7 @@ plugins {
     kotlin("jvm") version "2.3.20" apply false
     kotlin("plugin.jpa") version "2.3.20" apply false
     kotlin("plugin.spring") version "2.3.20" apply false
+    kotlin("kapt") version "2.3.20" apply false
 
     id("com.google.protobuf") version "0.9.4" apply false
 }
@@ -33,6 +34,13 @@ subprojects {
     // "phantom" projects (e.g. ":platform:adapter") with no java component — gate on the
     // java plugin actually being applied so only real leaf modules get configured.
     if (project.path.startsWith(":platform:")) {
+        plugins.withId("org.springframework.boot") {
+            apply(plugin = "org.jetbrains.kotlin.kapt")
+            dependencies {
+                "kapt"("org.springframework.boot:spring-boot-configuration-processor")
+            }
+        }
+
         plugins.withId("java") {
             // Gradle defaults both the jar's archive base name and the Maven artifactId to the
             // leaf project name, which collides across modules that share a leaf directory name
