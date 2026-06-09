@@ -19,7 +19,7 @@ allprojects {
     group = "org.whiteprint"
     // JitPack injects the requested git tag/commit via the VERSION env var so the
     // published artifact version always matches the coordinate consumers ask for.
-    version = System.getenv("VERSION") ?: "0.0.1"
+    version = System.getenv("VERSION") ?: "0.0.3"
 
     repositories {
         mavenCentral()

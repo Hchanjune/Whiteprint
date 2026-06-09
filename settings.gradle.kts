@@ -6,6 +6,9 @@ include("sample:auth")
 include("sample:user:command")
 include("sample:user:query")
 
+// BOM
+include("platform:bom")
+
 // Platform Adapter
 include("platform:adapter:serializer")
 

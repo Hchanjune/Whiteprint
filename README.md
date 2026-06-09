@@ -116,7 +116,7 @@ Kotlin 2.3.20 · Spring Boot 4.0.6 · Java 21 · Apache Kafka · Redis · Postgr
 
 ## Getting Started
 
-Add Whiteprint to your Gradle build via JitPack — that's it:
+Add the JitPack repository and import the BOM, then pick whichever modules your service needs — no per-dependency version required:
 
 ```kotlin
 repositories {
@@ -124,10 +124,18 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Hchanjune.Whiteprint:core-kernel:<version>")
-    implementation("com.github.Hchanjune.Whiteprint:adapter-web-servlet:<version>")
-    implementation("com.github.Hchanjune.Whiteprint:infra-messaging-kafka:<version>")
+    // Import the BOM — all Whiteprint module versions are managed from this one line
+    implementation(platform("com.github.Hchanjune.Whiteprint:whiteprint-bom:<version>"))
+
+    // Pick the modules your service needs — no version needed
+    implementation("com.github.Hchanjune.Whiteprint:adapter-web-servlet")
+    implementation("com.github.Hchanjune.Whiteprint:adapter-security-verifier-servlet")
+    implementation("com.github.Hchanjune.Whiteprint:adapter-security-provider-servlet")
+    implementation("com.github.Hchanjune.Whiteprint:adapter-event-outbox")
+    implementation("com.github.Hchanjune.Whiteprint:adapter-event-publisher")
 }
 ```
 
-Artifact names are the module's Gradle path with the `platform:` prefix dropped and `:` replaced by `-` — e.g. `platform:adapter:web:servlet` becomes `adapter-web-servlet` (see the Module Reference tables above for the full list). Pick whichever `platform:*` modules your service needs — there's no single monolithic dependency to pull in. A complete reference implementation (an auth service built entirely on this platform) lives under [`sample/`](./sample).
+To upgrade, change only the BOM version — all modules update together.
+
+Artifact names follow a simple rule: drop the `platform:` prefix from the Gradle module path and replace `:` with `-` — e.g. `platform:adapter:web:servlet` becomes `adapter-web-servlet`. See the Module Reference tables above for the full list. A complete reference implementation (an auth service built entirely on this platform) lives under [`sample/`](./sample).
