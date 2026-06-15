@@ -81,7 +81,7 @@ class PlatformExceptionHandler {
         val response = ApiResponse.clientError(
             id = TsidGenerator.generate().toString(),
             traceId = Operations.context.traceId,
-            message = "Resource not found: ${exception.resourcePath}",
+            message = "[METHOD: ${exception.httpMethod}]Resource not found: ${exception.resourcePath}",
         )
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response)
     }
@@ -188,6 +188,18 @@ class PlatformExceptionHandler {
             message = "Missing required cookie: '${exception.cookieName}'",
         )
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    // UnknownException
+    @ExceptionHandler(RuntimeException::class)
+    fun handleUnknownException(exception: RuntimeException): ResponseEntity<ApiResponse<Any?>> {
+        val response = ApiResponse.error(
+            id = TsidGenerator.generate().toString(),
+            traceId = Operations.context.traceId,
+            data = "UNKNOWN ERROR OCCURRED",
+            exception = exception,
+        )
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response)
     }
 
 }
