@@ -73,5 +73,11 @@ enum class SecurityPolicy(
         500,
         "TOKEN_VERIFICATION_KEY_ERROR",
         "Verification should be handled by Verifier with Public Key."
+    ),
+
+    PERMISSION_DENIED(
+        403,
+        "PERMISSION_DENIED",
+        "You do not have the required permission to perform this action."
     )
 }
