@@ -19,6 +19,7 @@ dependencies {
 
     // Spring WebMVC
     api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework:spring-tx")
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springframework.boot:spring-boot-starter-aspectj")
     api("org.springframework.boot:spring-boot-starter-validation")

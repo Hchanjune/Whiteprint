@@ -22,6 +22,7 @@ import org.whiteprint.platform.core.kernel.model.ApiResponse
 import org.whiteprint.platform.core.kernel.policy.exception.DomainPolicyException
 import org.whiteprint.platform.core.kernel.policy.exception.DomainValidationException
 import org.whiteprint.platform.core.kernel.policy.exception.StandardException
+import org.springframework.dao.OptimisticLockingFailureException
 import tools.jackson.databind.exc.InvalidFormatException
 import tools.jackson.databind.exc.MismatchedInputException
 
@@ -188,6 +189,17 @@ class PlatformExceptionHandler {
             message = "Missing required cookie: '${exception.cookieName}'",
         )
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    // Optimistic Lock Exception (Platform Version Field)
+    @ExceptionHandler(OptimisticLockingFailureException::class)
+    fun handleOptimisticLock(exception: OptimisticLockingFailureException): ResponseEntity<ApiResponse<Any?>> {
+        val response = ApiResponse.clientError(
+            id = TsidGenerator.generate().toString(),
+            traceId = Operations.context.traceId,
+            message = "Resource was modified by another request. Please retry.",
+        )
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response)
     }
 
     // UnknownException

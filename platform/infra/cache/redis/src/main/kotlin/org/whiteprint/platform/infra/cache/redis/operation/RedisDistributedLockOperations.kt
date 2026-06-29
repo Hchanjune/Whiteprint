@@ -3,10 +3,10 @@ package org.whiteprint.platform.infra.cache.redis.operation
 import org.whiteprint.platform.infra.cache.redis.model.FencingKey
 import org.whiteprint.platform.infra.cache.redis.model.LuaScript
 import org.springframework.data.redis.core.RedisTemplate
-import org.whiteprint.platform.core.cache.model.CacheKey
-import org.whiteprint.platform.core.cache.model.CacheLockHandle
 import org.whiteprint.platform.core.cache.model.CacheValidator
-import org.whiteprint.platform.core.cache.operation.DistributedLockOperations
+import org.whiteprint.platform.core.lock.model.LockHandle
+import org.whiteprint.platform.core.lock.model.LockKey
+import org.whiteprint.platform.core.lock.operation.DistributedLockOperations
 import java.time.Duration
 
 class RedisDistributedLockOperations(
@@ -75,9 +75,9 @@ class RedisDistributedLockOperations(
     }
 
     override fun acquireLock(
-        key: CacheKey,
+        key: LockKey,
         ttl: Duration
-    ): CacheLockHandle? {
+    ): LockHandle? {
 
         CacheValidator.validateTtlOrThrow(ttl)
 
@@ -93,14 +93,14 @@ class RedisDistributedLockOperations(
 
         if (token == null || token <= 0) return null
 
-        return CacheLockHandle(
+        return LockHandle(
             key = key,
             owner = owner,
             fencingToken = token
         )
     }
 
-    override fun releaseLock(lock: CacheLockHandle): Boolean {
+    override fun releaseLock(lock: LockHandle): Boolean {
 
         val result = redisTemplate.execute(
             releaseLockScript.redisScript,
@@ -111,7 +111,7 @@ class RedisDistributedLockOperations(
         return result == 1L
     }
 
-    override fun extendLock(lock: CacheLockHandle, ttl: Duration): Boolean {
+    override fun extendLock(lock: LockHandle, ttl: Duration): Boolean {
 
         CacheValidator.validateTtlOrThrow(ttl)
 

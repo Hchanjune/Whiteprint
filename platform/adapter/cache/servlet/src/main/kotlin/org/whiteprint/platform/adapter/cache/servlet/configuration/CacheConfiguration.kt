@@ -6,19 +6,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.whiteprint.platform.core.cache.operation.AtomicOperations
 import org.whiteprint.platform.core.cache.operation.BatchOperations
-import org.whiteprint.platform.core.cache.operation.DistributedLockOperations
 import org.whiteprint.platform.core.cache.operation.ListOperations
 import org.whiteprint.platform.core.cache.operation.SetOperations
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.cache.provider.CacheProvider
-import org.whiteprint.platform.core.cache.provider.DistributedLockOwnerProvider
 import org.whiteprint.platform.infra.cache.redis.operation.RedisAtomicOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisBatchOperations
-import org.whiteprint.platform.infra.cache.redis.operation.RedisDistributedLockOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisListOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisSetOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisValueOperations
-import org.whiteprint.platform.infra.cache.redis.provider.DefaultDistributedLockOwnerProvider
 import org.whiteprint.platform.infra.cache.redis.provider.RedisCacheProvider
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -105,28 +101,14 @@ class CacheConfiguration(
     @Bean
     fun redisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
         return RedisTemplate<String, Any>().apply {
-            setConnectionFactory(connectionFactory)
-            keySerializer = RedisSerializer.string()
-            hashKeySerializer = RedisSerializer.string()
-            valueSerializer = RedisSerializer.json()
-            hashValueSerializer = RedisSerializer.json()
-            afterPropertiesSet()
+            this.connectionFactory = connectionFactory
+            this.keySerializer = RedisSerializer.string()
+            this.hashKeySerializer = RedisSerializer.string()
+            this.valueSerializer = RedisSerializer.json()
+            this.hashValueSerializer = RedisSerializer.json()
+            this.afterPropertiesSet()
         }
     }
-
-    @Bean
-    fun distributedLockOwnerProvider(): DistributedLockOwnerProvider =
-        DefaultDistributedLockOwnerProvider()
-
-    @Bean
-    fun distributedLockOperations(
-        redisTemplate: RedisTemplate<String, Any>,
-        distributedLockOwnerProvider: DistributedLockOwnerProvider,
-    ): DistributedLockOperations =
-        RedisDistributedLockOperations(
-            redisTemplate,
-            distributedLockOwnerProvider.provideOwner()
-        )
 
     @Bean
     fun valueOperations(
@@ -165,14 +147,12 @@ class CacheConfiguration(
         batchOperations: BatchOperations,
         listOperations: ListOperations,
         setOperations: SetOperations,
-        distributedLockOperations: DistributedLockOperations
     ): CacheProvider = RedisCacheProvider(
         value = valueOperations,
         atomic = atomicOperation,
         batch = batchOperations,
         list = listOperations,
         set = setOperations,
-        lock = distributedLockOperations
     )
 
 }

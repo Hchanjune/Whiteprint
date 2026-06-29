@@ -1,6 +1,6 @@
 package org.whiteprint.platform.infra.cache.redis.provider
 
-import org.whiteprint.platform.core.cache.provider.DistributedLockOwnerProvider
+import org.whiteprint.platform.core.lock.provider.DistributedLockOwnerProvider
 import java.net.InetAddress
 import java.util.UUID
 
