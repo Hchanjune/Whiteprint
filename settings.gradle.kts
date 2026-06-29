@@ -35,6 +35,8 @@ include("platform:adapter:web:reactive")
 
 // Platform Infra
 include("platform:infra:persistence:jpa")
+include("platform:infra:persistence:mongo:reactive")
+include("platform:infra:persistence:mongo:servlet")
 
 include("platform:infra:cache:redis")
 
@@ -55,6 +57,7 @@ include("platform:infra:kms:vault")
 // Platform Core
 include("platform:core:kernel")
 include("platform:core:domain")
+include("platform:core:projection")
 include("platform:core:cache")
 include("platform:core:lock")
 include("platform:core:messaging")

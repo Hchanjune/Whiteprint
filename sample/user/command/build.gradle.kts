@@ -25,7 +25,7 @@ dependencies {
 	implementation(project(":platform:adapter:persistence:servlet"))
 	runtimeOnly("org.postgresql:postgresql")
 
-	implementation(project(":platform:adapter:lock:distributed"))
+	implementation(project(":platform:adapter:lock:distributed:servlet"))
 
 	implementation(project(":platform:adapter:event:outbox"))
 	implementation(project(":platform:adapter:event:publisher"))

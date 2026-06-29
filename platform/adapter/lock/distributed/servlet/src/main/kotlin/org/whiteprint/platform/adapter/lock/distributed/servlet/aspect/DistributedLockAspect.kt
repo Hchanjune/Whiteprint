@@ -1,5 +1,13 @@
 package org.whiteprint.platform.adapter.lock.distributed.servlet.aspect
 
+import io.github.hchanjune.omk.core.metric.MetricDescriptor
+import io.github.hchanjune.omk.core.metric.MetricKind
+import io.github.hchanjune.omk.core.metric.MetricLayer
+import io.github.hchanjune.omk.core.metric.MetricName
+import io.github.hchanjune.omk.core.metric.MetricPolicy
+import io.github.hchanjune.omk.core.metric.MetricTags
+import io.github.hchanjune.omk.core.provider.SpanIdProvider
+import io.github.hchanjune.omk.webmvc.Operations
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -15,7 +23,8 @@ import java.time.Duration
 
 @Aspect
 class DistributedLockAspect(
-    private val lockOperations: DistributedLockOperations
+    private val lockOperations: DistributedLockOperations,
+    private val spanIdProvider: SpanIdProvider,
 ) {
 
     @Around("@annotation(distributedLock)")
@@ -23,15 +32,80 @@ class DistributedLockAspect(
         val key = buildLockKey(joinPoint, distributedLock)
         val ttl = Duration.ofMillis(distributedLock.ttlMillis)
 
-        val lock = acquireWithWait(key, ttl, distributedLock.waitMillis)
+        val lock = acquireWithSpan(key, ttl, distributedLock.waitMillis)
             ?: throw LockException(LockPolicy.ACQUISITION_FAILED, mapOf("key" to key.value))
 
         return try {
             joinPoint.proceed()
         } finally {
-            lockOperations.releaseLock(lock)
+            releaseWithSpan(lock, key)
         }
     }
+
+    private fun acquireWithSpan(key: LockKey, ttl: Duration, waitMillis: Long): LockHandle? {
+        if (!Operations.hasContext) return acquireWithWait(key, ttl, waitMillis)
+
+        val context = Operations.context
+        val span = context.push(
+            name = MetricName("lock.acquire"),
+            kind = MetricKind.TIMER,
+            policy = MetricPolicy.defaults(),
+            tags = buildTags(key, context.operation),
+            descriptor = MetricDescriptor(
+                operation = context.operation,
+                useCase = context.useCase,
+                layer = MetricLayer.EXTERNAL,
+            ),
+            idProvider = spanIdProvider,
+        )
+
+        return try {
+            val lock = acquireWithWait(key, ttl, waitMillis)
+            span.end()
+            context.pop()
+            lock
+        } catch (e: Throwable) {
+            span.end(e)
+            context.pop()
+            throw e
+        }
+    }
+
+    private fun releaseWithSpan(lock: LockHandle, key: LockKey) {
+        if (!Operations.hasContext) {
+            lockOperations.releaseLock(lock)
+            return
+        }
+
+        val context = Operations.context
+        val span = context.push(
+            name = MetricName("lock.release"),
+            kind = MetricKind.TIMER,
+            policy = MetricPolicy.defaults(),
+            tags = buildTags(key, context.operation),
+            descriptor = MetricDescriptor(
+                operation = context.operation,
+                useCase = context.useCase,
+                layer = MetricLayer.EXTERNAL,
+            ),
+            idProvider = spanIdProvider,
+        )
+
+        try {
+            lockOperations.releaseLock(lock)
+            span.end()
+            context.pop()
+        } catch (e: Throwable) {
+            span.end(e)
+            context.pop()
+        }
+    }
+
+    private fun buildTags(key: LockKey, operation: String): MetricTags =
+        MetricTags.Builder()
+            .put("lock_key", key.value)
+            .put("operation", operation)
+            .build()
 
     private fun buildLockKey(joinPoint: ProceedingJoinPoint, annotation: DistributedLock): LockKey {
         val method = (joinPoint.signature as MethodSignature).method
@@ -40,14 +114,12 @@ class DistributedLockAspect(
 
         val keyValues = mutableListOf<String>()
 
-        // 파라미터에 직접 @DistributedLockKey가 붙은 경우
         params.forEachIndexed { i, param ->
             if (param.isAnnotationPresent(DistributedLockKey::class.java)) {
                 args[i]?.let { keyValues.add(it.toString()) }
             }
         }
 
-        // 파라미터 객체의 필드/프로퍼티에 @DistributedLockKey가 붙은 경우
         if (keyValues.isEmpty()) {
             args.forEach { arg ->
                 if (arg == null) return@forEach
@@ -61,10 +133,7 @@ class DistributedLockAspect(
         }
 
         if (keyValues.isEmpty()) {
-            throw LockException(
-                LockPolicy.NO_LOCK_KEY_DEFINED,
-                mapOf("key" to method.name)
-            )
+            throw LockException(LockPolicy.NO_LOCK_KEY_DEFINED, mapOf("key" to method.name))
         }
 
         val keyPart = if (keyValues.size == 1) keyValues[0]

@@ -14,6 +14,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializer
+import io.github.hchanjune.omk.core.provider.SpanIdProvider
 import org.whiteprint.platform.adapter.lock.distributed.servlet.aspect.DistributedLockAspect
 import org.whiteprint.platform.core.lock.operation.DistributedLockOperations
 import org.whiteprint.platform.core.lock.provider.DistributedLockOwnerProvider
@@ -87,7 +88,8 @@ class DistributedLockConfiguration(
     @Bean
     fun distributedLockAspect(
         lockOperations: DistributedLockOperations,
+        spanIdProvider: SpanIdProvider,
     ): DistributedLockAspect =
-        DistributedLockAspect(lockOperations)
+        DistributedLockAspect(lockOperations, spanIdProvider)
 
 }

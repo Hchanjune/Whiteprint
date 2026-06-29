@@ -8,5 +8,6 @@ data class EventOutboxAutoConfigurationProperties(
 ) {
     enum class InfrastructureImplementation {
         JPA,
+        MONGO,
     }
 }

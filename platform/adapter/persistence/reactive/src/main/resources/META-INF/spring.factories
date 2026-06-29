@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
+org.whiteprint.platform.adapter.persistence.reactive.guards.StarterConfigGuardFilter

@@ -15,6 +15,7 @@ repositories {
 dependencies {
     api(project(":platform:core:messaging"))
     api(project(":platform:infra:persistence:jpa"))
+    api(project(":platform:infra:persistence:mongo:servlet"))
 
     api(project(":platform:infra:observability:servlet"))
 

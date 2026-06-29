@@ -11,6 +11,7 @@ group = "org.whiteprint.platform.adapter.persistence"
 dependencies {
     api(project(":platform:core:kernel"))
     api(project(":platform:infra:persistence:jpa"))
+    api(project(":platform:infra:persistence:mongo:servlet"))
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
 }

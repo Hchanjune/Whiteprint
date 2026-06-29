@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.event.inbox.configuration.jpa.serializer
+package org.whiteprint.platform.adapter.event.inbox.configuration.serializer
 
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer

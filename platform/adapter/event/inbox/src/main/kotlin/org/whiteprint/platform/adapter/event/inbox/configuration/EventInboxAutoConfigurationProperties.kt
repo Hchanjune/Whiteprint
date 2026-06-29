@@ -8,6 +8,6 @@ data class EventInboxAutoConfigurationProperties(
 ) {
     enum class InfrastructureImplementation {
         JPA,
-        MONGODB_REACTIVE
+        MONGO,
     }
 }

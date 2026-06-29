@@ -8,7 +8,7 @@ import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.In
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEventConsumer
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.JpaEventInboxStore
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.repository.JpaEventInboxRepository
-import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.serializer.InboxEventSerializerImpl
+import org.whiteprint.platform.adapter.event.inbox.configuration.serializer.InboxEventSerializerImpl
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EnvelopeOpener
 import org.whiteprint.platform.core.messaging.inbox.EventConsumer

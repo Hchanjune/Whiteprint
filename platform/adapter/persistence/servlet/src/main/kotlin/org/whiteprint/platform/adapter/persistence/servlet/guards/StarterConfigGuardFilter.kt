@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurationMetadata
 import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
 import org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration
+import org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration
 import org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration
 import kotlin.jvm.java
 
@@ -15,6 +16,7 @@ class StarterConfigGuardFilter: AutoConfigurationImportFilter {
         HibernateJpaAutoConfiguration::class.java.name,
         TransactionAutoConfiguration::class.java.name,
         JdbcTemplateAutoConfiguration::class.java.name,
+        MongoAutoConfiguration::class.java.name,
     )
 
     override fun match(

@@ -5,9 +5,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Import
 import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.JpaConfiguration
 import org.whiteprint.platform.adapter.persistence.servlet.configurations.jpa.JpaConfigurationProperties
+import org.whiteprint.platform.adapter.persistence.servlet.configurations.mongo.MongoConfiguration
 
 @AutoConfiguration
-@Import(JpaConfiguration::class)
+@Import(JpaConfiguration::class, MongoConfiguration::class)
 @EnableConfigurationProperties(
     PersistenceConfigurationProperties::class,
     JpaConfigurationProperties::class,
