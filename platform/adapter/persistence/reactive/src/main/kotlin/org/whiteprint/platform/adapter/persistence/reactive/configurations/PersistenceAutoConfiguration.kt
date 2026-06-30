@@ -7,4 +7,5 @@ import org.whiteprint.platform.adapter.persistence.reactive.configurations.mongo
 
 @AutoConfiguration
 @Import(MongoConfiguration::class)
+@EnableConfigurationProperties(PersistenceConfigurationProperties::class)
 class PersistenceAutoConfiguration
