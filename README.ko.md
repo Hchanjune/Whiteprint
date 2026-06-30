@@ -50,9 +50,11 @@ Whiteprint는 **Hexagonal Architecture** 위에서, 단순한 컨벤션이 아�
 | 모듈 | 설명 |
 | --- | --- |
 | `adapter:serializer` | 직렬화 포트 연결 |
-| `adapter:persistence:servlet` / `:reactive` | JPA / R2DBC 영속성 연결 |
-| `adapter:event:outbox` / `:inbox` | Outbox/Inbox 폴링 및 멱등성 처리 연결 — JPA·MongoDB 백엔드 선택 가능 |
-| `adapter:event:publisher` / `:subscriber` | 이벤트 발행·구독 연결 |
+| `adapter:persistence:servlet` | JPA 영속성 연결 — `JpaRepositoryRegistrar`가 `adapter.persistence.jpa.options.entity-packages-to-scan`에 선언된 패키지를 동적으로 스캔; 사용 서비스에서 `@EnableJpaRepositories` 불필요 |
+| `adapter:persistence:reactive` | Reactive MongoDB 영속성 연결 — `ReactiveMongoRepositoryRegistrar`가 `adapter.persistence-reactive.reactive-mongo.options.repository-packages-to-scan`을 동적으로 스캔; `@EnableReactiveMongoRepositories` 불필요 |
+| `adapter:event:outbox` / `:inbox` | Outbox/Inbox 폴링 및 멱등성 처리 연결 — `adapter.event.outbox/inbox.infrastructure-implementation`으로 JPA·MongoDB 백엔드 선택 가능; MongoDB 백엔드는 context에 `MongoTemplate`/`ReactiveMongoTemplate` 중 무엇이 있는지에 따라 자동 선택 — 폴링은 항상 `ScheduledThreadPoolExecutor`에서 실행되므로 reactive 서비스에서도 `.block()` 안전; `JpaAutoConfigurationGuard`가 JPA를 사용하지 않는 서비스에서 Spring Boot JPA/JDBC 자동 구성을 자동 제외 |
+| `adapter:event:publisher` | 이벤트 발행 연결 — `@EnableScheduling` 자동 적용; 사용 서비스에서 별도 선언 불필요 |
+| `adapter:event:subscriber` | 이벤트 구독 연결 — `@EnableScheduling` 자동 적용; 사용 서비스에서 별도 선언 불필요 |
 | `adapter:cache:servlet` / `:reactive` | 스택별 캐시 연결 |
 | `adapter:lock:distributed:servlet` | 분산 락 AOP 연결 (서블릿 스택) |
 | `adapter:security:provider:servlet` / `:reactive` | 토큰 발급(로그인/리프레시) 연결 |
@@ -116,6 +118,12 @@ JWT 서명은 비대칭 키(RSA) 기반으로 동작합니다 — 서명에 쓰�
 **복원력 & 유연성**
 - Redis 기반 분산 락
 - web/cache/security/persistence 전반의 서블릿·리액티브 듀얼 스택 어댑터
+
+**설정 없는 자동 구성 (Zero-Boilerplate)**
+- **동적 Repository 스캔** — yaml에 패키지만 선언하면(`entity-packages-to-scan` / `repository-packages-to-scan`) 자동 스캔; 사용 서비스에서 `@EnableJpaRepositories`·`@EnableReactiveMongoRepositories` 작성 불필요
+- **스케줄링** — publisher·subscriber 어댑터가 `@EnableScheduling`을 자동으로 적용하므로 사용 서비스에서 별도 선언 불필요
+- **JPA 가드** — `JpaAutoConfigurationGuard`(`EnvironmentPostProcessor`)가 시작 시점에 `adapter.event.outbox/inbox.infrastructure-implementation`과 `adapter.persistence.infrastructure-implementation`을 검사하여, 어느 모듈도 `jpa`를 사용하지 않으면 Spring Boot의 JPA·JDBC 자동 구성을 자동 제외 — 리액티브 전용 서비스에서 "Failed to configure a DataSource" 오류 발생 없음
+- **Outbox/Inbox 듀얼 스택 MongoDB** — reactive WebFlux 서비스에서 HTTP 요청은 `ReactiveMongoTemplate`을 통해 Netty 이벤트 루프 위에서 non-blocking으로 처리; Outbox/Inbox 폴링은 이벤트 루프와 완전히 분리된 `ScheduledThreadPoolExecutor` 위에서 동일한 `ReactiveMongoTemplate`을 `.block()`으로 사용 — 안전하며 MongoDB 클라이언트 이중 설정 불필요
 
 **관측성**
 - [Operation Manager Kit(OMK)](https://github.com/Hchanjune/operation-manager-kit) 기반 — OpenTelemetry 계측이 Prometheus, Grafana, Loki, Tempo와 기본 연동

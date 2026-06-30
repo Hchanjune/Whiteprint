@@ -2,17 +2,17 @@ package org.whiteprint.platform.adapter.event.outbox.configuration.mongo
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.context.OutboxEventContextProvider
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer.OutboxEventEnveloper
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer.OutboxEventProducer
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.serializer.OutboxEventSerializerImpl
-import org.whiteprint.platform.adapter.event.outbox.configuration.mongo.producer.MongoEventOutboxStore
-import org.whiteprint.platform.adapter.event.outbox.configuration.mongo.repository.MongoEventOutboxRepository
+import org.whiteprint.platform.adapter.event.outbox.configuration.mongo.producer.ReactiveMongoEventOutboxStore
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EventEnveloper
 import org.whiteprint.platform.core.messaging.outbox.EventContextProvider
@@ -26,25 +26,21 @@ import org.whiteprint.platform.core.messaging.outbox.OutboxEventSerializer
     name = ["infrastructure-implementation"],
     havingValue = "mongo",
 )
-@ConditionalOnBean(MongoTemplate::class)
-@EnableMongoRepositories(basePackageClasses = [MongoEventOutboxRepository::class])
-class MongoEventOutboxConfiguration {
+@ConditionalOnBean(ReactiveMongoTemplate::class)
+@ConditionalOnMissingBean(MongoTemplate::class)
+class ReactiveMongoEventOutboxConfiguration {
 
     @Bean
     fun eventEnveloper(): EventEnveloper = OutboxEventEnveloper()
 
     @Bean
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    fun eventOutboxStore(
-        repository: MongoEventOutboxRepository,
-        mongoTemplate: MongoTemplate,
-    ): EventOutboxStore = MongoEventOutboxStore(repository, mongoTemplate)
+    fun eventOutboxStore(reactiveMongoTemplate: ReactiveMongoTemplate): EventOutboxStore =
+        ReactiveMongoEventOutboxStore(reactiveMongoTemplate)
 
     @Bean
     fun eventContextProvider(): EventContextProvider = OutboxEventContextProvider()
 
     @Bean
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     fun outBoxEventSerializer(serializer: Serializer): OutboxEventSerializer =
         OutboxEventSerializerImpl(serializer)
 
@@ -60,5 +56,4 @@ class MongoEventOutboxConfiguration {
         eventContextProvider = eventContextProvider,
         eventSerializer = eventSerializer,
     )
-
 }

@@ -1,21 +1,21 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.mongo
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEnvelopeOpener
+import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEventConsumer
+import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer.ReactiveMongoEventInboxStore
 import org.whiteprint.platform.adapter.event.inbox.configuration.serializer.InboxEventSerializerImpl
-import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer.MongoEventInboxStore
-import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.repository.MongoEventInboxRepository
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EnvelopeOpener
 import org.whiteprint.platform.core.messaging.inbox.EventConsumer
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer
-import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEventConsumer
 
 @Configuration
 @ConditionalOnProperty(
@@ -23,12 +23,11 @@ import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.In
     name = ["infrastructure-implementation"],
     havingValue = "mongo",
 )
-@ConditionalOnBean(MongoTemplate::class)
-@EnableMongoRepositories(basePackageClasses = [MongoEventInboxRepository::class])
-class MongoEventInboxConfiguration {
+@ConditionalOnBean(ReactiveMongoTemplate::class)
+@ConditionalOnMissingBean(MongoTemplate::class)
+class ReactiveMongoEventInboxConfiguration {
 
     @Bean
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     fun inboxEventSerializer(serializer: Serializer): InboxEventSerializer =
         InboxEventSerializerImpl(serializer)
 
@@ -37,14 +36,10 @@ class MongoEventInboxConfiguration {
         InboxEnvelopeOpener(eventSerializer)
 
     @Bean
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    fun eventInboxStore(
-        repository: MongoEventInboxRepository,
-        mongoTemplate: MongoTemplate,
-    ): EventInboxStore = MongoEventInboxStore(repository, mongoTemplate)
+    fun eventInboxStore(reactiveMongoTemplate: ReactiveMongoTemplate): EventInboxStore =
+        ReactiveMongoEventInboxStore(reactiveMongoTemplate)
 
     @Bean
     fun eventConsumer(inboxStore: EventInboxStore, envelopeOpener: EnvelopeOpener): EventConsumer =
         InboxEventConsumer(inboxStore, envelopeOpener)
-
 }

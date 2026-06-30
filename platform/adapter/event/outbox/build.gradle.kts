@@ -18,6 +18,8 @@ dependencies {
     api(project(":platform:infra:persistence:mongo:servlet"))
 
     api(project(":platform:infra:observability:servlet"))
+    compileOnly("io.projectreactor:reactor-core")
+    compileOnly("org.springframework.data:spring-data-mongodb")
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
 }

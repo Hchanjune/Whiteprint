@@ -50,9 +50,11 @@ Because services depend on `core` abstractions — never on Kafka or Redis direc
 | Module | Purpose |
 | --- | --- |
 | `adapter:serializer` | Serialization port wiring |
-| `adapter:persistence:servlet` / `:reactive` | JPA / R2DBC persistence wiring |
-| `adapter:event:outbox` / `:inbox` | Outbox/Inbox polling & idempotency wiring — JPA and MongoDB backends switchable |
-| `adapter:event:publisher` / `:subscriber` | Event publishing & subscription wiring |
+| `adapter:persistence:servlet` | JPA persistence wiring — `JpaRepositoryRegistrar` dynamically scans repositories from `adapter.persistence.jpa.options.entity-packages-to-scan`; `@EnableJpaRepositories` not needed in consuming services |
+| `adapter:persistence:reactive` | Reactive MongoDB persistence wiring — `ReactiveMongoRepositoryRegistrar` dynamically scans from `adapter.persistence-reactive.reactive-mongo.options.repository-packages-to-scan`; `@EnableReactiveMongoRepositories` not needed |
+| `adapter:event:outbox` / `:inbox` | Outbox/Inbox polling & idempotency wiring — JPA and MongoDB backends switchable via `adapter.event.outbox/inbox.infrastructure-implementation`; MongoDB backend auto-selects between sync (`MongoTemplate`) and reactive (`ReactiveMongoTemplate`) based on which bean is present in the context — polling always runs on a `ScheduledThreadPoolExecutor` so `.block()` is safe regardless of stack; includes `JpaAutoConfigurationGuard` that automatically excludes Spring Boot JPA/JDBC auto-configuration in non-JPA services |
+| `adapter:event:publisher` | Event publishing wiring — `@EnableScheduling` auto-applied; not needed in consuming services |
+| `adapter:event:subscriber` | Event subscription wiring — `@EnableScheduling` auto-applied; not needed in consuming services |
 | `adapter:cache:servlet` / `:reactive` | Cache wiring per stack |
 | `adapter:lock:distributed:servlet` | Distributed-lock AOP wiring (servlet stack) |
 | `adapter:security:provider:servlet` / `:reactive` | Token issuance (login/refresh) wiring |
@@ -116,6 +118,12 @@ The `core / adapter / infra` split isn't a naming convention — it's a dependen
 **Resilience & Flexibility**
 - Redis-backed distributed locking
 - Dual-stack adapters — servlet and reactive — across web, cache, security, and persistence
+
+**Zero-Boilerplate Auto-Configuration**
+- **Dynamic repository scanning** — declare packages in yaml (`entity-packages-to-scan` / `repository-packages-to-scan`); `@EnableJpaRepositories` and `@EnableReactiveMongoRepositories` are never needed in consuming services
+- **Scheduling** — `@EnableScheduling` is applied automatically by the publisher and subscriber adapters; consuming services need not declare it
+- **JPA guard** — `JpaAutoConfigurationGuard` (`EnvironmentPostProcessor`) inspects `adapter.event.outbox/inbox.infrastructure-implementation` and `adapter.persistence.infrastructure-implementation` at startup; if none resolves to `jpa`, Spring Boot's JPA and JDBC auto-configurations are excluded automatically — reactive-only services never fail with "Failed to configure a DataSource"
+- **Outbox/Inbox dual-stack MongoDB** — in a reactive WebFlux service, HTTP requests flow through `ReactiveMongoTemplate` non-blocking on the Netty event loop; Outbox/Inbox polling runs on a `ScheduledThreadPoolExecutor` (entirely separate from the event loop), so the same `ReactiveMongoTemplate` is used with `.block()` there — safe, and no duplicate MongoDB client configuration needed
 
 **Observability**
 - Built on [Operation Manager Kit (OMK)](https://github.com/Hchanjune/operation-manager-kit) — OpenTelemetry instrumentation wired to Prometheus, Grafana, Loki, and Tempo
