@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.persistence.reactive.configurations.mongo
+package org.whiteprint.platform.adapter.persistence.reactive.configurations.reactiveMongo
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

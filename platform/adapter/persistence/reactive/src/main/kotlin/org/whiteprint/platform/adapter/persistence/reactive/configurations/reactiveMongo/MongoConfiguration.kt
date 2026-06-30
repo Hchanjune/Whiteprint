@@ -1,6 +1,5 @@
-package org.whiteprint.platform.adapter.persistence.reactive.configurations.mongo
+package org.whiteprint.platform.adapter.persistence.reactive.configurations.reactiveMongo
 
-import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
