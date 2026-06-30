@@ -10,7 +10,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
+import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory
+import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory
 import java.util.concurrent.TimeUnit
 
 @Configuration
@@ -18,12 +19,10 @@ import java.util.concurrent.TimeUnit
 @Import(ReactiveMongoRepositoryRegistrar::class)
 class ReactiveMongoConfiguration(
     private val properties: ReactiveMongoConfigurationProperties,
-) : AbstractReactiveMongoConfiguration() {
-
-    override fun getDatabaseName(): String = properties.datasource.database
+) {
 
     @Bean
-    override fun reactiveMongoClient(): MongoClient {
+    fun reactiveMongoClient(): MongoClient {
         val datasource = properties.datasource
         val pool = properties.pool
 
@@ -51,5 +50,9 @@ class ReactiveMongoConfiguration(
 
         return MongoClients.create(settingsBuilder.build())
     }
+
+    @Bean
+    fun reactiveMongoDatabaseFactory(client: MongoClient): ReactiveMongoDatabaseFactory =
+        SimpleReactiveMongoDatabaseFactory(client, properties.datasource.database)
 
 }
