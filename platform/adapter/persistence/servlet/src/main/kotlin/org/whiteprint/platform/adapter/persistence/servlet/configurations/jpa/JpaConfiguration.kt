@@ -5,6 +5,7 @@ import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.orm.jpa.JpaTransactionManager
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
@@ -26,6 +27,7 @@ import javax.sql.DataSource
 @Configuration
 @ConditionalOnProperty(prefix = "adapter.persistence", name = ["infrastructureImplementation"], havingValue = "JPA", matchIfMissing = true)
 @EnableTransactionManagement(proxyTargetClass = true)
+@Import(JpaRepositoryRegistrar::class)
 class JpaConfiguration(
     private val jpaProperties: JpaConfigurationProperties
 ) {

@@ -9,19 +9,15 @@ import com.mongodb.reactivestreams.client.MongoClients
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
-import org.whiteprint.platform.infra.persistence.mongo.reactive.repository.OptimizedReactiveMongoRepository
 import java.util.concurrent.TimeUnit
 
 @Configuration
-@EnableConfigurationProperties(MongoConfigurationProperties::class)
-@EnableReactiveMongoRepositories(
-    basePackages = ["org.whiteprint"],
-    repositoryBaseClass = OptimizedReactiveMongoRepository::class,
-)
-class MongoConfiguration(
-    private val properties: MongoConfigurationProperties,
+@EnableConfigurationProperties(ReactiveMongoConfigurationProperties::class)
+@Import(ReactiveMongoRepositoryRegistrar::class)
+class ReactiveMongoConfiguration(
+    private val properties: ReactiveMongoConfigurationProperties,
 ) : AbstractReactiveMongoConfiguration() {
 
     override fun getDatabaseName(): String = properties.datasource.database

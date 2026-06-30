@@ -4,11 +4,13 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.whiteprint.platform.adapter.event.subscriber.configuration.kafka.KafkaConsumerConfigurationProperties
 import org.whiteprint.platform.adapter.event.subscriber.configuration.kafka.KafkaConsumerConfiguration
 import org.whiteprint.platform.core.messaging.subscriber.EventSubscriber
 
 @AutoConfiguration
+@EnableScheduling
 @Import(
     KafkaConsumerConfiguration::class,
 )

@@ -2,8 +2,8 @@ package org.whiteprint.platform.adapter.persistence.reactive.configurations.reac
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "adapter.persistence.mongo")
-data class MongoConfigurationProperties(
+@ConfigurationProperties(prefix = "adapter.persistence-reactive.reactive-mongo")
+data class ReactiveMongoConfigurationProperties(
     var datasource: DataSourceProperties = DataSourceProperties(),
     var pool: PoolProperties = PoolProperties(),
     var options: Options = Options(),
