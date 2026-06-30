@@ -38,10 +38,12 @@ Whiteprint는 **Hexagonal Architecture** 위에서, 단순한 컨벤션이 아�
 | --- | --- |
 | `core:kernel` | `Identifiable`, `Auditable`, `LifeCycle` 등 공통 베이스 계약과 정책/예외 컨벤션 |
 | `core:domain` | Aggregate 기반 도메인 모델링 기본 요소 |
-| `core:cache` | 캐시 및 분산 락 계약 |
+| `core:projection` | 읽기 모델 — `ProjectionModel<ID>` (version/soft-delete/감사 필드 내장) |
+| `core:cache` | 캐시 계약 |
+| `core:lock` | 분산 락 계약 — `LockKey`, `LockHandle`, `DistributedLockOperations`, `@DistributedLock`/`@DistributedLockKey` |
 | `core:messaging` | 이벤트, 발행/구독, Outbox/Inbox 계약 |
 | `core:kms` | 키 자료, 캐싱, 로테이션 정책 계약 |
-| `core:security` | JWT/토큰 검증, 클레임, revocation 계약 |
+| `core:security` | JWT/토큰 검증, 클레임, revocation 계약 및 선언적 권한 어노테이션(`@RequirePermission`, `@ForbidPermission`, `@RequireAnyPermission`, `@RequireAllPermissions`, `@RequireHigherPermissionThan`) |
 
 **`platform/adapter`** — Spring Boot 연결 (서블릿·리액티브 듀얼 스택)
 
@@ -49,19 +51,23 @@ Whiteprint는 **Hexagonal Architecture** 위에서, 단순한 컨벤션이 아�
 | --- | --- |
 | `adapter:serializer` | 직렬화 포트 연결 |
 | `adapter:persistence:servlet` / `:reactive` | JPA / R2DBC 영속성 연결 |
-| `adapter:event:outbox` / `:inbox` | Outbox/Inbox 폴링 및 멱등성 처리 연결 |
+| `adapter:event:outbox` / `:inbox` | Outbox/Inbox 폴링 및 멱등성 처리 연결 — JPA·MongoDB 백엔드 선택 가능 |
 | `adapter:event:publisher` / `:subscriber` | 이벤트 발행·구독 연결 |
 | `adapter:cache:servlet` / `:reactive` | 스택별 캐시 연결 |
-| `adapter:lock:distributed` | 분산 락 연결 |
+| `adapter:lock:distributed:servlet` | 분산 락 AOP 연결 (서블릿 스택) |
 | `adapter:security:provider:servlet` / `:reactive` | 토큰 발급(로그인/리프레시) 연결 |
-| `adapter:security:verifier:servlet` / `:reactive` | 토큰 검증 및 필터 체인 연결 |
-| `adapter:web:servlet` / `:reactive` | 웹 레이어 컨벤션 — 예외 처리, 응답 래핑 |
+| `adapter:security:verifier:servlet` | 토큰 검증 및 필터 체인 연결 (서블릿) — `@Before` AOP, `SecurityContextSupport.getCurrentClaims()`, `Authorizer` 빈 |
+| `adapter:security:verifier:reactive` | 토큰 검증 및 필터 체인 연결 (리액티브) — `@Around` AOP로 `Mono`/`Flux` 래핑, `SecurityContextSupport.currentClaims(): Mono<AccessTokenClaims>` |
+| `adapter:web:servlet` | 웹 레이어 컨벤션 — 예외 처리, 응답 래핑; `ResponseEntityGenerator`가 `Operations.context.traceId`(thread-local)로 traceId 읽음 |
+| `adapter:web:reactive` | WebFlux 웹 레이어 컨벤션 — `ResponseEntityGenerator.generateInstantData()`가 `Mono<ResponseEntity<ApiResponse<T>>>` 반환, Reactor Context에서 `ReactiveOperations`를 통해 traceId 읽음; `PlatformExceptionHandler`가 WebFlux 전용 예외(`WebExchangeBindException`, `ServerWebInputException`, `ResponseStatusException` 등) 처리 |
 
 **`platform/infra`** — 실제 기술 구현체
 
 | 모듈 | 설명 |
 | --- | --- |
 | `infra:persistence:jpa` | 최적화된 Repository와 생명주기 훅을 갖춘 JPA/Hibernate 구현체 |
+| `infra:persistence:mongo:servlet` | MongoDB 구현체 — `MongoDocument`, `SoftDeletableMongoDocument`, `OptimizedMongoRepository` |
+| `infra:persistence:mongo:reactive` | Reactive MongoDB 구현체 — `ProjectionDocument`, `OptimizedReactiveMongoRepository` (버전 가드 upsert + soft delete) |
 | `infra:cache:redis` | Redis 기반 캐시 및 분산 락 구현체 |
 | `infra:messaging:kafka` | Kafka 프로듀서/컨슈머 구현체 (idempotent producer, `read_committed` 컨슈머) |
 | `infra:observability:servlet` / `:reactive` | OMK 기반 OpenTelemetry 계측, 스택별 제공 |
@@ -98,9 +104,13 @@ JWT 서명은 비대칭 키(RSA) 기반으로 동작합니다 — 서명에 쓰�
 **보안**
 - 비대칭 키(RSA) 기반 JWT 발급·검증(Access/Refresh) — Private Key는 Vault에서 export 차단, Public Key는 로컬 캐싱으로 빠른 검증
 - 30일 자동 키 로테이션, Redis 기반 토큰·계정 이중 revocation
+- 선언적 AOP 권한 어노테이션(`@RequirePermission`, `@ForbidPermission`, `@RequireAnyPermission`, `@RequireAllPermissions`, `@RequireHigherPermissionThan`) — 서블릿·리액티브 양쪽에서 동일한 어노테이션 사용 가능
+  - **서블릿**: `@Before` advice — 메서드 본체 실행 전에 권한 거부; `Authorizer` 빈으로 프로그래밍 방식 체크 가능; `SecurityContextSupport.getCurrentClaims()`가 `AccessTokenClaims` 직접 반환
+  - **리액티브**: `@Around` advice — 반환된 `Mono`/`Flux`를 Reactor Context 안에서 래핑하여 구독 시점에 권한 체크; `SecurityContextSupport.currentClaims()`가 `Mono<AccessTokenClaims>` 반환; `Authorizer` 빈 없음(Mono 체인 안에서 `SecurityContextSupport` 사용); revocation 체크는 `Schedulers.boundedElastic()`에서 실행되므로 Netty 이벤트 루프는 절대 블로킹되지 않음
 
 **영속성 & 식별자**
 - 최적화된 Repository와 자동 생명주기 처리를 갖춘 JPA 영속성 레이어
+- MongoDB 영속성 — 서블릿(`MongoDocument` / `OptimizedMongoRepository`)과 리액티브(`ProjectionDocument` / 버전 가드 upsert 적용 `OptimizedReactiveMongoRepository`)
 - TSID 기반 PK (전역 유일 + 시간 정렬)
 
 **복원력 & 유연성**

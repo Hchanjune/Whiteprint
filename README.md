@@ -38,10 +38,12 @@ Because services depend on `core` abstractions — never on Kafka or Redis direc
 | --- | --- |
 | `core:kernel` | Shared base contracts — `Identifiable`, `Auditable`, `LifeCycle`, policy/exception conventions |
 | `core:domain` | Aggregate-based domain modeling primitives |
-| `core:cache` | Cache and distributed-lock contracts |
+| `core:projection` | Read-side projection model — `ProjectionModel<ID>` with version, soft-delete, and audit fields |
+| `core:cache` | Cache contracts |
+| `core:lock` | Distributed-lock contracts — `LockKey`, `LockHandle`, `DistributedLockOperations`, `@DistributedLock`/`@DistributedLockKey` |
 | `core:messaging` | Event, publisher/subscriber, and Outbox/Inbox contracts |
 | `core:kms` | Key material, caching, and rotation-policy contracts |
-| `core:security` | JWT/token verification, claims, and revocation contracts |
+| `core:security` | JWT/token verification, claims, revocation contracts, and declarative permission annotations (`@RequirePermission`, `@ForbidPermission`, `@RequireAnyPermission`, `@RequireAllPermissions`, `@RequireHigherPermissionThan`) |
 
 **`platform/adapter`** — Spring Boot wiring (servlet & reactive stacks)
 
@@ -49,19 +51,23 @@ Because services depend on `core` abstractions — never on Kafka or Redis direc
 | --- | --- |
 | `adapter:serializer` | Serialization port wiring |
 | `adapter:persistence:servlet` / `:reactive` | JPA / R2DBC persistence wiring |
-| `adapter:event:outbox` / `:inbox` | Outbox/Inbox polling & idempotency wiring |
+| `adapter:event:outbox` / `:inbox` | Outbox/Inbox polling & idempotency wiring — JPA and MongoDB backends switchable |
 | `adapter:event:publisher` / `:subscriber` | Event publishing & subscription wiring |
 | `adapter:cache:servlet` / `:reactive` | Cache wiring per stack |
-| `adapter:lock:distributed` | Distributed-lock wiring |
+| `adapter:lock:distributed:servlet` | Distributed-lock AOP wiring (servlet stack) |
 | `adapter:security:provider:servlet` / `:reactive` | Token issuance (login/refresh) wiring |
-| `adapter:security:verifier:servlet` / `:reactive` | Token verification & filter-chain wiring |
-| `adapter:web:servlet` / `:reactive` | Web-layer conventions — exception handling, response wrapping |
+| `adapter:security:verifier:servlet` | Token verification & filter-chain wiring (servlet) — `@Before` AOP, `SecurityContextSupport.getCurrentClaims()`, `Authorizer` bean |
+| `adapter:security:verifier:reactive` | Token verification & filter-chain wiring (reactive) — `@Around` AOP wrapping `Mono`/`Flux`, `SecurityContextSupport.currentClaims(): Mono<AccessTokenClaims>` |
+| `adapter:web:servlet` | Web-layer conventions — exception handling, response wrapping; `ResponseEntityGenerator` reads traceId via `Operations.context.traceId` (thread-local) |
+| `adapter:web:reactive` | WebFlux web-layer conventions — `ResponseEntityGenerator.generateInstantData()` returns `Mono<ResponseEntity<ApiResponse<T>>>`, reading traceId from Reactor Context via `ReactiveOperations`; `PlatformExceptionHandler` maps WebFlux-specific exceptions (`WebExchangeBindException`, `ServerWebInputException`, `ResponseStatusException`, etc.) |
 
 **`platform/infra`** — concrete technology implementations
 
 | Module | Purpose |
 | --- | --- |
 | `infra:persistence:jpa` | JPA/Hibernate implementation with optimized repositories & lifecycle hooks |
+| `infra:persistence:mongo:servlet` | MongoDB implementation — `MongoDocument`, `SoftDeletableMongoDocument`, `OptimizedMongoRepository` |
+| `infra:persistence:mongo:reactive` | Reactive MongoDB implementation — `ProjectionDocument`, `OptimizedReactiveMongoRepository` with version-guard upsert & soft delete |
 | `infra:cache:redis` | Redis-backed cache & distributed-lock implementation |
 | `infra:messaging:kafka` | Kafka producer/consumer implementation (idempotent producer, `read_committed` consumer) |
 | `infra:observability:servlet` / `:reactive` | OpenTelemetry instrumentation via OMK, per stack |
@@ -98,9 +104,13 @@ The `core / adapter / infra` split isn't a naming convention — it's a dependen
 **Security**
 - JWT issuance & verification (access/refresh) on asymmetric (RSA) keys — private keys stay in Vault (export disabled), public keys cached locally for fast verification
 - Automatic 30-day key rotation and dual-level (token + account) revocation via Redis
+- Declarative AOP permission annotations (`@RequirePermission`, `@ForbidPermission`, `@RequireAnyPermission`, `@RequireAllPermissions`, `@RequireHigherPermissionThan`) — same annotations work on both stacks
+  - **Servlet**: `@Before` advice throws before the method body runs; `Authorizer` bean available for programmatic checks; `SecurityContextSupport.getCurrentClaims()` returns `AccessTokenClaims` directly
+  - **Reactive**: `@Around` advice wraps the returned `Mono`/`Flux` inside the Reactor context — permission is denied when the publisher is subscribed, not when the method is called; `SecurityContextSupport.currentClaims()` returns `Mono<AccessTokenClaims>`; no `Authorizer` bean (use `SecurityContextSupport` in the Mono chain instead); revocation check runs on `Schedulers.boundedElastic()` so the Netty event loop is never blocked
 
 **Persistence & Identity**
 - JPA persistence layer with optimized repositories and automatic lifecycle handling
+- MongoDB persistence — servlet (`MongoDocument` / `OptimizedMongoRepository`) and reactive (`ProjectionDocument` / `OptimizedReactiveMongoRepository` with version-guard upsert)
 - TSID-based primary keys (globally unique, time-sortable)
 
 **Resilience & Flexibility**
