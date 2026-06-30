@@ -10,6 +10,7 @@ group = "org.whiteprint.platform.adapter.persistence"
 dependencies {
     api(project(":platform:core:kernel"))
     api(project(":platform:infra:persistence:mongo:reactive"))
+    implementation("org.mongodb:mongodb-driver-sync")
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
 }

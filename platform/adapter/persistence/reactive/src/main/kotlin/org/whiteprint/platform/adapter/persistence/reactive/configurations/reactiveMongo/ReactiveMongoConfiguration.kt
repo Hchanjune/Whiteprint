@@ -4,13 +4,17 @@ import com.mongodb.MongoClientSettings
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
 import com.mongodb.connection.ConnectionPoolSettings
+import com.mongodb.client.MongoClient as SyncMongoClient
+import com.mongodb.client.MongoClients as SyncMongoClients
 import com.mongodb.reactivestreams.client.MongoClient
 import com.mongodb.reactivestreams.client.MongoClients
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.data.mongodb.MongoDatabaseFactory
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory
 import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory
 import java.util.concurrent.TimeUnit
 
@@ -54,5 +58,39 @@ class ReactiveMongoConfiguration(
     @Bean
     fun reactiveMongoDatabaseFactory(client: MongoClient): ReactiveMongoDatabaseFactory =
         SimpleReactiveMongoDatabaseFactory(client, properties.datasource.database)
+
+    @Bean
+    fun syncMongoClient(): SyncMongoClient {
+        val datasource = properties.datasource
+        val pool = properties.pool
+
+        val poolSettings = ConnectionPoolSettings.builder()
+            .maxSize(pool.maxSize)
+            .minSize(pool.minSize)
+            .maxWaitTime(pool.maxWaitMillis, TimeUnit.MILLISECONDS)
+            .maxConnectionIdleTime(pool.maxConnectionIdleTimeMillis, TimeUnit.MILLISECONDS)
+            .maxConnectionLifeTime(pool.maxConnectionLifeTimeMillis, TimeUnit.MILLISECONDS)
+            .build()
+
+        val settingsBuilder = MongoClientSettings.builder()
+            .applyToClusterSettings { it.hosts(listOf(ServerAddress(datasource.host, datasource.port))) }
+            .applyToConnectionPoolSettings { it.applySettings(poolSettings) }
+
+        if (datasource.username != null) {
+            settingsBuilder.credential(
+                MongoCredential.createCredential(
+                    datasource.username!!,
+                    datasource.authDatabase,
+                    datasource.password?.toCharArray() ?: charArrayOf(),
+                )
+            )
+        }
+
+        return SyncMongoClients.create(settingsBuilder.build())
+    }
+
+    @Bean
+    fun mongoDatabaseFactory(client: SyncMongoClient): MongoDatabaseFactory =
+        SimpleMongoClientDatabaseFactory(client, properties.datasource.database)
 
 }
