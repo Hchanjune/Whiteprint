@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.mongo
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -23,7 +23,7 @@ import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.In
     name = ["infrastructure-implementation"],
     havingValue = "mongo",
 )
-@ConditionalOnBean(MongoTemplate::class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableMongoRepositories(basePackageClasses = [MongoEventInboxRepository::class])
 class MongoEventInboxConfiguration {
 

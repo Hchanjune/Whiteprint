@@ -1,8 +1,8 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.mongo
 
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -26,7 +26,7 @@ import org.whiteprint.platform.core.messaging.outbox.OutboxEventSerializer
     name = ["infrastructure-implementation"],
     havingValue = "mongo",
 )
-@ConditionalOnBean(MongoTemplate::class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableMongoRepositories(basePackageClasses = [MongoEventOutboxRepository::class])
 class MongoEventOutboxConfiguration {
 

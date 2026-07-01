@@ -52,7 +52,7 @@ Whiteprint는 **Hexagonal Architecture** 위에서, 단순한 컨벤션이 아�
 | `adapter:serializer` | 직렬화 포트 연결 |
 | `adapter:persistence:servlet` | JPA 영속성 연결 — `JpaRepositoryRegistrar`가 `adapter.persistence.jpa.options.entity-packages-to-scan`에 선언된 패키지를 동적으로 스캔; 사용 서비스에서 `@EnableJpaRepositories` 불필요 |
 | `adapter:persistence:reactive` | Reactive MongoDB 영속성 연결 — `ReactiveMongoRepositoryRegistrar`가 `adapter.persistence-reactive.reactive-mongo.options.repository-packages-to-scan`을 동적으로 스캔; `@EnableReactiveMongoRepositories` 불필요 |
-| `adapter:event:outbox` / `:inbox` | Outbox/Inbox 폴링 및 멱등성 처리 연결 — `adapter.event.outbox/inbox.infrastructure-implementation`으로 JPA·MongoDB 백엔드 선택 가능; MongoDB 백엔드는 context에 `MongoTemplate`/`ReactiveMongoTemplate` 중 무엇이 있는지에 따라 자동 선택 — 폴링은 항상 `ScheduledThreadPoolExecutor`에서 실행되므로 reactive 서비스에서도 `.block()` 안전; `JpaAutoConfigurationGuard`가 JPA를 사용하지 않는 서비스에서 Spring Boot JPA/JDBC 자동 구성을 자동 제외 |
+| `adapter:event:outbox` / `:inbox` | Outbox/Inbox 폴링 및 멱등성 처리 연결 — `adapter.event.outbox/inbox.infrastructure-implementation`으로 JPA·MongoDB 백엔드 선택 가능; MongoDB 백엔드는 웹 스택에 따라 자동 선택 — 서블릿은 `MongoTemplate`(sync), 리액티브는 `ReactiveMongoTemplate`을 `ScheduledThreadPoolExecutor` 스레드에서 `.block()`으로 사용(Netty 이벤트 루프와 완전히 분리되어 안전); `JpaAutoConfigurationGuard`가 JPA를 사용하지 않는 서비스에서 Spring Boot JPA/JDBC 자동 구성을 자동 제외 |
 | `adapter:event:publisher` | 이벤트 발행 연결 — `@EnableScheduling` 자동 적용; 사용 서비스에서 별도 선언 불필요 |
 | `adapter:event:subscriber` | 이벤트 구독 연결 — `@EnableScheduling` 자동 적용; 사용 서비스에서 별도 선언 불필요 |
 | `adapter:cache:servlet` / `:reactive` | 스택별 캐시 연결 |

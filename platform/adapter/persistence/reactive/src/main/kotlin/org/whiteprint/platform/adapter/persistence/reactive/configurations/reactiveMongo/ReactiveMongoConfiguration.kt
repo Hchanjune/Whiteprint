@@ -4,8 +4,6 @@ import com.mongodb.MongoClientSettings
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
 import com.mongodb.connection.ConnectionPoolSettings
-import com.mongodb.client.MongoClient as SyncMongoClient
-import com.mongodb.client.MongoClients as SyncMongoClients
 import com.mongodb.reactivestreams.client.MongoClient
 import com.mongodb.reactivestreams.client.MongoClients
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -56,35 +54,5 @@ class ReactiveMongoConfiguration(
     @Bean
     fun reactiveMongoDatabaseFactory(client: MongoClient): ReactiveMongoDatabaseFactory =
         SimpleReactiveMongoDatabaseFactory(client, properties.datasource.database)
-
-    @Bean
-    fun syncMongoClient(): SyncMongoClient {
-        val datasource = properties.datasource
-        val pool = properties.pool
-
-        val poolSettings = ConnectionPoolSettings.builder()
-            .maxSize(pool.maxSize)
-            .minSize(pool.minSize)
-            .maxWaitTime(pool.maxWaitMillis, TimeUnit.MILLISECONDS)
-            .maxConnectionIdleTime(pool.maxConnectionIdleTimeMillis, TimeUnit.MILLISECONDS)
-            .maxConnectionLifeTime(pool.maxConnectionLifeTimeMillis, TimeUnit.MILLISECONDS)
-            .build()
-
-        val settingsBuilder = MongoClientSettings.builder()
-            .applyToClusterSettings { it.hosts(listOf(ServerAddress(datasource.host, datasource.port))) }
-            .applyToConnectionPoolSettings { it.applySettings(poolSettings) }
-
-        if (datasource.username != null) {
-            settingsBuilder.credential(
-                MongoCredential.createCredential(
-                    datasource.username!!,
-                    datasource.authDatabase,
-                    datasource.password?.toCharArray() ?: charArrayOf(),
-                )
-            )
-        }
-
-        return SyncMongoClients.create(settingsBuilder.build())
-    }
 
 }

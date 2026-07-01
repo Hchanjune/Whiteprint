@@ -1,12 +1,10 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.mongo
 
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.context.OutboxEventContextProvider
 import org.whiteprint.platform.adapter.event.outbox.configuration.jpa.producer.OutboxEventEnveloper
@@ -26,8 +24,7 @@ import org.whiteprint.platform.core.messaging.outbox.OutboxEventSerializer
     name = ["infrastructure-implementation"],
     havingValue = "mongo",
 )
-@ConditionalOnBean(ReactiveMongoTemplate::class)
-@ConditionalOnMissingBean(MongoTemplate::class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 class ReactiveMongoEventOutboxConfiguration {
 
     @Bean
