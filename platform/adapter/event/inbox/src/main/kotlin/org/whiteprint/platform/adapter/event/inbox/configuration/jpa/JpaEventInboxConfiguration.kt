@@ -3,7 +3,6 @@ package org.whiteprint.platform.adapter.event.inbox.configuration.jpa
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEnvelopeOpener
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEventConsumer
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.JpaEventInboxStore
@@ -22,7 +21,6 @@ import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer
     havingValue = "jpa",
     matchIfMissing = false
 )
-@EnableJpaRepositories(basePackageClasses = [JpaEventInboxRepository::class])
 class JpaEventInboxConfiguration {
 
     @Bean

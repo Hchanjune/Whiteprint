@@ -4,8 +4,10 @@ import org.springframework.boot.autoconfigure.AutoConfigurationImportFilter
 import org.springframework.boot.autoconfigure.AutoConfigurationMetadata
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration
 import org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration
+import org.springframework.boot.security.autoconfigure.ReactiveUserDetailsServiceAutoConfiguration
 import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
 import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+import org.springframework.boot.security.autoconfigure.web.reactive.ReactiveWebSecurityAutoConfiguration
 
 class StarterConfigGuardFilter : AutoConfigurationImportFilter {
 
@@ -14,6 +16,8 @@ class StarterConfigGuardFilter : AutoConfigurationImportFilter {
         DataRedisReactiveAutoConfiguration::class.java.name,
         SecurityAutoConfiguration::class.java.name,
         UserDetailsServiceAutoConfiguration::class.java.name,
+        ReactiveWebSecurityAutoConfiguration::class.java.name,
+        ReactiveUserDetailsServiceAutoConfiguration::class.java.name,
     )
 
     override fun match(
