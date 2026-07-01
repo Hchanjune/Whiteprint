@@ -25,6 +25,7 @@ class SecurityServerAuthenticationEntryPoint(
         val response = exchange.response
         response.statusCode = HttpStatus.valueOf(exception.status)
         response.headers.contentType = MediaType.APPLICATION_JSON
+        response.headers.remove("WWW-Authenticate")
 
         val body = ApiResponse.error(
             id = TsidGenerator.generate().toString(),

@@ -1,7 +1,6 @@
 package org.whiteprint.platform.adapter.security.verifier.reactive.configuration
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.http.HttpMethod
 
 @ConfigurationProperties("adapter.security.verifier")
 data class SecurityVerifierConfigurationProperties(
@@ -22,7 +21,7 @@ data class SecurityVerifierConfigurationProperties(
     )
 
     data class Rule(
-        var path: String,
-        var method: HttpMethod,
+        var path: String = "",
+        var method: String = "",
     )
 }

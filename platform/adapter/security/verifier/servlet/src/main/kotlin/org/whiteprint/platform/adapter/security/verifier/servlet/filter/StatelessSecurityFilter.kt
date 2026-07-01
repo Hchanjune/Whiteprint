@@ -1,6 +1,5 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.filter
 
-import com.google.common.net.HttpHeaders
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

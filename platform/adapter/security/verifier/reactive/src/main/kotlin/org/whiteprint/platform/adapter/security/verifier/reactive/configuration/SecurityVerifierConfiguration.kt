@@ -146,6 +146,7 @@ class SecurityVerifierConfiguration(
             .csrf { it.disable() }
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
+            .logout { it.disable() }
             .authorizeExchange { exchanges ->
                 exchanges.matchers(ServerWebExchangeMatchers.pathMatchers(HttpMethod.OPTIONS, "/**")).permitAll()
                 permittedPathProvider.entries().forEach { (method, pattern) ->
