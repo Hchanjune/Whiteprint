@@ -17,6 +17,7 @@ dependencies {
     api(project(":platform:infra:observability:reactive"))
 
     api("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     api("org.springframework:spring-tx")
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springframework.boot:spring-boot-starter-aspectj")
