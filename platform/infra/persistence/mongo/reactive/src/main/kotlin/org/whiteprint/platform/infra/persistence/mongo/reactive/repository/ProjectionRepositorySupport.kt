@@ -10,21 +10,16 @@ import org.springframework.data.mongodb.repository.support.MappingMongoEntityInf
 import org.springframework.data.mongodb.repository.support.SimpleReactiveMongoRepository
 import org.whiteprint.platform.infra.persistence.mongo.reactive.document.ProjectionDocument
 import reactor.core.publisher.Mono
-import java.io.Serializable
 import java.time.Instant
 
-class OptimizedReactiveMongoRepository<T : ProjectionDocument<ID>, ID : Serializable>(
-    entityInformation: MappingMongoEntityInformation<T, ID>,
+class ProjectionRepositorySupport<T : ProjectionDocument>(
+    entityInformation: MappingMongoEntityInformation<T, String>,
     private val mongoOperations: ReactiveMongoOperations,
-) : SimpleReactiveMongoRepository<T, ID>(entityInformation, mongoOperations) {
+) : SimpleReactiveMongoRepository<T, String>(entityInformation, mongoOperations) {
 
     private val entityClass = entityInformation.javaType
     private val collectionName = entityInformation.collectionName
 
-    /**
-     * version guard 포함 전체 document 교체 upsert.
-     * 전달된 document의 version이 저장된 것보다 낮으면 stale로 판단하고 무시(false 반환).
-     */
     fun upsert(document: T): Mono<Boolean> {
         val query = Query(
             Criteria.where("_id").`is`(document.id)
@@ -56,7 +51,7 @@ class OptimizedReactiveMongoRepository<T : ProjectionDocument<ID>, ID : Serializ
         return super.delete(entity)
     }
 
-    override fun deleteById(id: ID): Mono<Void> {
+    override fun deleteById(id: String): Mono<Void> {
         return findById(id).flatMap { delete(it) }
     }
 

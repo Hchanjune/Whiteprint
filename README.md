@@ -38,7 +38,7 @@ Because services depend on `core` abstractions — never on Kafka or Redis direc
 | --- | --- |
 | `core:kernel` | Shared base contracts — `Identifiable`, `Auditable`, `LifeCycle`, policy/exception conventions |
 | `core:domain` | Aggregate-based domain modeling primitives |
-| `core:projection` | Read-side projection model — `ProjectionModel<ID>` with version, soft-delete, and audit fields |
+| `core:projection` | Read-side projection contracts — `Projection` (id, version, soft-delete, audit fields) and marker interfaces `Query`, `QueryParams`, `ViewModel` |
 | `core:cache` | Cache contracts |
 | `core:lock` | Distributed-lock contracts — `LockKey`, `LockHandle`, `DistributedLockOperations`, `@DistributedLock`/`@DistributedLockKey` |
 | `core:messaging` | Event, publisher/subscriber, and Outbox/Inbox contracts |
@@ -69,7 +69,7 @@ Because services depend on `core` abstractions — never on Kafka or Redis direc
 | --- | --- |
 | `infra:persistence:jpa` | JPA/Hibernate implementation with optimized repositories & lifecycle hooks |
 | `infra:persistence:mongo:servlet` | MongoDB implementation — `MongoDocument`, `SoftDeletableMongoDocument`, `OptimizedMongoRepository` |
-| `infra:persistence:mongo:reactive` | Reactive MongoDB implementation — `ProjectionDocument`, `OptimizedReactiveMongoRepository` with version-guard upsert & soft delete |
+| `infra:persistence:mongo:reactive` | Reactive MongoDB implementation — `ProjectionDocument` (MongoDB document base with `@Id`, field mapping), `ProjectionRepository<T>` (coroutine-first interface extending `CoroutineCrudRepository<T, String>` with `suspend fun upsert`), `ProjectionRepositorySupport<T>` (reactive backing class registered as `repositoryBaseClass` — standard CRUD auto-wrapped to suspend by Spring Data, custom methods matched by signature) |
 | `infra:cache:redis` | Redis-backed cache & distributed-lock implementation |
 | `infra:messaging:kafka` | Kafka producer/consumer implementation (idempotent producer, `read_committed` consumer) |
 | `infra:observability:servlet` / `:reactive` | OpenTelemetry instrumentation via OMK, per stack |
@@ -112,7 +112,7 @@ The `core / adapter / infra` split isn't a naming convention — it's a dependen
 
 **Persistence & Identity**
 - JPA persistence layer with optimized repositories and automatic lifecycle handling
-- MongoDB persistence — servlet (`MongoDocument` / `OptimizedMongoRepository`) and reactive (`ProjectionDocument` / `OptimizedReactiveMongoRepository` with version-guard upsert)
+- MongoDB persistence — servlet (`MongoDocument` / `OptimizedMongoRepository`) and reactive (`ProjectionDocument` / `ProjectionRepository<T>` coroutine-first with version-guard upsert & soft delete — `suspend fun` out of the box, no `.awaitX()` boilerplate)
 - TSID-based primary keys (globally unique, time-sortable)
 
 **Resilience & Flexibility**

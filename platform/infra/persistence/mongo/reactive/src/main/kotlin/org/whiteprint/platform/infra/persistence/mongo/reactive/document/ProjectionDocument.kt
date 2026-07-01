@@ -1,11 +1,14 @@
 package org.whiteprint.platform.infra.persistence.mongo.reactive.document
 
+import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Field
-import org.whiteprint.platform.core.projection.model.ProjectionModel
-import java.io.Serializable
+import org.whiteprint.platform.core.projection.model.Projection
 import java.time.Instant
 
-abstract class ProjectionDocument<ID : Serializable> : ProjectionModel<ID>() {
+abstract class ProjectionDocument : Projection {
+
+    @get:Id
+    abstract override val id: String
 
     @get:Field("inserted_at")
     abstract override val insertedAt: Instant

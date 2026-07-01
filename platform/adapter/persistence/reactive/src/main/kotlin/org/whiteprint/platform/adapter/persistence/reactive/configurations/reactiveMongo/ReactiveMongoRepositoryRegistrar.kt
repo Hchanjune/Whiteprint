@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.repository.config.ReactiveMongoRepositor
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource
 import org.springframework.data.repository.config.RepositoryConfigurationDelegate
 import org.springframework.data.util.Streamable
-import org.whiteprint.platform.infra.persistence.mongo.reactive.repository.OptimizedReactiveMongoRepository
+import org.whiteprint.platform.infra.persistence.mongo.reactive.repository.ProjectionRepositorySupport
 
 internal class ReactiveMongoRepositoryRegistrar : ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
 
@@ -55,7 +55,7 @@ internal class ReactiveMongoRepositoryRegistrar : ImportBeanDefinitionRegistrar,
 
     @EnableReactiveMongoRepositories(
         basePackages = ["org.whiteprint"],
-        repositoryBaseClass = OptimizedReactiveMongoRepository::class,
+        repositoryBaseClass = ProjectionRepositorySupport::class,
     )
     private class DefaultRepositoryConfiguration
 }
