@@ -108,7 +108,10 @@ The `core / adapter / infra` split isn't a naming convention — it's a dependen
 - Automatic 30-day key rotation and dual-level (token + account) revocation via Redis
 - Declarative AOP permission annotations (`@RequirePermission`, `@ForbidPermission`, `@RequireAnyPermission`, `@RequireAllPermissions`, `@RequireHigherPermissionThan`) — same annotations work on both stacks
   - **Servlet**: `@Before` advice throws before the method body runs; `Authorizer` bean available for programmatic checks; `SecurityContextSupport.getCurrentClaims()` returns `AccessTokenClaims` directly
-  - **Reactive**: `@Around` advice wraps the returned `Mono`/`Flux` inside the Reactor context — permission is denied when the publisher is subscribed, not when the method is called; `SecurityContextSupport.currentClaims()` returns `Mono<AccessTokenClaims>`; no `Authorizer` bean (use `SecurityContextSupport` in the Mono chain instead); revocation check runs on `Schedulers.boundedElastic()` so the Netty event loop is never blocked
+  - **Reactive**: `@Around` advice wraps the returned `Mono`/`Flux` inside the Reactor context — permission is denied when the publisher is subscribed, not when the method is called; no `Authorizer` bean; revocation check runs on `Schedulers.boundedElastic()` so the Netty event loop is never blocked
+    - `SecurityContextSupport.currentClaims(): Mono<AccessTokenClaims>` — use inside a Mono/Flux chain
+    - `SecurityContextSupport.awaitCurrentClaims(): AccessTokenClaims` — use inside a `suspend fun`; suspends the coroutine (not the thread) via `awaitSingle()`, so the Netty event loop is never blocked
+    - `SecurityContextSupport.currentUserId(): Mono<String>` / `awaitCurrentUserId(): String` — same pattern, returns the JWT `subject` claim
 
 **Persistence & Identity**
 - JPA persistence layer with optimized repositories and automatic lifecycle handling

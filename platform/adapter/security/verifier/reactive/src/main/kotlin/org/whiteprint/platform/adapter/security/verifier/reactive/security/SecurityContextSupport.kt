@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.security.verifier.reactive.security
 
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.whiteprint.platform.core.security.model.AccessTokenClaims
 import org.whiteprint.platform.core.security.policy.SecurityException
@@ -16,4 +17,8 @@ object SecurityContextSupport {
             }
 
     fun currentUserId(): Mono<String> = currentClaims().map { it.subject }
+
+    suspend fun awaitCurrentClaims(): AccessTokenClaims = currentClaims().awaitSingle()
+
+    suspend fun awaitCurrentUserId(): String = currentUserId().awaitSingle()
 }
