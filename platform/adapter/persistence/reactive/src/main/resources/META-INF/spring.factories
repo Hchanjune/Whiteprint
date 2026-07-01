@@ -1,2 +1,5 @@
 org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
 org.whiteprint.platform.adapter.persistence.reactive.guards.StarterConfigGuardFilter
+
+org.springframework.boot.env.EnvironmentPostProcessor=\
+org.whiteprint.platform.adapter.persistence.reactive.configurations.ReactiveMongoAutoConfigurationGuard

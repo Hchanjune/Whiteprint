@@ -45,7 +45,7 @@ class MongoConfiguration(
             .applyToClusterSettings { it.hosts(listOf(ServerAddress(datasource.host, datasource.port))) }
             .applyToConnectionPoolSettings { it.applySettings(poolSettings) }
 
-        if (datasource.username != null) {
+        if (!datasource.username.isNullOrBlank()) {
             settingsBuilder.credential(
                 MongoCredential.createCredential(
                     datasource.username!!,
