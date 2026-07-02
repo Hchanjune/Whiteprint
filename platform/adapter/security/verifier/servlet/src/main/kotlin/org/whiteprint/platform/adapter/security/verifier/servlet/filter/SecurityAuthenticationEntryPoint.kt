@@ -1,6 +1,5 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.filter
 
-import io.github.hchanjune.omk.webmvc.Operations
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.MediaType
@@ -35,7 +34,7 @@ class SecurityAuthenticationEntryPoint(
         val errorBody = ApiResponse.error(
             id = TsidGenerator.generate().toString(),
             exception = exception,
-            traceId = if (Operations.hasContext) Operations.context.traceId else null,
+            traceId = null,
         )
 
         response.writer.write(serializer.serializeToJson(errorBody))
