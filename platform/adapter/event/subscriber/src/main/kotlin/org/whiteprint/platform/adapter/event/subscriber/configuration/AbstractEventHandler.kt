@@ -1,7 +1,5 @@
 package org.whiteprint.platform.adapter.event.subscriber.configuration
 
-import io.github.hchanjune.omk.core.event.EventMetadata
-import io.github.hchanjune.omk.webmvc.Operations
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -18,10 +16,11 @@ import org.whiteprint.platform.core.messaging.subscriber.EventHandler
  *
  * Polls the inbox store on a fixed schedule, acquires per-record locks to prevent
  * duplicate processing, and delegates to [handle] with the deserialized payload.
+ * Subclasses only need to implement [handle].
  *
- * Distributed trace context (traceId, causationId, issuer, eventType) is automatically
- * initialized via Operation Manager Kit before each [handle] invocation, using metadata
- * stored in the inbox record. Subclasses only need to implement [handle].
+ * Observability context (traceId, causationId, etc.) is handled by the
+ * [@ManagedEventHandler][io.github.hchanjune.omk.core.annotations.ManagedEventHandler]
+ * AOP aspect — annotate [handle] and declare the relevant fields on your event class.
  */
 abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationContextAware {
 
@@ -52,31 +51,13 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
 
     }
 
-    /**
-     * Self Invocation Problem + Observability Manual Config (InBox/OutBox Pattern)
-     */
     protected fun processOne(record: EventInbox) {
-        Operations.initializeForEvent(
-            EventMetadata(
-                traceId = record.traceId,
-                causationId = record.causationId,
-                issuer = record.issuer,
-                eventType = record.eventType,
-            )
-        )
-        val context = Operations.context
         try {
             val event = eventSerializer.deserialize(record.payload, eventClass.java)
             applicationContext.getBean(this::class.java).handle(event)
-            Operations.complete()
-            Operations.hook?.onSuccess(context)
             inboxStore.markCompleted(record.eventId)
         } catch (exception: Exception) {
-            Operations.complete()
-            Operations.hook?.onFailure(context, exception)
             inboxStore.markFailed(record.eventId, exception.message ?: "")
-        } finally {
-            Operations.clear()
         }
     }
 

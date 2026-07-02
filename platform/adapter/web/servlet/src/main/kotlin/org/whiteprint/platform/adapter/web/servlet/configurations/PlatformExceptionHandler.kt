@@ -1,6 +1,6 @@
 package org.whiteprint.platform.adapter.web.servlet.configurations
 
-import io.github.hchanjune.omk.webmvc.Operations
+import io.github.hchanjune.omk.servlet.Operations
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException

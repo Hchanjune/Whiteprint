@@ -1,7 +1,7 @@
 package org.whiteprint.platform.adapter.web.reactive.configurations
 
 import io.github.hchanjune.omk.core.context.ManagedContext
-import io.github.hchanjune.omk.webflux.ReactiveOperations
+import io.github.hchanjune.omk.reactive.ReactiveOperations
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

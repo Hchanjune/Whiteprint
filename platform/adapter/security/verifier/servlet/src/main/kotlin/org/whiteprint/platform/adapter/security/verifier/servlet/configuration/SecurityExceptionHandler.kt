@@ -1,6 +1,6 @@
 package org.whiteprint.platform.adapter.security.verifier.servlet.configuration
 
-import io.github.hchanjune.omk.webmvc.Operations
+import io.github.hchanjune.omk.servlet.Operations
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice

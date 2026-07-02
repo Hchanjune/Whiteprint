@@ -2,7 +2,7 @@ package org.whiteprint.platform.adapter.web.servlet.omk
 
 import org.whiteprint.platform.core.kernel.model.ApiResponse
 import io.github.hchanjune.omk.core.OperationResult
-import io.github.hchanjune.omk.webmvc.Operations
+import io.github.hchanjune.omk.servlet.Operations
 import org.springframework.http.HttpHeaders.SET_COOKIE
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity

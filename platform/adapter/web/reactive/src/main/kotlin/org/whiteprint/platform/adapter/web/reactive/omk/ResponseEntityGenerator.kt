@@ -2,7 +2,7 @@ package org.whiteprint.platform.adapter.web.reactive.omk
 
 import io.github.hchanjune.omk.core.OperationResult
 import io.github.hchanjune.omk.core.context.ManagedContext
-import io.github.hchanjune.omk.webflux.ReactiveOperations
+import io.github.hchanjune.omk.reactive.ReactiveOperations
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactor.ReactorContext
 import org.springframework.http.ResponseEntity

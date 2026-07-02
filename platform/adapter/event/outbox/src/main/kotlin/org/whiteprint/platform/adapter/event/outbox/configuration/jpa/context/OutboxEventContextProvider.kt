@@ -1,6 +1,6 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.jpa.context
 
-import io.github.hchanjune.omk.webmvc.Operations
+import io.github.hchanjune.omk.servlet.Operations
 import org.whiteprint.platform.core.messaging.model.EventContext
 import org.whiteprint.platform.core.messaging.outbox.EventContextProvider
 

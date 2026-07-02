@@ -56,6 +56,7 @@ include("platform:infra:kms:vault")
 
 // Platform Core
 include("platform:core:kernel")
+include("platform:core:observability")
 include("platform:core:domain")
 include("platform:core:projection")
 include("platform:core:cache")

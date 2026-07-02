@@ -3,7 +3,7 @@ package org.whiteprint.sample.auth.application.service
 import io.github.hchanjune.omk.core.OperationResult
 import io.github.hchanjune.omk.core.annotations.ManagedOperation
 import io.github.hchanjune.omk.core.annotations.ManagedService
-import io.github.hchanjune.omk.webmvc.Operations
+import io.github.hchanjune.omk.servlet.Operations
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.core.security.model.AccessTokenProfile

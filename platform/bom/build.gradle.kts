@@ -7,6 +7,7 @@ dependencies {
     constraints {
         // core
         api("com.github.Hchanjune.Whiteprint:core-kernel:${project.version}")
+        api("com.github.Hchanjune.Whiteprint:core-observability:${project.version}")
         api("com.github.Hchanjune.Whiteprint:core-domain:${project.version}")
         api("com.github.Hchanjune.Whiteprint:core-cache:${project.version}")
         api("com.github.Hchanjune.Whiteprint:core-messaging:${project.version}")
