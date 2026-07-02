@@ -28,6 +28,8 @@ class MongoConfiguration(
 
     override fun getDatabaseName(): String = properties.datasource.database
 
+    override fun autoIndexCreation(): Boolean = properties.options.autoIndexCreation
+
     @Bean
     override fun mongoClient(): MongoClient {
         val datasource = properties.datasource

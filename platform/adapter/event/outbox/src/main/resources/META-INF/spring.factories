@@ -1,2 +1,2 @@
-org.springframework.boot.env.EnvironmentPostProcessor=\
-  org.whiteprint.platform.adapter.event.outbox.configuration.JpaAutoConfigurationGuard
+org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
+org.whiteprint.platform.adapter.event.outbox.guards.StarterConfigGuardFilter

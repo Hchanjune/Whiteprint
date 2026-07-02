@@ -28,6 +28,7 @@ data class ReactiveMongoConfigurationProperties(
 
     data class Options(
         var repositoryPackagesToScan: MutableList<String> = mutableListOf(),
+        var autoIndexCreation: Boolean = false,
     )
 
 }
