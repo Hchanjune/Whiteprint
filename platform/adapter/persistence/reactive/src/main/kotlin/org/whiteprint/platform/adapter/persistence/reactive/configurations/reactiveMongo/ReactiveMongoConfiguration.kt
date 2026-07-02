@@ -10,12 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory
-import org.springframework.data.mongodb.core.convert.MappingMongoConverter
-import org.springframework.data.mongodb.core.convert.NoOpDbRefResolver
-import org.springframework.data.mongodb.core.mapping.MongoMappingContext
+import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
 import java.util.concurrent.TimeUnit
 
 @Configuration
@@ -23,10 +18,14 @@ import java.util.concurrent.TimeUnit
 @Import(ReactiveMongoRepositoryRegistrar::class)
 class ReactiveMongoConfiguration(
     private val properties: ReactiveMongoConfigurationProperties,
-) {
+) : AbstractReactiveMongoConfiguration() {
+
+    override fun getDatabaseName(): String = properties.datasource.database
+
+    override fun autoIndexCreation(): Boolean = properties.options.autoIndexCreation
 
     @Bean
-    fun reactiveMongoClient(): MongoClient {
+    override fun reactiveMongoClient(): MongoClient {
         val datasource = properties.datasource
         val pool = properties.pool
 
@@ -54,18 +53,4 @@ class ReactiveMongoConfiguration(
 
         return MongoClients.create(settingsBuilder.build())
     }
-
-    @Bean
-    fun reactiveMongoDatabaseFactory(client: MongoClient): ReactiveMongoDatabaseFactory =
-        SimpleReactiveMongoDatabaseFactory(client, properties.datasource.database)
-
-    @Bean
-    fun reactiveMongoTemplate(factory: ReactiveMongoDatabaseFactory): ReactiveMongoTemplate {
-        val mappingContext = MongoMappingContext().apply {
-            setAutoIndexCreation(properties.options.autoIndexCreation)
-        }
-        val converter = MappingMongoConverter(NoOpDbRefResolver.INSTANCE, mappingContext)
-        return ReactiveMongoTemplate(factory, converter)
-    }
-
 }
