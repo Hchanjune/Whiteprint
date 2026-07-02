@@ -18,6 +18,7 @@ import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.whiteprint.platform.adapter.event.publisher.configuration.EventPublisherAutoConfigurationProperties
 import org.whiteprint.platform.adapter.event.publisher.poller.ScheduledEventPoller
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EventEnveloper
@@ -35,7 +36,8 @@ import java.util.concurrent.TimeUnit
 @Configuration
 @ConditionalOnProperty(prefix = "adapter.event.publisher", name = ["infrastructure-implementation"], havingValue = "kafka", matchIfMissing = false)
 class KafkaProducerConfiguration(
-    private val kafkaProperties: KafkaProducerConfigurationProperties
+    private val kafkaProperties: KafkaProducerConfigurationProperties,
+    private val publisherProperties: EventPublisherAutoConfigurationProperties,
 ) {
 
     @Bean
@@ -160,7 +162,8 @@ class KafkaProducerConfiguration(
         ScheduledEventPoller(
             outboxEventStore = outboxEventStore,
             eventEnveloper = eventEnveloper,
-            producer = producer
+            producer = producer,
+            claimTimeoutMillis = publisherProperties.claimTimeoutMillis,
         )
 
 }

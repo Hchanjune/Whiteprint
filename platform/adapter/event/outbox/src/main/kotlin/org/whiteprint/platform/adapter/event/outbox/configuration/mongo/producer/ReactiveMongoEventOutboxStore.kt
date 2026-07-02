@@ -46,6 +46,16 @@ class ReactiveMongoEventOutboxStore(
 
     override fun markFailed(eventId: Long) = updateStatus(eventId, EventOutboxStatus.FAILED)
 
+    override fun resetStaleProcessing(olderThan: Instant): Int {
+        val result = reactiveMongoTemplate.updateMulti(
+            Query(Criteria.where("status").`is`(EventOutboxStatus.PROCESSING)
+                .and("last_attempted_at").lt(olderThan)),
+            Update().set("status", EventOutboxStatus.PENDING),
+            EventOutboxDocument::class.java,
+        ).block()
+        return result?.modifiedCount?.toInt() ?: 0
+    }
+
     private fun updateStatus(eventId: Long, status: EventOutboxStatus) {
         reactiveMongoTemplate.updateFirst(
             Query(Criteria.where("_id").`is`(eventId)),

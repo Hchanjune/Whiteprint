@@ -75,4 +75,14 @@ open class JpaEventInboxStore(
             pageable = PageRequest.of(0, limit),
         )
     }
+
+    @Transactional
+    override fun resetStaleProcessing(eventType: String, olderThan: Instant): Int {
+        return repository.resetStaleProcessing(
+            eventType = eventType,
+            processingStatus = EventInboxStatus.PROCESSING,
+            newStatus = EventInboxStatus.RECEIVED,
+            olderThan = olderThan,
+        )
+    }
 }

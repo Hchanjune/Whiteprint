@@ -8,4 +8,5 @@ interface EventInboxStore {
     fun markDead(eventId: Long)
     fun findById(eventId: Long): EventInbox?
     fun findAllByEventTypeAndStatus(eventType: String, status: EventInboxStatus, limit: Int): List<EventInbox>
+    fun resetStaleProcessing(eventType: String, olderThan: java.time.Instant): Int
 }

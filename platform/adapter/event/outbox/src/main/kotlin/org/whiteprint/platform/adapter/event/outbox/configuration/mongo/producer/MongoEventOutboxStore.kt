@@ -48,6 +48,16 @@ class MongoEventOutboxStore(
 
     override fun markFailed(eventId: Long) = updateStatus(eventId, EventOutboxStatus.FAILED)
 
+    override fun resetStaleProcessing(olderThan: Instant): Int {
+        val result = mongoTemplate.updateMulti(
+            Query(Criteria.where("status").`is`(EventOutboxStatus.PROCESSING)
+                .and("last_attempted_at").lt(olderThan)),
+            Update().set("status", EventOutboxStatus.PENDING),
+            EventOutboxDocument::class.java,
+        )
+        return result.modifiedCount.toInt()
+    }
+
     private fun updateStatus(eventId: Long, status: EventOutboxStatus) {
         mongoTemplate.updateFirst(
             Query(Criteria.where("_id").`is`(eventId)),

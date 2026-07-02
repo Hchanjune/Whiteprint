@@ -10,4 +10,6 @@ interface EventOutboxStore {
 
     fun markFailed(eventId: Long)
 
+    fun resetStaleProcessing(olderThan: java.time.Instant): Int
+
 }

@@ -64,7 +64,7 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
 
     @Modifying
     @Query("""
-        UPDATE EventInboxEntity e 
+        UPDATE EventInboxEntity e
         SET e.status = :status,
             e.lastAttemptedAt = :now
         WHERE e.eventId = :eventId
@@ -73,6 +73,21 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
         eventId: Long,
         status: EventInboxStatus,
         now: Instant,
+    ): Int
+
+    @Modifying
+    @Query("""
+        UPDATE EventInboxEntity e
+        SET e.status = :newStatus
+        WHERE e.eventType = :eventType
+          AND e.status = :processingStatus
+          AND e.lastAttemptedAt < :olderThan
+    """)
+    fun resetStaleProcessing(
+        eventType: String,
+        processingStatus: EventInboxStatus,
+        newStatus: EventInboxStatus,
+        olderThan: Instant,
     ): Int
 
 }

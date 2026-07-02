@@ -70,4 +70,15 @@ class MongoEventInboxStore(
         return mongoTemplate.find(query, EventInboxDocument::class.java)
     }
 
+    override fun resetStaleProcessing(eventType: String, olderThan: Instant): Int {
+        val result = mongoTemplate.updateMulti(
+            Query(Criteria.where("event_type").`is`(eventType)
+                .and("status").`is`(EventInboxStatus.PROCESSING)
+                .and("last_attempted_at").lt(olderThan)),
+            Update().set("status", EventInboxStatus.RECEIVED),
+            EventInboxDocument::class.java,
+        )
+        return result.modifiedCount.toInt()
+    }
+
 }

@@ -69,4 +69,15 @@ class ReactiveMongoEventInboxStore(
         return reactiveMongoTemplate.find(query, EventInboxDocument::class.java)
             .collectList().block() ?: emptyList()
     }
+
+    override fun resetStaleProcessing(eventType: String, olderThan: Instant): Int {
+        val result = reactiveMongoTemplate.updateMulti(
+            Query(Criteria.where("event_type").`is`(eventType)
+                .and("status").`is`(EventInboxStatus.PROCESSING)
+                .and("last_attempted_at").lt(olderThan)),
+            Update().set("status", EventInboxStatus.RECEIVED),
+            EventInboxDocument::class.java,
+        ).block()
+        return result?.modifiedCount?.toInt() ?: 0
+    }
 }

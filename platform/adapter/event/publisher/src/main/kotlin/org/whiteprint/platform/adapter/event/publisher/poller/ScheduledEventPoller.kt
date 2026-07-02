@@ -6,11 +6,13 @@ import org.whiteprint.platform.core.messaging.contract.EventEnveloper
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
 import org.whiteprint.platform.core.messaging.publisher.EventPoller
 import org.whiteprint.platform.core.messaging.publisher.EventPublisher
+import java.time.Instant
 
 open class ScheduledEventPoller(
     private val outboxEventStore: EventOutboxStore,
     private val eventEnveloper: EventEnveloper,
     private val producer: EventPublisher,
+    private val claimTimeoutMillis: Long = 300_000L,
 ) : EventPoller {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -31,6 +33,12 @@ open class ScheduledEventPoller(
         }
 
         return events.size
+    }
+
+    @Scheduled(fixedDelay = 60_000)
+    fun recoverStaleProcessing() {
+        val threshold = Instant.now().minusMillis(claimTimeoutMillis)
+        outboxEventStore.resetStaleProcessing(threshold)
     }
 
     private fun markPublishedWithRetry(eventId: Long) {

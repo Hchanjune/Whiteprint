@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api("com.github.Hchanjune.operation-manager-kit:core:0.8.6")
+    api("com.github.Hchanjune.operation-manager-kit:core:0.8.7")
 }

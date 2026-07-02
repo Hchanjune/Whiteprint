@@ -11,6 +11,7 @@ import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer
 import org.whiteprint.platform.core.messaging.model.Event
 import org.whiteprint.platform.core.messaging.subscriber.EventHandler
+import java.time.Instant
 
 /**
  * Abstract base for transactional inbox event handlers.
@@ -28,11 +29,13 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
     private lateinit var inboxStore: EventInboxStore
     private lateinit var eventSerializer: InboxEventSerializer
     private lateinit var applicationContext: ApplicationContext
+    private var claimTimeoutMillis: Long = 300_000L
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.applicationContext = applicationContext
         inboxStore = applicationContext.getBean<EventInboxStore>()
         eventSerializer = applicationContext.getBean<InboxEventSerializer>()
+        claimTimeoutMillis = applicationContext.getBean<EventSubscriberAutoConfigurationProperties>().claimTimeoutMillis
     }
 
     @Scheduled(fixedDelay = 500)
@@ -50,6 +53,12 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
             processOne(record)
         }
 
+    }
+
+    @Scheduled(fixedDelay = 60_000)
+    open fun recoverStaleProcessing() {
+        val threshold = Instant.now().minusMillis(claimTimeoutMillis)
+        inboxStore.resetStaleProcessing(eventType, threshold)
     }
 
     protected fun processOne(record: EventInbox) {

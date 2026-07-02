@@ -41,4 +41,13 @@ open class JpaEventOutboxStore(
         repository.updateStatus(eventId, EventOutboxStatus.FAILED)
     }
 
+    @Transactional
+    override fun resetStaleProcessing(olderThan: Instant): Int {
+        return repository.resetStaleProcessing(
+            processingStatus = EventOutboxStatus.PROCESSING,
+            newStatus = EventOutboxStatus.PENDING,
+            olderThan = olderThan,
+        )
+    }
+
 }

@@ -51,4 +51,17 @@ interface JpaEventOutboxRepository: JpaRepository<EventOutboxEntity, Long> {
         @Param("status") status: EventOutboxStatus,
     ): Int
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        UPDATE EventOutboxEntity e
+        SET e.status = :newStatus
+        WHERE e.status = :processingStatus
+          AND e.lastAttemptedAt < :olderThan
+    """)
+    fun resetStaleProcessing(
+        @Param("processingStatus") processingStatus: EventOutboxStatus,
+        @Param("newStatus") newStatus: EventOutboxStatus,
+        @Param("olderThan") olderThan: Instant,
+    ): Int
+
 }
