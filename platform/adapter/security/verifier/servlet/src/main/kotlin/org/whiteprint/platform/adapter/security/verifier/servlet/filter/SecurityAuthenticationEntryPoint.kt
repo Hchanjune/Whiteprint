@@ -35,7 +35,7 @@ class SecurityAuthenticationEntryPoint(
         val errorBody = ApiResponse.error(
             id = TsidGenerator.generate().toString(),
             exception = exception,
-            traceId = Operations.context.traceId,
+            traceId = if (Operations.hasContext) Operations.context.traceId else null,
         )
 
         response.writer.write(serializer.serializeToJson(errorBody))
