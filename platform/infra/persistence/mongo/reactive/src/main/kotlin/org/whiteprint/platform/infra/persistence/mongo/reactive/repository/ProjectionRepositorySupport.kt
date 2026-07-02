@@ -1,5 +1,6 @@
 package org.whiteprint.platform.infra.persistence.mongo.reactive.repository
 
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
@@ -21,17 +22,23 @@ class ProjectionRepositorySupport<T : ProjectionDocument>(
     private val collectionName = entityInformation.collectionName
 
     fun upsert(document: T): Mono<Boolean> {
-        val query = Query(
+        val replaceQuery = Query(
             Criteria.where("_id").`is`(document.id)
                 .and("version").lt(document.version)
         )
         return mongoOperations.findAndReplace(
-            query,
+            replaceQuery,
             document,
-            FindAndReplaceOptions.options().upsert().returnNew(),
+            FindAndReplaceOptions.options().returnNew(),
             entityClass,
             collectionName,
         ).hasElement()
+            .flatMap { replaced ->
+                if (replaced) Mono.just(true)
+                else mongoOperations.insert(document, collectionName)
+                    .thenReturn(true)
+                    .onErrorResume(DuplicateKeyException::class.java) { Mono.just(false) }
+            }
     }
 
     override fun delete(entity: T): Mono<Void> {
