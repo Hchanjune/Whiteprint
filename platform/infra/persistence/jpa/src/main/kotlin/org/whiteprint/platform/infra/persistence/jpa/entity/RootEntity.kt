@@ -32,6 +32,10 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, 
     @Column(name = "last_fencing_token", nullable = true)
     override var lastFencingToken: Long = 0
 
+    fun touch() {
+        updatedAt = Instant.now()
+    }
+
     @PreUpdate
     override fun preUpdate() {
         updatedAt = Instant.now()
