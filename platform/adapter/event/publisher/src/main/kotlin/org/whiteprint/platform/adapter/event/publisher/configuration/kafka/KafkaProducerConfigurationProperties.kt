@@ -7,8 +7,13 @@ data class KafkaProducerConfigurationProperties(
     var datasource: DataSourceProperties = DataSourceProperties(),
     var topicPolicy: TopicPolicy = TopicPolicy(),
     var producer: Producer = Producer(),
-    var publish: Publish = Publish()
+    var publish: Publish = Publish(),
+    var connectionValidation: ConnectionValidation = ConnectionValidation(),
 ) {
+
+    data class ConnectionValidation(
+        var enabled: Boolean = false,
+    )
 
     data class DataSourceProperties(
         var host: String = "localhost",

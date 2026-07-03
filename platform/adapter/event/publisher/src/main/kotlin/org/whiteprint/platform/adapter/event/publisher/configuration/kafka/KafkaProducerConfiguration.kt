@@ -91,6 +91,12 @@ class KafkaProducerConfiguration(
     }
 
     @Bean("producerConnectionValidator")
+    @ConditionalOnProperty(
+        prefix = "adapter.event.publisher.kafka.connection-validation",
+        name = ["enabled"],
+        havingValue = "true",
+        matchIfMissing = false,
+    )
     fun kafkaConnectionValidator() =
         SmartInitializingSingleton {
             val props = mapOf<String, Any>(

@@ -8,7 +8,12 @@ data class KafkaConsumerConfigurationProperties(
     var consumer: Consumer = Consumer(),
     var subscriptionPolicy: SubscriptionPolicy = SubscriptionPolicy(),
     var errorHandling: ErrorHandling = ErrorHandling(),
+    var connectionValidation: ConnectionValidation = ConnectionValidation(),
 ) {
+
+    data class ConnectionValidation(
+        var enabled: Boolean = false,
+    )
 
     data class DataSourceProperties(
         var host: String = "localhost",

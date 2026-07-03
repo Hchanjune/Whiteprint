@@ -10,7 +10,17 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.data.mapping.model.FieldNamingStrategy
+import org.springframework.data.mapping.model.Property
+import org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy
+import org.springframework.data.mapping.model.SimpleTypeHolder
+import org.springframework.data.mongodb.MongoManagedTypes
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions
+import org.springframework.data.mongodb.core.mapping.BasicMongoPersistentProperty
+import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity
+import org.springframework.data.mongodb.core.mapping.MongoPersistentProperty
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext
 import java.util.concurrent.TimeUnit
 
 @Configuration
@@ -23,6 +33,19 @@ class ReactiveMongoConfiguration(
     override fun getDatabaseName(): String = properties.datasource.database
 
     override fun autoIndexCreation(): Boolean = properties.options.autoIndexCreation
+
+    @Bean
+    override fun mongoMappingContext(
+        customConversions: MongoCustomConversions,
+        managedTypes: MongoManagedTypes,
+    ): MongoMappingContext {
+        val ctx = if (properties.options.writeNullValues) WriteNullValuesMappingContext() else MongoMappingContext()
+        ctx.setManagedTypes(managedTypes)
+        ctx.setSimpleTypeHolder(customConversions.simpleTypeHolder)
+        ctx.setFieldNamingStrategy(fieldNamingStrategy())
+        ctx.setAutoIndexCreation(autoIndexCreation())
+        return ctx
+    }
 
     @Bean
     override fun reactiveMongoClient(): MongoClient {
@@ -53,4 +76,22 @@ class ReactiveMongoConfiguration(
 
         return MongoClients.create(settingsBuilder.build())
     }
+}
+
+private class WriteNullValuesMappingContext : MongoMappingContext() {
+    private var namingStrategy: FieldNamingStrategy = PropertyNameFieldNamingStrategy.INSTANCE
+
+    override fun setFieldNamingStrategy(strategy: FieldNamingStrategy?) {
+        super.setFieldNamingStrategy(strategy)
+        namingStrategy = strategy ?: PropertyNameFieldNamingStrategy.INSTANCE
+    }
+
+    override fun createPersistentProperty(
+        property: Property,
+        owner: MongoPersistentEntity<*>,
+        simpleTypeHolder: SimpleTypeHolder,
+    ): MongoPersistentProperty =
+        object : BasicMongoPersistentProperty(property, owner, simpleTypeHolder, namingStrategy) {
+            override fun writeNullValues(): Boolean = true
+        }
 }

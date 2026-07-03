@@ -46,6 +46,12 @@ class KafkaConsumerConfiguration(
     fun serializer(): Serializer = JacksonSerializer()
 
     @Bean("consumerConnectionValidator")
+    @ConditionalOnProperty(
+        prefix = "adapter.event.subscriber.kafka.connection-validation",
+        name = ["enabled"],
+        havingValue = "true",
+        matchIfMissing = false,
+    )
     fun kafkaConnectionValidator(kafkaProperties: KafkaConsumerConfigurationProperties) =
         SmartInitializingSingleton {
             val props = mapOf<String, Any>(
