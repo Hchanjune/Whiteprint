@@ -1,6 +1,5 @@
 package org.whiteprint.platform.adapter.event.subscriber.configuration
 
-import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -64,9 +63,7 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
     protected fun processOne(record: EventInbox) {
         try {
             val event = eventSerializer.deserialize(record.payload, eventClass.java)
-            runBlocking {
-                applicationContext.getBean(this@AbstractEventHandler::class.java).handle(event)
-            }
+            applicationContext.getBean(this@AbstractEventHandler::class.java).handle(event)
             inboxStore.markCompleted(record.eventId)
         } catch (exception: Exception) {
             inboxStore.markFailed(record.eventId, exception.message ?: "")

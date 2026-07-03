@@ -6,5 +6,5 @@ import kotlin.reflect.KClass
 interface EventHandler<E: Event> {
     val eventType: String
     val eventClass: KClass<E>
-    suspend fun handle(event: E)
+    fun handle(event: E)
 }

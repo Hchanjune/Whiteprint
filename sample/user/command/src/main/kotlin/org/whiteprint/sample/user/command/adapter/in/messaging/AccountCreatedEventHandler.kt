@@ -13,7 +13,7 @@ class AccountCreatedEventHandler: AbstractEventHandler<AccountCreatedEvent>() {
     override val eventClass: KClass<AccountCreatedEvent> = AccountCreatedEvent::class
 
     @ManagedEventHandler
-    override suspend fun handle(event: AccountCreatedEvent) {
+    override fun handle(event: AccountCreatedEvent) {
         println(">>> $event")
     }
 
