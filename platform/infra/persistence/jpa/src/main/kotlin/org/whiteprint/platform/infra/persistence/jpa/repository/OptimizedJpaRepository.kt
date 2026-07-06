@@ -41,4 +41,15 @@ class OptimizedJpaRepository<T: Any, ID: Serializable>(
         findById(id).ifPresent { this.delete(it) }
     }
 
+    fun restore(entity: T) {
+        if (entity is DeletableEntity && entity.useSoftDelete) {
+            entity.restore()
+            this.save(entity)
+        }
+    }
+
+    fun restoreById(id: ID) {
+        findById(id).ifPresent { this.restore(it) }
+    }
+
 }

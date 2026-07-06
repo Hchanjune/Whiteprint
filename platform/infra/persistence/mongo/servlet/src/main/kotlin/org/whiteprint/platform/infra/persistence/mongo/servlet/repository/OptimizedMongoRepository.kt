@@ -50,4 +50,18 @@ class OptimizedMongoRepository<T : MongoDocument<ID>, ID : Serializable>(
         findById(id).ifPresent { delete(it) }
     }
 
+    fun restore(entity: T) {
+        if (entity.useSoftDelete) {
+            val query = Query(Criteria.where("_id").`is`(entity.id))
+            val update = Update()
+                .set("is_deleted", false)
+                .unset("deleted_at")
+            mongoOperations.findAndModify(query, update, FindAndModifyOptions.options(), entityClass, collectionName)
+        }
+    }
+
+    fun restoreById(id: ID) {
+        findById(id).ifPresent { restore(it) }
+    }
+
 }
