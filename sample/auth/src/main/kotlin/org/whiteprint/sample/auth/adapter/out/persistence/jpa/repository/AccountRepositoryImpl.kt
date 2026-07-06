@@ -62,6 +62,19 @@ class AccountRepositoryImpl(
         aggregates.forEach { delete(it) }
     }
 
+    override fun restore(aggregate: AccountAggregate): AccountAggregate =
+        jpaRepository.findByIdOrNull(aggregate.id)
+            ?.also { it.restore() }
+            ?.let(jpaRepository::save)
+            ?.let { mapper.toAggregate(it) }
+            ?: throw AccountPolicyException(
+                policy = AccountPolicy.ACCOUNT_NOT_FOUND,
+                attributes = mapOf("key" to "id", "value" to aggregate.id)
+            )
+
+    override fun restoreAll(aggregates: Collection<AccountAggregate>): List<AccountAggregate> =
+        aggregates.map(::restore)
+
     override fun existsByUsername(username: Username): Boolean {
         return jpaRepository.existsByUsername(username.value)
     }

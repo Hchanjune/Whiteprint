@@ -15,8 +15,12 @@ interface AggregateRepository<ID: Serializable, T: Aggregate<*>> {
 
     fun delete(aggregate: T)
 
+    fun restore(aggregate: T): T
+
     fun updateAll(aggregates: Collection<T>): List<T>
 
     fun deleteAll(aggregates: Collection<T>)
+
+    fun restoreAll(aggregates: Collection<T>): List<T>
 
 }

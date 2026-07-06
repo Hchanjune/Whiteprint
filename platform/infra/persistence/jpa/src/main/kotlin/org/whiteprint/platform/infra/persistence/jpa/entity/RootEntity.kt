@@ -48,6 +48,7 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, 
 
     override fun restore() {
         isDeleted = false
+        deletedAt = null
     }
 
 }
