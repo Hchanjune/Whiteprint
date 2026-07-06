@@ -12,6 +12,10 @@ import java.time.Instant
 @Repository
 interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
 
+    fun findAllByTraceId(traceId: String): List<EventInboxEntity>
+
+    fun findAllByCausationId(causationId: String): List<EventInboxEntity>
+
     fun findAllByEventTypeAndStatus(
         eventType: String,
         status: EventInboxStatus,

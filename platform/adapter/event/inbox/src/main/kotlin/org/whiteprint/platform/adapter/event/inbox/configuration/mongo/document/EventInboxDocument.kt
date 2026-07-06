@@ -17,9 +17,11 @@ data class EventInboxDocument(
     @Field("_id")
     override var eventId: Long,
 
+    @Indexed
     @Field("trace_id")
     override var traceId: String,
 
+    @Indexed
     @Field("causation_id")
     override var causationId: String?,
 

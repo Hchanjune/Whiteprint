@@ -5,12 +5,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEnvelopeOpener
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEventConsumer
+import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.JpaEventInboxQueryStore
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.JpaEventInboxStore
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.repository.JpaEventInboxRepository
 import org.whiteprint.platform.adapter.event.inbox.configuration.serializer.InboxEventSerializerImpl
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EnvelopeOpener
 import org.whiteprint.platform.core.messaging.inbox.EventConsumer
+import org.whiteprint.platform.core.messaging.inbox.EventInboxQueryStore
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 import org.whiteprint.platform.core.messaging.inbox.InboxEventSerializer
 
@@ -45,6 +47,15 @@ class JpaEventInboxConfiguration {
         jpaEventInboxRepository: JpaEventInboxRepository,
     ): EventInboxStore =
         JpaEventInboxStore(
+            repository = jpaEventInboxRepository
+        )
+
+    @Bean
+    fun eventInboxQueryStore(
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+        jpaEventInboxRepository: JpaEventInboxRepository,
+    ): EventInboxQueryStore =
+        JpaEventInboxQueryStore(
             repository = jpaEventInboxRepository
         )
 

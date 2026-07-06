@@ -5,6 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.Table
 import org.whiteprint.platform.core.messaging.inbox.EventInbox
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStatus
@@ -12,7 +13,13 @@ import org.whiteprint.platform.core.messaging.model.event.EventScope
 import java.time.Instant
 
 @Entity
-@Table(name = "event_inbox")
+@Table(
+    name = "event_inbox",
+    indexes = [
+        Index(name = "idx_event_inbox_trace_id", columnList = "trace_id"),
+        Index(name = "idx_event_inbox_causation_id", columnList = "causation_id"),
+    ]
+)
 class EventInboxEntity(
     @Id
     @Column(name = "event_id")
