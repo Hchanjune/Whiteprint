@@ -31,12 +31,10 @@ class OptimizedJpaRepository<T: Any, ID: Serializable>(
             if (entity.useSoftDelete) {
                 entity.delete()
                 this.save(entity)
-                println("${entity.useSoftDelete}, soft deleted")
                 return
             }
         }
         super.delete(entity)
-        println("hard deleted")
     }
 
     override fun deleteById(id: ID) {
