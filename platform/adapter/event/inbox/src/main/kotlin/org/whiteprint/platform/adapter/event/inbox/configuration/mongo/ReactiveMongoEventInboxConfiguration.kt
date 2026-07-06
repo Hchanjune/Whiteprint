@@ -7,9 +7,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEnvelopeOpener
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer.InboxEventConsumer
-import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer.MongoEventInboxQueryStore
+import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer.ReactiveMongoEventInboxQueryStore
 import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer.ReactiveMongoEventInboxStore
-import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.repository.MongoEventInboxRepository
 import org.whiteprint.platform.adapter.event.inbox.configuration.serializer.InboxEventSerializerImpl
 import org.whiteprint.platform.core.kernel.serializer.Serializer
 import org.whiteprint.platform.core.messaging.contract.EnvelopeOpener
@@ -40,9 +39,8 @@ class ReactiveMongoEventInboxConfiguration {
         ReactiveMongoEventInboxStore(reactiveMongoTemplate)
 
     @Bean
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    fun eventInboxQueryStore(repository: MongoEventInboxRepository): EventInboxQueryStore =
-        MongoEventInboxQueryStore(repository)
+    fun eventInboxQueryStore(reactiveMongoTemplate: ReactiveMongoTemplate): EventInboxQueryStore =
+        ReactiveMongoEventInboxQueryStore(reactiveMongoTemplate)
 
     @Bean
     fun eventConsumer(inboxStore: EventInboxStore, envelopeOpener: EnvelopeOpener): EventConsumer =
