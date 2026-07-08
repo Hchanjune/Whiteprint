@@ -9,7 +9,7 @@ group = "org.whiteprint.platform.adapter.lock.servlet"
 
 dependencies {
     api(project(":platform:core:lock"))
-    implementation(project(":platform:infra:cache:redis"))
+    implementation(project(":platform:infra:cache:redis:servlet"))
     implementation(project(":platform:infra:observability:servlet"))
 
     implementation("org.springframework.boot:spring-boot-starter-aspectj")

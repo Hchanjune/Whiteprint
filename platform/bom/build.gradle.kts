@@ -34,7 +34,8 @@ dependencies {
 
         // infra
         api("com.github.Hchanjune.Whiteprint:infra-persistence-jpa:${project.version}")
-        api("com.github.Hchanjune.Whiteprint:infra-cache-redis:${project.version}")
+        api("com.github.Hchanjune.Whiteprint:infra-cache-redis-servlet:${project.version}")
+        api("com.github.Hchanjune.Whiteprint:infra-cache-redis-reactive:${project.version}")
         api("com.github.Hchanjune.Whiteprint:infra-messaging-kafka:${project.version}")
         api("com.github.Hchanjune.Whiteprint:infra-observability-servlet:${project.version}")
         api("com.github.Hchanjune.Whiteprint:infra-observability-reactive:${project.version}")

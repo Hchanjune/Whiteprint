@@ -2,4 +2,6 @@ package org.whiteprint.platform.core.lock.annotation
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class DistributedLockKey
+annotation class DistributedLockKey(
+    val order: Int = 0
+)

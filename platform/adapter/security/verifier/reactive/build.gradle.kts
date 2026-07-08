@@ -17,7 +17,7 @@ dependencies {
     api(project(":platform:core:kms"))
     api(project(":platform:infra:kms:vault"))
 
-    api(project(":platform:infra:cache:redis"))
+    api(project(":platform:infra:cache:redis:servlet"))
 
     implementation("org.apache.commons:commons-pool2")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")

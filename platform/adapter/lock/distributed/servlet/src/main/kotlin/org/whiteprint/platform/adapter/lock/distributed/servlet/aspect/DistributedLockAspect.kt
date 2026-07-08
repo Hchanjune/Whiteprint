@@ -30,9 +30,10 @@ class DistributedLockAspect(
     @Around("@annotation(distributedLock)")
     fun around(joinPoint: ProceedingJoinPoint, distributedLock: DistributedLock): Any? {
         val key = buildLockKey(joinPoint, distributedLock)
-        val ttl = Duration.ofMillis(distributedLock.ttlMillis)
+        val ttl = Duration.ofMillis(distributedLock.timeUnit.toMillis(distributedLock.ttl))
+        val waitMillis = distributedLock.timeUnit.toMillis(distributedLock.wait)
 
-        val lock = acquireWithSpan(key, ttl, distributedLock.waitMillis)
+        val lock = acquireWithSpan(key, ttl, waitMillis)
             ?: throw LockException(LockPolicy.ACQUISITION_FAILED, mapOf("key" to key.value))
 
         return try {
@@ -112,32 +113,33 @@ class DistributedLockAspect(
         val args = joinPoint.args
         val params = method.parameters
 
-        val keyValues = mutableListOf<String>()
+        val keyEntries = mutableListOf<Pair<Int, String>>()
 
         params.forEachIndexed { i, param ->
-            if (param.isAnnotationPresent(DistributedLockKey::class.java)) {
-                args[i]?.let { keyValues.add(it.toString()) }
+            param.getAnnotation(DistributedLockKey::class.java)?.let { keyAnnotation ->
+                args[i]?.let { keyEntries.add(keyAnnotation.order to it.toString()) }
             }
         }
 
-        if (keyValues.isEmpty()) {
+        if (keyEntries.isEmpty()) {
             args.forEach { arg ->
                 if (arg == null) return@forEach
                 arg::class.java.declaredFields.forEach { field ->
-                    if (field.isAnnotationPresent(DistributedLockKey::class.java)) {
+                    field.getAnnotation(DistributedLockKey::class.java)?.let { keyAnnotation ->
                         field.isAccessible = true
-                        field.get(arg)?.let { keyValues.add(it.toString()) }
+                        field.get(arg)?.let { keyEntries.add(keyAnnotation.order to it.toString()) }
                     }
                 }
             }
         }
 
-        if (keyValues.isEmpty()) {
+        if (keyEntries.isEmpty()) {
             throw LockException(LockPolicy.NO_LOCK_KEY_DEFINED, mapOf("key" to method.name))
         }
 
-        val keyPart = if (keyValues.size == 1) keyValues[0]
-                      else keyValues.sorted().joinToString(":")
+        // order가 같으면(기본값 0 포함) 선언 순서를 유지한다 (stable sort).
+        val keyPart = if (keyEntries.size == 1) keyEntries[0].second
+                      else keyEntries.sortedBy { it.first }.joinToString(":") { it.second }
 
         val prefix = annotation.prefix
         return if (prefix.isBlank()) LockKey(keyPart) else LockKey("$prefix:$keyPart")

@@ -38,7 +38,8 @@ include("platform:infra:persistence:jpa")
 include("platform:infra:persistence:mongo:reactive")
 include("platform:infra:persistence:mongo:servlet")
 
-include("platform:infra:cache:redis")
+include("platform:infra:cache:redis:servlet")
+include("platform:infra:cache:redis:reactive")
 
 include("platform:infra:messaging:kafka")
 

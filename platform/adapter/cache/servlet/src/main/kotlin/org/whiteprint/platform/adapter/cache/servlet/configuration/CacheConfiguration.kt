@@ -10,6 +10,11 @@ import org.whiteprint.platform.core.cache.operation.ListOperations
 import org.whiteprint.platform.core.cache.operation.SetOperations
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.cache.provider.CacheProvider
+import org.whiteprint.platform.adapter.cache.servlet.aspect.CacheEvictAspect
+import org.whiteprint.platform.adapter.cache.servlet.aspect.CachedAspect
+import org.whiteprint.platform.adapter.cache.servlet.aspect.DeduplicatedAspect
+import org.whiteprint.platform.adapter.cache.servlet.aspect.IdempotentAspect
+import org.whiteprint.platform.adapter.cache.servlet.aspect.RateLimitedAspect
 import org.whiteprint.platform.infra.cache.redis.operation.RedisAtomicOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisBatchOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisListOperations
@@ -154,5 +159,20 @@ class CacheConfiguration(
         list = listOperations,
         set = setOperations,
     )
+
+    @Bean
+    fun cachedAspect(cacheProvider: CacheProvider) = CachedAspect(cacheProvider)
+
+    @Bean
+    fun idempotentAspect(cacheProvider: CacheProvider) = IdempotentAspect(cacheProvider)
+
+    @Bean
+    fun deduplicatedAspect(cacheProvider: CacheProvider) = DeduplicatedAspect(cacheProvider)
+
+    @Bean
+    fun rateLimitedAspect(cacheProvider: CacheProvider) = RateLimitedAspect(cacheProvider)
+
+    @Bean
+    fun cacheEvictAspect(cacheProvider: CacheProvider) = CacheEvictAspect(cacheProvider)
 
 }

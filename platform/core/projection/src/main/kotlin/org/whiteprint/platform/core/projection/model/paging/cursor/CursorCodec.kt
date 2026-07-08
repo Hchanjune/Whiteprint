@@ -1,5 +1,7 @@
 package org.whiteprint.platform.core.projection.model.paging.cursor
 
+import org.whiteprint.platform.core.projection.policy.QueryException
+import org.whiteprint.platform.core.projection.policy.QueryPolicy
 import java.util.Base64
 
 /**
@@ -15,10 +17,19 @@ object CursorCodec {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(raw.toByteArray(Charsets.UTF_8))
     }
 
+    /** 변조되었거나 다른 형식(과거 버전 등)으로 만들어진 토큰이 들어오면 raw 파싱 예외 대신 QueryException으로 감싼다. */
     fun decode(token: String): Cursor {
-        val raw = String(Base64.getUrlDecoder().decode(token), Charsets.UTF_8)
+        val raw = try {
+            String(Base64.getUrlDecoder().decode(token), Charsets.UTF_8)
+        } catch (e: IllegalArgumentException) {
+            throw QueryException(QueryPolicy.INVALID_CURSOR, mapOf("key" to "cursor", "value" to token), cause = e)
+        }
+
         val delimiterIndex = raw.lastIndexOf(DELIMITER)
-        require(delimiterIndex >= 0) { "Invalid cursor token: $token" }
+        if (delimiterIndex < 0) {
+            throw QueryException(QueryPolicy.INVALID_CURSOR, mapOf("key" to "cursor", "value" to token))
+        }
+
         return Cursor(
             sortValue = raw.substring(0, delimiterIndex),
             id = raw.substring(delimiterIndex + 1),

@@ -112,6 +112,17 @@ enum class QueryPolicy(
      * - [key]
      * - [value]
      */
+    INVALID_CURSOR(
+        400,
+        "QUERY_INVALID_CURSOR",
+        "Invalid cursor. ([[key]]=[[value]])"
+    ),
+
+    /**
+     * RequiredAttributes
+     * - [key]
+     * - [value]
+     */
     QUERY_FORBIDDEN(
         403,
         "QUERY_FORBIDDEN",

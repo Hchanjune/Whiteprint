@@ -65,4 +65,23 @@ enum class CachePolicy(
      */
     INFRA_FAILURE(500, "CACHE_INFRA_ERROR", "Unknown Cache infrastructure error occurred. requestedKey:[[requestedKey]] reason:[[reason]]"),
 
+    /**
+     * RequiredAttributes
+     * - [key]
+     */
+    NO_CACHE_KEY_DEFINED(500, "CACHE_NO_KEY_DEFINED", "No key annotation found on method or its parameters. method:[[key]]"),
+
+    /**
+     * RequiredAttributes
+     * - [key]
+     */
+    DUPLICATE_REQUEST(409, "CACHE_DUPLICATE_REQUEST", "Duplicate request detected within the deduplication window. key:[[key]]"),
+
+    /**
+     * RequiredAttributes
+     * - [key]
+     * - [limit]
+     */
+    RATE_LIMIT_EXCEEDED(429, "CACHE_RATE_LIMIT_EXCEEDED", "Rate limit exceeded. key:[[key]] limit:[[limit]]"),
+
 }
