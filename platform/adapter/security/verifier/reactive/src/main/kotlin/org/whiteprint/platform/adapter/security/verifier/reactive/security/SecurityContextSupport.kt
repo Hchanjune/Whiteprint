@@ -25,5 +25,5 @@ object SecurityContextSupport {
 
     suspend fun awaitCurrentSubject(): String = currentSubject().awaitSingle()
 
-    suspend fun awaitCurrentSubjectOrNull(): String? = currentSubject().awaitSingle().takeUnless { it.isEmpty() }
+    suspend fun awaitCurrentSubjectOrNull(): String? = currentSubject().awaitSingleOrNull()?.takeUnless { it.isEmpty() }
 }

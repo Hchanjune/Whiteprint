@@ -1,4 +1,4 @@
-package org.whiteprint.platform.core.projection.model
+package org.whiteprint.platform.core.projection.model.projecion
 
 import java.time.Instant
 
