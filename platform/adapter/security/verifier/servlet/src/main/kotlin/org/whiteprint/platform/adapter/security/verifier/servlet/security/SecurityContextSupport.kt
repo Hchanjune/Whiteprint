@@ -21,6 +21,6 @@ object SecurityContextSupport {
         throw SecurityException(policy = SecurityPolicy.TOKEN_NOT_FOUND)
     }
 
-    fun getCurrentUserId(): String = SecurityContextHolder.getContext().authentication?.name
+    fun getCurrentSubject(): String = SecurityContextHolder.getContext().authentication?.name
         ?: throw SecurityException(policy = SecurityPolicy.TOKEN_NOT_FOUND)
 }
