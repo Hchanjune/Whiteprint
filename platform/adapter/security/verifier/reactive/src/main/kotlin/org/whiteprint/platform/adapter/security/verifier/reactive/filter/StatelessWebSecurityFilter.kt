@@ -28,6 +28,9 @@ class StatelessWebSecurityFilter(
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return Mono.fromCallable { verifyToken(exchange) }
             .subscribeOn(Schedulers.boundedElastic())
+            // verifyToken()만 blocking-tolerant 스레드에서 돌리고, 그 뒤(컨트롤러/서비스/DB)는
+            // 다시 가벼운 스케줄러로 돌아온다 — 안 그러면 subscribeOn이 체인 전체를 물들여버린다.
+            .publishOn(Schedulers.parallel())
             .flatMap { result ->
                 when (result) {
                     is VerificationResult.Authenticated -> {
