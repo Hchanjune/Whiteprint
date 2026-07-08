@@ -21,3 +21,14 @@ data class OffsetPagedData<T: ViewModel>(
     val firstItemIndex: Long get() = if (totalCount == 0L) 0 else (currentPage - 1).toLong() * size + 1
     val lastItemIndex: Long get() = minOf(currentPage.toLong() * size, totalCount)
 }
+
+/** 페이지네이션 메타데이터는 그대로 두고 content 타입만 바꾼다 (예: Projection -> ViewModel). */
+inline fun <T: ViewModel, R: ViewModel> OffsetPagedData<T>.mapContent(transform: (T) -> R): OffsetPagedData<R> =
+    OffsetPagedData(
+        content = content.map(transform),
+        size = size,
+        sort = sort,
+        meta = meta,
+        currentPage = currentPage,
+        totalCount = totalCount,
+    )
