@@ -26,10 +26,6 @@ class StatelessWebSecurityFilter(
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        if (permittedPathProvider.isPermitted(exchange.request)) {
-            return chain.filter(exchange)
-        }
-
         return Mono.fromCallable { verifyToken(exchange) }
             .subscribeOn(Schedulers.boundedElastic())
             .flatMap { result ->
@@ -47,7 +43,11 @@ class StatelessWebSecurityFilter(
                             )
                     }
                     is VerificationResult.Failed -> {
-                        exchange.attributes[SECURITY_EXCEPTION_KEY] = result.exception
+                        // permitted 경로는 토큰이 없거나 유효하지 않아도 막지 않는다(옵셔널 인증) —
+                        // 그래서 이 경우엔 예외를 기록하지 않고 그냥 통과시킨다.
+                        if (!permittedPathProvider.isPermitted(exchange.request)) {
+                            exchange.attributes[SECURITY_EXCEPTION_KEY] = result.exception
+                        }
                         chain.filter(exchange)
                     }
                 }

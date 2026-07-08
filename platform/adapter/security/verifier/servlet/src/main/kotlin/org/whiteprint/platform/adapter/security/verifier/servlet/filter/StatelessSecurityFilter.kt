@@ -31,12 +31,7 @@ class StatelessSecurityFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val permitAllMatchers = permittedEntryPointProvider.matchers()
-
-        if (permitAllMatchers.any { it.matches(request) }) {
-            filterChain.doFilter(request, response)
-            return
-        }
+        val isPermitted = permittedEntryPointProvider.matchers().any { it.matches(request) }
 
         try {
             val token = extractToken(request)
@@ -52,12 +47,18 @@ class StatelessSecurityFilter(
             SecurityContextHolder.setContext(context)
             securityContextRepository.saveContext(context, request, response)
         } catch (exception: SecurityException) {
-            request.setAttribute(SECURITY_EXCEPTION_KEY, exception)
+            // permitted 경로는 토큰이 없거나 유효하지 않아도 막지 않는다(옵셔널 인증) —
+            // 그래서 이 경우엔 예외를 기록하지 않고 그냥 통과시킨다.
+            if (!isPermitted) {
+                request.setAttribute(SECURITY_EXCEPTION_KEY, exception)
+            }
         } catch (exception: Exception) {
-            request.setAttribute(SECURITY_EXCEPTION_KEY, SecurityException(
-                policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR,
-                cause = exception
-            ))
+            if (!isPermitted) {
+                request.setAttribute(SECURITY_EXCEPTION_KEY, SecurityException(
+                    policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR,
+                    cause = exception
+                ))
+            }
         }
         filterChain.doFilter(request, response)
     }
