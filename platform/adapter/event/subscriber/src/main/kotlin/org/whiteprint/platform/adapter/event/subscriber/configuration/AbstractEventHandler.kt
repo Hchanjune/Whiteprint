@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.subscriber.configuration
 
+import io.github.hchanjune.omk.core.annotations.ManagedSchedule
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -37,6 +38,10 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
         claimTimeoutMillis = applicationContext.getBean<EventSubscriberAutoConfigurationProperties>().claimTimeoutMillis
     }
 
+    // Intentionally NOT @ManagedSchedule: each record's handle() opens its own context via
+    // @ManagedEventHandler and extracts the event's original traceId. A schedule-owned
+    // context here would make handle() a non-owner and skip that per-event extraction,
+    // collapsing every record in the batch into the poller's trace.
     @Scheduled(fixedDelay = 500)
     open fun pollAndProcess() {
         val records = inboxStore.findAllByEventTypeAndStatus(
@@ -55,9 +60,10 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
     }
 
     @Scheduled(fixedDelay = 60_000)
-    open fun recoverStaleProcessing() {
+    @ManagedSchedule(quietWhenEmpty = true)
+    open fun recoverStaleProcessing(): Int {
         val threshold = Instant.now().minusMillis(claimTimeoutMillis)
-        inboxStore.resetStaleProcessing(eventType, threshold)
+        return inboxStore.resetStaleProcessing(eventType, threshold)
     }
 
     protected fun processOne(record: EventInbox) {

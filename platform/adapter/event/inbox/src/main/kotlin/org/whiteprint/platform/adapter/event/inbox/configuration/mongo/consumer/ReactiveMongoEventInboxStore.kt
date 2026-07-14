@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer
 
+import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -12,7 +13,8 @@ import org.whiteprint.platform.core.messaging.inbox.EventInboxStatus
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 import java.time.Instant
 
-class ReactiveMongoEventInboxStore(
+@ManagedRepository
+open class ReactiveMongoEventInboxStore(
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
 ) : EventInboxStore {
 

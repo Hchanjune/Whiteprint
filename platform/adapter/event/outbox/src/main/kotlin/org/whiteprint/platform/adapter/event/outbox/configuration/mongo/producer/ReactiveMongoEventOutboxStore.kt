@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.mongo.producer
 
+import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -11,7 +12,8 @@ import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
 import org.whiteprint.platform.core.messaging.outbox.EventOutboxStore
 import java.time.Instant
 
-class ReactiveMongoEventOutboxStore(
+@ManagedRepository
+open class ReactiveMongoEventOutboxStore(
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
 ) : EventOutboxStore {
 

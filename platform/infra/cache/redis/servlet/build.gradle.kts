@@ -15,6 +15,7 @@ dependencies {
     api(project(":platform:core:kernel"))
     api(project(":platform:core:cache"))
     api(project(":platform:core:lock"))
+    api(project(":platform:core:observability"))
 
     implementation("org.apache.commons:commons-pool2")
     api("org.springframework.boot:spring-boot-starter-data-redis")

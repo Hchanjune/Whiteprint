@@ -9,6 +9,7 @@ group = "org.whiteprint.platform.adapter.messaging"
 
 dependencies {
     api(project(":platform:core:messaging"))
+    api(project(":platform:core:observability"))
     api(project(":platform:infra:messaging:kafka"))
 
     implementation("org.springframework:spring-tx")

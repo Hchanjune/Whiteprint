@@ -1,10 +1,12 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer
 
+import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.document.EventInboxDocument
 import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.repository.MongoEventInboxRepository
 import org.whiteprint.platform.core.messaging.inbox.EventInboxQueryStore
 import org.whiteprint.platform.core.messaging.inbox.EventProcessingStatus
 
+@ManagedRepository
 open class MongoEventInboxQueryStore(
     private val repository: MongoEventInboxRepository
 ) : EventInboxQueryStore {

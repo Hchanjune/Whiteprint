@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer
 
+import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -7,7 +8,8 @@ import org.whiteprint.platform.adapter.event.inbox.configuration.mongo.document.
 import org.whiteprint.platform.core.messaging.inbox.EventInboxQueryStore
 import org.whiteprint.platform.core.messaging.inbox.EventProcessingStatus
 
-class ReactiveMongoEventInboxQueryStore(
+@ManagedRepository
+open class ReactiveMongoEventInboxQueryStore(
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
 ) : EventInboxQueryStore {
 

@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.publisher.poller
 
+import io.github.hchanjune.omk.core.annotations.ManagedSchedule
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.whiteprint.platform.core.messaging.contract.EventEnveloper
@@ -18,6 +19,7 @@ open class ScheduledEventPoller(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(fixedDelay = 1000)
+    @ManagedSchedule(quietWhenEmpty = true)
     override fun pollOnce(): Int {
         val events = outboxEventStore.claimPending(limit = 100)
 
@@ -36,9 +38,10 @@ open class ScheduledEventPoller(
     }
 
     @Scheduled(fixedDelay = 60_000)
-    fun recoverStaleProcessing() {
+    @ManagedSchedule(quietWhenEmpty = true)
+    open fun recoverStaleProcessing(): Int {
         val threshold = Instant.now().minusMillis(claimTimeoutMillis)
-        outboxEventStore.resetStaleProcessing(threshold)
+        return outboxEventStore.resetStaleProcessing(threshold)
     }
 
     private fun markPublishedWithRetry(eventId: Long) {

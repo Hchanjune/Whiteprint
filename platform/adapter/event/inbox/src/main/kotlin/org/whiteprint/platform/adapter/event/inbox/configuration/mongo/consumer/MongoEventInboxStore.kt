@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.mongo.consumer
 
+import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -13,7 +14,8 @@ import org.whiteprint.platform.core.messaging.inbox.EventInboxStatus
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 import java.time.Instant
 
-class MongoEventInboxStore(
+@ManagedRepository
+open class MongoEventInboxStore(
     private val repository: MongoEventInboxRepository,
     private val mongoTemplate: MongoTemplate,
 ) : EventInboxStore {

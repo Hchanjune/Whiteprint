@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer
 
+import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.entity.EventInboxEntity
@@ -9,6 +10,7 @@ import org.whiteprint.platform.core.messaging.inbox.EventInboxStatus
 import org.whiteprint.platform.core.messaging.inbox.EventInboxStore
 import java.time.Instant
 
+@ManagedRepository
 open class JpaEventInboxStore(
     private val repository: JpaEventInboxRepository
 ): EventInboxStore {
