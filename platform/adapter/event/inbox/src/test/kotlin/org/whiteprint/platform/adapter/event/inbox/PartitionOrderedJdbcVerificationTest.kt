@@ -63,7 +63,7 @@ class PartitionOrderedJdbcVerificationTest {
           AND NOT EXISTS (
               SELECT 1 FROM event_inbox b
               WHERE b.partition_key = ?
-                AND b.status IN ('PROCESSING', 'FAILED')
+                AND b.status IN ('PROCESSING', 'FAILED', 'DEAD')
           )
     """.trimIndent()
 
@@ -78,7 +78,7 @@ class PartitionOrderedJdbcVerificationTest {
         WHERE NOT EXISTS (
             SELECT 1 FROM event_inbox b
             WHERE b.partition_key = f.partition_key
-              AND b.status IN ('PROCESSING', 'FAILED')
+              AND b.status IN ('PROCESSING', 'FAILED', 'DEAD')
         )
         ORDER BY f.event_id
         LIMIT ?
@@ -277,6 +277,11 @@ class PartitionOrderedJdbcVerificationTest {
             setStatus(conn, f1, "RECEIVED")
             val recovered = frontiers(conn)
             assertEquals(f1, recovered.single { it.second == failedKey }.first, "복구 후 첫 순번이 f1 이 아님")
+
+            // DEAD(재시도 소진 종결)도 동일하게 키를 블로킹한다
+            setStatus(conn, f1, "DEAD")
+            assertTrue(frontiers(conn).none { it.second == failedKey }, "DEAD 키가 frontier 에 노출됨")
+            assertFalse(tryAcquireOrdered(conn, f2, failedKey), "DEAD 키의 후속 이벤트가 claim 됨")
         }
     }
 

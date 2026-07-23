@@ -10,6 +10,19 @@ interface EventInboxStore {
     fun findAllByEventTypeAndStatus(eventType: String, status: EventInboxStatus, limit: Int): List<EventInbox>
     fun resetStaleProcessing(eventType: String, olderThan: java.time.Instant): Int
 
+    /**
+     * 하트비트 — 처리 중(PROCESSING)인 이벤트들의 last_attempted_at 을 현재 시각으로 갱신한다.
+     * 살아있는 처리자는 주기적으로 이를 호출해 stale 판정(resetStaleProcessing)에서 제외되고,
+     * 죽은 처리자의 이벤트만 타임스탬프가 오래되어 회수된다. PROCESSING 이 아닌 행은 건드리지 않는다.
+     */
+    fun touchProcessing(eventIds: List<Long>)
+
+    /**
+     * 재시도 복귀 — FAILED 인 이벤트를 RECEIVED 로 되돌린다(CAS: FAILED 일 때만).
+     * 재시도 스케줄러가 backoff 경과 후 호출한다. 성공 시 true.
+     */
+    fun markReceivedForRetry(eventId: Long): Boolean
+
     // ---------- PARTITION_ORDERED (설계: adapter/event/inbox/partition-ordered-design.md) ----------
 
     /**

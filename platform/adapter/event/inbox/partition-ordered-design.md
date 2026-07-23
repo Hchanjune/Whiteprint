@@ -24,7 +24,7 @@
 | D1 | 인메모리 레인 폐기, **DB key 게이트** 채택 | 인메모리 구조는 인스턴스 경계를 못 넘음. k8s 오토스케일 전제. DB 게이트는 non-sticky(키가 인스턴스에 고정되지 않음 → 리밸런싱 불요, 스케일아웃 시 새 인스턴스가 claim 경쟁에 합류만 하면 됨) |
 | D2 | 락 단위 = **`partition_key` 단독** (`(eventType, key)` 아님) | 키는 서러게이트(TSID)라 단독으로 유일. 도메인 이벤트가 인과체인(다음 타입 이벤트는 이전 타입 처리 후 생성)이라 같은 키의 크로스타입 co-occur가 없음 → 동시성 손해 0. 가정이 깨져도 실패 방향이 "레이스 버그"가 아닌 "직렬화(느려짐)"인 fail-safe |
 | D3 | claim 원자화 = **키 단위 상호배제 락** + `PROCESSING` 상태가 처리 기간 동안 게이트 유지 | `NOT EXISTS` 검사만으로는 같은 키의 서로 다른 두 이벤트를 두 인스턴스가 동시에 claim하는 레이스가 남음(각자 다른 row라 row lock으로 안 막힘). 락은 claim 순간만 잡고, 이후는 영속화된 상태가 게이트 역할 |
-| D4 | **FAILED는 키를 블로킹** — 게이트가 `PROCESSING`+`FAILED` 모두 검사 | 실패 이벤트를 건너뛰면 순서 위반. 순서가 목적이므로 head-of-line 블로킹을 감수하고 알림+복구(수동/후속 알고리즘)로 대응. 멱등성은 순서의 대체재가 아니라 재시도(at-least-once)의 보완재 — 델타형 이벤트와 부수효과는 버전 게이팅으로 재정렬을 못 버팀 |
+| D4 | **실패 정책: FAILED(재시도 대기) → 총 3회 실행 소진 시 DEAD(종결)** — 게이트는 `PROCESSING`+`FAILED`+`DEAD` 모두 검사(키 블로킹) | 실패 이벤트를 건너뛰면 순서 위반 → head-of-line 블로킹 감수. FAILED 는 backoff(30s→60s) 후 자동 재시도(조용함, WARN). DEAD 는 종결 — 알림([DeadEventNotifier] 전역 빈 + `onEventDead` 핸들러 훅)을 던지고 수동 복구(status='RECEIVED', attempt_count=0) 전까지 키 정지. 순서 포기(스킵)는 자동으로 일어나지 않는다. 멱등성은 순서의 대체재가 아니라 재시도(at-least-once)의 보완재 |
 | D5 | **frontier 조회 필수**: 키당 최선두 1건만, 최고령 순 | 단순 `ORDER BY … LIMIT` 은 한 키의 백로그가 조회 윈도우를 침수시켜 다른 키를 기아 상태로 만듦. frontier 방식이면 윈도우가 "이벤트 N개"가 아니라 "서로 다른 키 N개"를 커버 |
 | D6 | **claim ≤ 빈 워커 슬롯**, 조회 LIMIT ≈ 빈 슬롯 × 2~3 | over-claim 금지: claim만 하고 큐에 쌓으면 타 인스턴스에 안 보여 밸런싱 파괴 + 인스턴스 사망 시 stale 폭탄. 여유분(×2~3)은 멀티 인스턴스 claim 경쟁 패배 흡수용 |
 | D7 | 처리 모드 3종 **opt-in**: `SERIAL`(기본=현행) / `PARALLEL` / `PARTITION_ORDERED` | 인박스는 범용 플랫폼 컴포넌트 — 게이트 비용을 전 핸들러에 강제하지 않음. per-key 게이트 비용은 핸들러 지연에 비례(ms 핸들러는 체감 없음, 분 단위 핸들러가 최악 케이스). 기본 SERIAL로 기존 서비스 하위호환 |
@@ -42,11 +42,16 @@ PARTITION_ORDERED 모드에서:
    실효 병렬도 = min(활성 키 수, Σ워커풀, 커넥션 풀).
 4. **기아 없음**: frontier 조회(D5) + 최고령 우선(FIFO)으로, 대기 키는 유한 시간 내 처리.
    한 키는 슬롯을 1개만 점유 가능하므로 독식 불가.
-5. **FAILED 블로킹**: 키에 FAILED 이벤트가 있으면 그 키의 후속 이벤트는 claim 불가.
-   복구(RECEIVED 리셋) 시 순서대로 재개.
-6. **장애 복구**: 인스턴스 사망으로 방치된 PROCESSING은 `recoverStaleProcessing`
-   (claimTimeout 경과 시 RECEIVED 복귀)으로 키 블로킹 해제. 재처리 안전성은
-   핸들러 멱등성이 담당(at-least-once).
+5. **실패 시 키 블로킹 + 자동 재시도**: 예외 → FAILED(키 블로킹, backoff 30s→60s 후
+   자동 RECEIVED 복귀) → 총 `maxAttempts`(기본 3)회 실행 소진 시 DEAD(키 블로킹 유지,
+   알림 발화, 수동 복구 전까지 정지). FAILED/DEAD 모두 게이트에 포함되어 순서가
+   자동으로 스킵되는 일은 없다.
+6. **장애 복구(하트비트)**: 처리 중인 이벤트는 30초마다 `last_attempted_at` 하트비트를
+   갱신한다. stale 스캐너는 "하트비트가 `stale-timeout-millis`(기본 120초) 이상 끊긴
+   PROCESSING"만 사망으로 판정해 RECEIVED 복귀 — 처리 시간이 아무리 길어도 살아있는
+   처리를 회수하지 않는다(산 놈/죽은 놈을 시간 임계 추정이 아닌 생존 신호로 구분).
+   하트비트 펌프는 Spring 스케줄러 풀과 분리된 전용 데몬 스레드에서 돈다.
+   재처리 안전성은 핸들러 멱등성이 담당(at-least-once).
 
 ## 4. 처리 흐름 (PARTITION_ORDERED)
 
@@ -132,7 +137,11 @@ abstract class AbstractEventHandler<E: Event> {
 | `processingMode` | SERIAL | 하위호환 |
 | `workerPoolSize` | 10 | 인스턴스·핸들러당. **Hikari 기본(10)과 동수이므로 PARTITION_ORDERED 적용 서비스는 커넥션 풀 상향(권장: workerPoolSize+여유 ≥ 15~20) 필요** |
 | frontier LIMIT | `freeSlots × 3` | claim 경쟁 패배 흡수 |
-| claimTimeout | 기존 설정 유지 | 키 블로킹 시간 = stale 복구 지연. 긴 핸들러는 상향 필수 |
+| `maxAttempts` | 3 | 총 실행 횟수(최초 1 + 재시도 2). 소진 시 DEAD. attempt_count 는 claim 마다 증가하므로 크래시 재claim 도 카운트됨 |
+| `retryBackoffBaseMillis` | 30,000 | n회차 실패 후 대기 = base × 2^(n-1) → 30s, 60s |
+| 하트비트 주기 | 30초 (고정) | 처리 중 이벤트의 last_attempted_at 갱신. 전용 데몬 스레드 |
+| `adapter.event.subscriber.stale-timeout-millis` | 120,000 | 하트비트 두절 임계(주기의 3~4배). 구 claim-timeout-millis 를 rename — 처리시간 상한이 아니라 생존 판정 기준 |
+| DEAD 알림 | — | 전역: `DeadEventNotifier` 빈 1개 등록(모든 핸들러 공통) / 개별: `onEventDead` override. 노티파이어 → 훅 순, 예외는 삼켜짐 |
 
 ## 7. 구현 단계
 
@@ -157,8 +166,8 @@ abstract class AbstractEventHandler<E: Event> {
 
 ## 8. 스코프 밖 (후속 과제)
 
-- FAILED 자동 복구 알고리즘(재시도/backoff → `DEAD` 승급) 및 알림 채널 연동
-  — 현재는 `onEventFailed` 훅 + ERROR 로그 + 수동 복구(RECEIVED 리셋).
+- DEAD 알림의 실제 채널 연동(슬랙/페이저 등) — 포트(`DeadEventNotifier`)까지는 구현됨,
+  각 서비스가 빈으로 채널을 꽂으면 됨.
 - 외부 프로바이더별 동시 호출 상한(rate limit) 레이어 (D8).
 - 기존 인박스 조회/restore API를 "블로킹 키 복구" 운영 도구로 정비.
 - 초고빈도(초당 수만+) 스트림은 DB 인박스의 적용 경계 밖 — 해당 워크로드는

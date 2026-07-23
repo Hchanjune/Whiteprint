@@ -108,7 +108,7 @@ open class MongoEventInboxStore(
     override fun findClaimableFrontiers(eventType: String, limit: Int): List<EventInbox> {
         // 게이트는 키 전역(D2) — event_type 무관하게 PROCESSING/FAILED 보유 키를 제외한다.
         val blockedKeys = mongoTemplate.findDistinct(
-            Query(Criteria.where("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED)),
+            Query(Criteria.where("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED, EventInboxStatus.DEAD)),
             "partition_key",
             EventInboxDocument::class.java,
             Long::class.java,
@@ -138,6 +138,24 @@ open class MongoEventInboxStore(
      * 키 락(insert) → 게이트 검사 → 마킹 → 락 해제(delete).
      * 락은 claim 순간만 유지되고, 처리 기간의 상호배제는 PROCESSING 상태가 담당한다.
      */
+    override fun touchProcessing(eventIds: List<Long>) {
+        if (eventIds.isEmpty()) return
+        mongoTemplate.updateMulti(
+            Query(Criteria.where("_id").`in`(eventIds).and("status").`is`(EventInboxStatus.PROCESSING)),
+            Update().set("last_attempted_at", Instant.now()),
+            EventInboxDocument::class.java,
+        )
+    }
+
+    override fun markReceivedForRetry(eventId: Long): Boolean {
+        val result = mongoTemplate.updateFirst(
+            Query(Criteria.where("_id").`is`(eventId).and("status").`is`(EventInboxStatus.FAILED)),
+            Update().set("status", EventInboxStatus.RECEIVED),
+            EventInboxDocument::class.java,
+        )
+        return result.modifiedCount > 0
+    }
+
     override fun tryAcquireOrdered(eventId: Long, partitionKey: Long): Boolean {
         keyLockTtlIndexEnsured
 
@@ -152,7 +170,7 @@ open class MongoEventInboxStore(
             // ② 게이트 — 같은 키에 PROCESSING/FAILED 존재 시 claim 불가(FAILED = 키 블로킹).
             val blocked = mongoTemplate.exists(
                 Query(Criteria.where("partition_key").`is`(partitionKey)
-                    .and("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED)),
+                    .and("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED, EventInboxStatus.DEAD)),
                 EventInboxDocument::class.java,
             )
             if (blocked) {

@@ -108,4 +108,23 @@ open class JpaEventInboxStore(
             now = Instant.now(),
         ) > 0
     }
+
+    @Transactional
+    override fun touchProcessing(eventIds: List<Long>) {
+        if (eventIds.isEmpty()) return
+        repository.touchProcessing(
+            eventIds = eventIds,
+            processingStatus = EventInboxStatus.PROCESSING,
+            now = Instant.now(),
+        )
+    }
+
+    @Transactional
+    override fun markReceivedForRetry(eventId: Long): Boolean {
+        return repository.updateStatusIf(
+            eventId = eventId,
+            expectedStatus = EventInboxStatus.FAILED,
+            newStatus = EventInboxStatus.RECEIVED,
+        ) > 0
+    }
 }

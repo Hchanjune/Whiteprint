@@ -108,7 +108,7 @@ open class ReactiveMongoEventInboxStore(
 
     override fun findClaimableFrontiers(eventType: String, limit: Int): List<EventInbox> {
         val blockedKeys = reactiveMongoTemplate.findDistinct(
-            Query(Criteria.where("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED)),
+            Query(Criteria.where("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED, EventInboxStatus.DEAD)),
             "partition_key",
             EventInboxDocument::class.java,
             Long::class.java,
@@ -133,6 +133,24 @@ open class ReactiveMongoEventInboxStore(
         ).collectList().block() ?: emptyList()
     }
 
+    override fun touchProcessing(eventIds: List<Long>) {
+        if (eventIds.isEmpty()) return
+        reactiveMongoTemplate.updateMulti(
+            Query(Criteria.where("_id").`in`(eventIds).and("status").`is`(EventInboxStatus.PROCESSING)),
+            Update().set("last_attempted_at", Instant.now()),
+            EventInboxDocument::class.java,
+        ).block()
+    }
+
+    override fun markReceivedForRetry(eventId: Long): Boolean {
+        val result = reactiveMongoTemplate.updateFirst(
+            Query(Criteria.where("_id").`is`(eventId).and("status").`is`(EventInboxStatus.FAILED)),
+            Update().set("status", EventInboxStatus.RECEIVED),
+            EventInboxDocument::class.java,
+        ).block()
+        return (result?.modifiedCount ?: 0) > 0
+    }
+
     override fun tryAcquireOrdered(eventId: Long, partitionKey: Long): Boolean {
         keyLockTtlIndexEnsured
 
@@ -147,7 +165,7 @@ open class ReactiveMongoEventInboxStore(
         try {
             val blocked = reactiveMongoTemplate.exists(
                 Query(Criteria.where("partition_key").`is`(partitionKey)
-                    .and("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED)),
+                    .and("status").`in`(EventInboxStatus.PROCESSING, EventInboxStatus.FAILED, EventInboxStatus.DEAD)),
                 EventInboxDocument::class.java,
             ).block() ?: false
             if (blocked) {

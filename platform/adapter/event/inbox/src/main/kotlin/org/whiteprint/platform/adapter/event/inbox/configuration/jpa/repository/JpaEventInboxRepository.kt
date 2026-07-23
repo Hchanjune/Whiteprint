@@ -105,8 +105,8 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
     fun tryAdvisoryXactLock(partitionKey: Long): Boolean
 
     /**
-     * 키 게이트 claim — 같은 키에 PROCESSING/FAILED 가 없을 때만 RECEIVED → PROCESSING.
-     * FAILED 포함이 순서 보장의 핵심: 실패 이벤트가 키를 블로킹한다.
+     * 키 게이트 claim — 같은 키에 PROCESSING/FAILED/DEAD 가 없을 때만 RECEIVED → PROCESSING.
+     * FAILED(재시도 대기)·DEAD(재시도 소진) 포함이 순서 보장의 핵심: 실패 이벤트가 키를 블로킹한다.
      * 반드시 [tryAdvisoryXactLock] 획득 후 같은 트랜잭션에서 호출할 것.
      */
     @Modifying
@@ -120,7 +120,7 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
           AND NOT EXISTS (
               SELECT 1 FROM event_inbox b
               WHERE b.partition_key = :partitionKey
-                AND b.status IN ('PROCESSING', 'FAILED')
+                AND b.status IN ('PROCESSING', 'FAILED', 'DEAD')
           )
     """, nativeQuery = true)
     fun tryAcquireOrdered(
@@ -131,7 +131,7 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
 
     /**
      * claim 후보 frontier — 키당 최선두(event_id 최소) RECEIVED 1건씩,
-     * PROCESSING/FAILED 를 가진 키는 제외, 최고령 순으로 최대 :limit 건.
+     * PROCESSING/FAILED/DEAD 를 가진 키는 제외, 최고령 순으로 최대 :limit 건.
      * DISTINCT ON 으로 키당 1건만 뽑아 한 키의 백로그가 조회 윈도우를
      * 침수시키는 기아를 방지한다(공정성 필수 요건).
      */
@@ -146,7 +146,7 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
         WHERE NOT EXISTS (
             SELECT 1 FROM event_inbox b
             WHERE b.partition_key = f.partition_key
-              AND b.status IN ('PROCESSING', 'FAILED')
+              AND b.status IN ('PROCESSING', 'FAILED', 'DEAD')
         )
         ORDER BY f.event_id
         LIMIT :limit
@@ -155,5 +155,33 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
         eventType: String,
         limit: Int,
     ): List<EventInboxEntity>
+
+    /** 하트비트 — 처리 중인 이벤트들의 last_attempted_at 갱신 (PROCESSING 만). */
+    @Modifying
+    @Query("""
+        UPDATE EventInboxEntity e
+        SET e.lastAttemptedAt = :now
+        WHERE e.eventId IN :eventIds
+          AND e.status = :processingStatus
+    """)
+    fun touchProcessing(
+        eventIds: List<Long>,
+        processingStatus: EventInboxStatus,
+        now: Instant,
+    ): Int
+
+    /** 재시도 복귀 CAS — FAILED 일 때만 RECEIVED 로. */
+    @Modifying
+    @Query("""
+        UPDATE EventInboxEntity e
+        SET e.status = :newStatus
+        WHERE e.eventId = :eventId
+          AND e.status = :expectedStatus
+    """)
+    fun updateStatusIf(
+        eventId: Long,
+        expectedStatus: EventInboxStatus,
+        newStatus: EventInboxStatus,
+    ): Int
 
 }
