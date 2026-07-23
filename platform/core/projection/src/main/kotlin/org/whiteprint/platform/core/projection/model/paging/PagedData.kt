@@ -15,5 +15,8 @@ interface PagedData<T> {
     val hasPreviousPage: Boolean
     val size: Int
 
+    /** 검색조건(필터)이 적용된 전체 건수. 커서 경계는 포함하지 않으므로 페이지를 넘겨도 값이 유지된다. */
+    val totalCount: Long
+
     val isEmpty: Boolean get() = content.isEmpty()
 }

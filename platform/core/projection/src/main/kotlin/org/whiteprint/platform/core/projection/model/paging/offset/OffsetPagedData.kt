@@ -6,7 +6,7 @@ import kotlin.math.ceil
 data class OffsetPagedData<T>(
     override val content: List<T>,
     override val meta: OffsetPageMeta,
-    val totalCount: Long,
+    override val totalCount: Long,
 ): PagedData<T> {
     override val size: Int get() = meta.size
     /** 1-based. 첫 페이지는 1. */

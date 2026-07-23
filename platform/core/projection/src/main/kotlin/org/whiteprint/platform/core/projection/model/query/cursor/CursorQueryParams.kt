@@ -20,6 +20,6 @@ interface CursorQueryParams {
     val sortDirection: SortDirection
     val direction: CursorDirection
 
-    /** 응답(PagedData.meta)에 실어도 안전한 스냅샷으로 변환한다. 내부 필드명 대신 enum 이름을 에코한다. */
-    fun toMeta() = CursorPageMeta(cursor, size, direction, sortBy.name, sortDirection)
+    /** 응답(PagedData.meta)에 실어도 안전한 스냅샷으로 변환한다. 내부 필드명 대신 wire name(kebab)을 에코한다. */
+    fun toMeta() = CursorPageMeta(cursor, size, direction, sortBy.paramName, sortDirection)
 }

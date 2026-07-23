@@ -15,6 +15,7 @@ repositories {
 dependencies {
     // Cores
     api(project(":platform:core:kernel"))
+    api(project(":platform:core:projection"))
     api(project(":platform:infra:observability:servlet"))
 
     // Spring WebMVC

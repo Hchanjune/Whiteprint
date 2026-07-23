@@ -25,4 +25,10 @@ interface SortableField {
 
     /** 커서 경계값의 타입. */
     val valueType: SortValueType
+
+    /**
+     * 클라이언트 wire name (kebab-case). 기본: INSERTED_AT -> "inserted-at". 필요 시 override.
+     * 웹 바인딩(SortableFieldConverterFactory)과 응답 meta 에코 양쪽에 쓰인다.
+     */
+    val paramName: String get() = name.lowercase().replace('_', '-')
 }

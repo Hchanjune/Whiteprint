@@ -19,6 +19,6 @@ interface OffsetQueryParams {
     val sortBy: SortableField
     val sortDirection: SortDirection
 
-    /** 응답(PagedData.meta)에 실어도 안전한 스냅샷으로 변환한다. 내부 필드명 대신 enum 이름을 에코한다. */
-    fun toMeta() = OffsetPageMeta(page, size, sortBy.name, sortDirection)
+    /** 응답(PagedData.meta)에 실어도 안전한 스냅샷으로 변환한다. 내부 필드명 대신 wire name(kebab)을 에코한다. */
+    fun toMeta() = OffsetPageMeta(page, size, sortBy.paramName, sortDirection)
 }

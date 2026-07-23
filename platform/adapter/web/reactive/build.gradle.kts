@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     api(project(":platform:core:kernel"))
+    api(project(":platform:core:projection"))
     api(project(":platform:infra:observability:reactive"))
 
     api("org.springframework.boot:spring-boot-starter-webflux")

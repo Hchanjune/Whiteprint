@@ -5,6 +5,7 @@ import org.whiteprint.platform.core.projection.model.paging.PagedData
 data class CursorPagedData<T>(
     override val content: List<T>,
     override val meta: CursorPageMeta,
+    override val totalCount: Long,
     override val hasNextPage: Boolean,
     override val hasPreviousPage: Boolean,
     val startCursor: String?,
@@ -18,6 +19,7 @@ inline fun <T, R> CursorPagedData<T>.mapContent(transform: (T) -> R): CursorPage
     CursorPagedData(
         content = content.map(transform),
         meta = meta,
+        totalCount = totalCount,
         hasNextPage = hasNextPage,
         hasPreviousPage = hasPreviousPage,
         startCursor = startCursor,

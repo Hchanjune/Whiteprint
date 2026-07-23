@@ -17,6 +17,8 @@ import org.whiteprint.platform.core.projection.model.query.cursor.CursorQueryPar
  */
 fun <E, T> List<E>.toCursorPagedData(
     params: CursorQueryParams,
+    /** 검색조건(필터)만 적용한 전체 건수 — 커서 경계는 제외하고 count해야 페이지 이동에도 값이 유지된다. */
+    totalCount: Long,
     idOf: (E) -> String,
     sortValueOf: (E) -> String,
     mapper: (E) -> T,
@@ -29,6 +31,7 @@ fun <E, T> List<E>.toCursorPagedData(
     return CursorPagedData(
         content = page.map(mapper),
         meta = params.toMeta(),
+        totalCount = totalCount,
         hasNextPage = hasMore,
         hasPreviousPage = params.cursor != null,
         startCursor = page.firstOrNull()?.let(::cursorOf),
