@@ -41,22 +41,21 @@ fun CursorQueryParams.cursorBoundaryCriteria(): Criteria? {
 
     // 정방향탐색+오름차순, 혹은 역방향탐색+내림차순이면 "더 큰 값" 방향으로 진행 -> gt, 그 반대는 lt
     val movingToGreater = (direction == CursorDirection.FORWARD) == (sortDirection == SortDirection.ASC)
+    val primaryBoundary =
+        if (movingToGreater) Criteria.where(sortBy.field).gt(boundaryValue)
+        else Criteria.where(sortBy.field).lt(boundaryValue)
 
-    return if (movingToGreater) {
-        Criteria().orOperator(
-            Criteria.where(sortBy.field).gt(boundaryValue),
-            Criteria().andOperator(
-                Criteria.where(sortBy.field).`is`(boundaryValue),
-                Criteria.where("_id").gt(decoded.id),
-            ),
-        )
-    } else {
-        Criteria().orOperator(
-            Criteria.where(sortBy.field).lt(boundaryValue),
-            Criteria().andOperator(
-                Criteria.where(sortBy.field).`is`(boundaryValue),
-                Criteria.where("_id").lt(decoded.id),
-            ),
-        )
-    }
+    // tie-break 비교는 primary 방향이 아니라 탐색 방향을 따른다 — _id 정렬이 항상 ASC 고정이기 때문.
+    // (primary DESC + FORWARD에서 _id를 lt로 걸면 동점 그룹에서 중복/누락이 생긴다 — 실측으로 확인된 버그)
+    val tieBreaker =
+        if (direction == CursorDirection.FORWARD) Criteria.where("_id").gt(decoded.id)
+        else Criteria.where("_id").lt(decoded.id)
+
+    return Criteria().orOperator(
+        primaryBoundary,
+        Criteria().andOperator(
+            Criteria.where(sortBy.field).`is`(boundaryValue),
+            tieBreaker,
+        ),
+    )
 }
