@@ -2,6 +2,7 @@ package org.whiteprint.platform.adapter.event.inbox.configuration.jpa.consumer
 
 import io.github.hchanjune.omk.core.annotations.ManagedRepository
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.transaction.annotation.Transactional
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.entity.EventInboxEntity
 import org.whiteprint.platform.adapter.event.inbox.configuration.jpa.repository.JpaEventInboxRepository
@@ -71,10 +72,12 @@ open class JpaEventInboxStore(
         status: EventInboxStatus,
         limit: Int
     ): List<EventInbox> {
+        // event_id(TSID=시간정렬) 오름차순 — backlog 가 limit 을 넘어도 결정적으로 오래된 것부터.
+        // Mongo/Reactive 스토어의 occurred_at 정렬과 동작을 통일한다.
         return repository.findAllByEventTypeAndStatus(
             eventType = eventType,
             status = status,
-            pageable = PageRequest.of(0, limit),
+            pageable = PageRequest.of(0, limit, Sort.by("eventId")),
         )
     }
 

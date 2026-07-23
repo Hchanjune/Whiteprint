@@ -3,6 +3,8 @@
 멀티 인스턴스 환경에서 **파티션 키(partition_key) 단위 순서 보장 + 키 간 병렬 처리**를 제공하는
 인박스 처리 모드의 설계 문서. 구현 전 확정된 결정과 단계 계획을 기록한다.
 
+> 핸들러 적용법·설정·운영(복구/모니터링)은 [partition-ordered-usage.md](./partition-ordered-usage.md) 참고.
+
 ## 1. 배경 / 목표
 
 현행 `AbstractEventHandler`는 `@Scheduled(fixedDelay=500)` 폴러가 배치(limit=100)를

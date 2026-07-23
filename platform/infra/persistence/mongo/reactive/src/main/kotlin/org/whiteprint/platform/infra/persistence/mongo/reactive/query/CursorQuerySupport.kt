@@ -2,51 +2,61 @@ package org.whiteprint.platform.infra.persistence.mongo.reactive.query
 
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.whiteprint.platform.core.projection.model.paging.cursor.CursorCodec
 import org.whiteprint.platform.core.projection.model.query.cursor.CursorDirection
 import org.whiteprint.platform.core.projection.model.query.cursor.CursorQueryParams
 import org.whiteprint.platform.core.projection.model.sort.SortDirection
-import org.whiteprint.platform.core.projection.model.paging.cursor.CursorCodec
 import org.springframework.data.domain.Sort as SpringSort
 
 /**
- * 스켈레톤: 정렬 기준 1개 + `_id` tie-breaker 조합만 지원한다 (복합 정렬 커서는 추후 확장 포인트).
- * limit을 size+1로 걸어서 실제 more-data 여부(hasNextPage)를 count 쿼리 없이 판별한다.
+ * 단일 정렬 + `_id` tie-breaker 커서 페이지네이션의 공통 조립.
+ *
+ * - find() 기반 조회: [toMongoQuery] 하나면 된다.
+ * - aggregation 기반 조회($lookup 등): [cursorBoundaryCriteria]와 [toSpringSort]를
+ *   파이프라인에 직접 끼운다 — `match(필터) -> lookup/addFields -> match(경계) -> sort -> limit(size+1)`.
+ *   이때 sortBy.field는 파이프라인 상의 필드명(계산 필드 포함)이어야 한다.
+ *
+ * 경계값 타입 변환은 sortBy.valueType이 담당하므로 호출부에 타입 분기 코드가 필요 없다.
+ * 결과는 limit(size+1) 원본 그대로 [toCursorPagedData]에 넘긴다.
  */
 fun CursorQueryParams.toMongoQuery(): Query {
-    val primary = sort.orders.firstOrNull()
-        ?: error("Cursor pagination requires exactly one sort field for this skeleton")
+    val query = Query().with(toSpringSort()).limit(size + 1)
+    cursorBoundaryCriteria()?.let(query::addCriteria)
+    return query
+}
 
-    val ascending = primary.direction == SortDirection.ASC
-    val forward = direction == CursorDirection.FORWARD
-    // 정방향탐색+오름차순, 혹은 역방향탐색+내림차순이면 "더 큰 값" 방향으로 진행 -> gt, 그 반대는 lt
-    val movingToGreater = forward == ascending
-
-    val springSort = SpringSort
-        .by(if (ascending) SpringSort.Direction.ASC else SpringSort.Direction.DESC, primary.field)
+/** 정렬 필드 + `_id` ASC tie-breaker. Query.with()와 Aggregation.sort() 양쪽에 그대로 쓸 수 있다. */
+fun CursorQueryParams.toSpringSort(): SpringSort =
+    SpringSort
+        .by(
+            if (sortDirection == SortDirection.ASC) SpringSort.Direction.ASC else SpringSort.Direction.DESC,
+            sortBy.field,
+        )
         .and(SpringSort.by(SpringSort.Direction.ASC, "_id"))
 
-    val query = Query().with(springSort).limit(size + 1)
+/** 커서가 없으면(첫 페이지) null. 경계값은 sortBy.valueType으로 파싱해 BSON 타입을 맞춘다. */
+fun CursorQueryParams.cursorBoundaryCriteria(): Criteria? {
+    val decoded = cursor?.let(CursorCodec::decode) ?: return null
+    val boundaryValue = sortBy.valueType.parse(decoded.sortValue)
 
-    cursor?.let(CursorCodec::decode)?.let { decoded ->
-        val boundary = if (movingToGreater) {
-            Criteria().orOperator(
-                Criteria.where(primary.field).gt(decoded.sortValue),
-                Criteria().andOperator(
-                    Criteria.where(primary.field).`is`(decoded.sortValue),
-                    Criteria.where("_id").gt(decoded.id),
-                ),
-            )
-        } else {
-            Criteria().orOperator(
-                Criteria.where(primary.field).lt(decoded.sortValue),
-                Criteria().andOperator(
-                    Criteria.where(primary.field).`is`(decoded.sortValue),
-                    Criteria.where("_id").lt(decoded.id),
-                ),
-            )
-        }
-        query.addCriteria(boundary)
+    // 정방향탐색+오름차순, 혹은 역방향탐색+내림차순이면 "더 큰 값" 방향으로 진행 -> gt, 그 반대는 lt
+    val movingToGreater = (direction == CursorDirection.FORWARD) == (sortDirection == SortDirection.ASC)
+
+    return if (movingToGreater) {
+        Criteria().orOperator(
+            Criteria.where(sortBy.field).gt(boundaryValue),
+            Criteria().andOperator(
+                Criteria.where(sortBy.field).`is`(boundaryValue),
+                Criteria.where("_id").gt(decoded.id),
+            ),
+        )
+    } else {
+        Criteria().orOperator(
+            Criteria.where(sortBy.field).lt(boundaryValue),
+            Criteria().andOperator(
+                Criteria.where(sortBy.field).`is`(boundaryValue),
+                Criteria.where("_id").lt(decoded.id),
+            ),
+        )
     }
-
-    return query
 }
