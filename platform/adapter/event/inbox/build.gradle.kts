@@ -22,8 +22,18 @@ dependencies {
     compileOnly("org.springframework.data:spring-data-mongodb")
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
+
+    // PARTITION_ORDERED 동시성 실측 검증(로컬 Postgres/Mongo 필요 — 접속 불가 시 자동 skip)
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.postgresql:postgresql")
+    testImplementation("org.springframework.data:spring-data-mongodb")
+    testImplementation("org.mongodb:mongodb-driver-sync")
 }
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

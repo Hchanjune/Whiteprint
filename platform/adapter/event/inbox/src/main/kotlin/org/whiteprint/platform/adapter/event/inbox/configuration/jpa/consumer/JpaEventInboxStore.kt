@@ -87,4 +87,25 @@ open class JpaEventInboxStore(
             olderThan = olderThan,
         )
     }
+
+    override fun findClaimableFrontiers(eventType: String, limit: Int): List<EventInbox> {
+        return repository.findClaimableFrontiers(eventType = eventType, limit = limit)
+    }
+
+    /**
+     * advisory lock 과 게이트 CAS 가 반드시 같은 트랜잭션이어야 한다 —
+     * xact lock 은 트랜잭션 종료 시 해제되고, 그 사이 게이트 검사+마킹이 원자화된다.
+     * 락 획득 실패 = 타 인스턴스가 같은 키를 claim 중 → 즉시 양보(다음 폴에서 재시도).
+     */
+    @Transactional
+    override fun tryAcquireOrdered(eventId: Long, partitionKey: Long): Boolean {
+        if (!repository.tryAdvisoryXactLock(partitionKey)) {
+            return false
+        }
+        return repository.tryAcquireOrdered(
+            eventId = eventId,
+            partitionKey = partitionKey,
+            now = Instant.now(),
+        ) > 0
+    }
 }
