@@ -18,6 +18,8 @@ dependencies {
     api(project(":platform:infra:serializer:jackson"))
 
     api("org.springframework.kafka:spring-kafka")
+
+    implementation("org.slf4j:slf4j-api")
 }
 
 kotlin {

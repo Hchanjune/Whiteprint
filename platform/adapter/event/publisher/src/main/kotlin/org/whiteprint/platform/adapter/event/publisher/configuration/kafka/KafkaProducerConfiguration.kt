@@ -6,7 +6,9 @@ import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaEventSerializer
 import org.whiteprint.platform.infra.messaging.kafka.policy.KafkaTopicResolver
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.errors.TopicExistsException
 import org.apache.kafka.common.serialization.LongSerializer
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -14,7 +16,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
@@ -31,6 +32,7 @@ import org.whiteprint.platform.core.messaging.publisher.EventPoller
 import org.whiteprint.platform.core.messaging.publisher.EventPublisher
 import org.whiteprint.platform.infra.messaging.kafka.provider.KafkaEventPublisher
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
 @Configuration
@@ -40,33 +42,70 @@ class KafkaProducerConfiguration(
     private val publisherProperties: EventPublisherAutoConfigurationProperties,
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Bean
     @ConditionalOnMissingBean(Serializer::class)
     fun serializer(): Serializer = JacksonSerializer()
 
-    @Bean("producerAllowedTopics")
-    fun topics(): List<NewTopic> {
+    /**
+     * 선언된 토픽을 기동 시점에 생성한다.
+     *
+     * Spring 의 `KafkaAdmin` 에 맡기지 않고 AdminClient 를 직접 쓰는 이유:
+     * `KafkaAdmin` 은 `spring.kafka.bootstrap-servers` 를 보는데, 이 플랫폼은 브로커 주소를
+     * `adapter.event.publisher.kafka.datasource` 로 받는다. 두 곳을 동기화시키느니 여기서 직접 만든다.
+     *
+     * `topics` 가 비어 있거나 `auto-create: false` 면 아무것도 하지 않는다 —
+     * 아직 발행할 이벤트가 없는 서비스도 그대로 기동된다.
+     * 브로커에 붙지 못해도 기동을 막지 않는다(접속 확인은 `connection-validation` 의 몫).
+     */
+    @Bean("producerTopicInitializer")
+    fun topicInitializer(): SmartInitializingSingleton = SmartInitializingSingleton {
         val policy = kafkaProperties.topicPolicy
+        if (!policy.autoCreate || policy.topics.isEmpty()) return@SmartInitializingSingleton
 
-        if (!policy.autoCreate) return emptyList()
-
-        return policy.topics.map { (eventType, spec) ->
+        val newTopics = policy.topics.map { (eventType, spec) ->
             val topicName = listOf(
                 policy.prefix,
                 eventType,
                 policy.version
             ).joinToString(policy.separator)
 
-            TopicBuilder.name(topicName)
-                .partitions(spec.partitions)
-                .replicas(spec.replicationFactor)
+            NewTopic(topicName, spec.partitions, spec.replicationFactor.toShort())
                 .configs(
                     mapOf(
                         "retention.ms" to spec.retentionMillis.toString(),
                         "cleanup.policy" to spec.cleanupPolicy
                     )
                 )
-                .build()
+        }
+
+        val props = mapOf<String, Any>(
+            AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG to
+                    "${kafkaProperties.datasource.host}:${kafkaProperties.datasource.port}",
+            AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG to 3000,
+            AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG to 3000
+        )
+
+        runCatching {
+            AdminClient.create(props).use { admin ->
+                admin.createTopics(newTopics).values().forEach { (topicName, future) ->
+                    try {
+                        future.get(5, TimeUnit.SECONDS)
+                        logger.info("Kafka topic created — 토픽 생성됨: {}", topicName)
+                    } catch (exception: Exception) {
+                        val cause = (exception as? ExecutionException)?.cause ?: exception
+                        if (cause is TopicExistsException) return@forEach
+                        logger.warn("Kafka topic creation failed — 토픽 생성 실패: {}", topicName, cause)
+                    }
+                }
+            }
+        }.onFailure {
+            logger.warn(
+                "Skipping Kafka topic auto-creation, broker unreachable — " +
+                    "브로커에 접속할 수 없어 토픽 자동 생성을 건너뜁니다.",
+                it,
+            )
         }
     }
 

@@ -81,6 +81,14 @@ class KafkaConsumerConfiguration(
         config[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = consumer.enableAutoCommit
         config[ConsumerConfig.ISOLATION_LEVEL_CONFIG] = consumer.isolationLevel
 
+        // 구독자는 토픽을 만들지 않는다(클라이언트 기본값은 true).
+        // 토픽 스펙(파티션 수·retention)의 주인은 발행 서비스의 topic-policy 다.
+        // 구독자가 먼저 떠서 브로커 기본값(보통 1파티션)으로 토픽을 만들어버리면,
+        // 나중에 발행 서비스의 createTopics 는 TopicExistsException 으로 스킵되어
+        // 선언한 스펙이 영영 적용되지 않는다 — 기동 순서에 따라 결과가 갈리게 된다.
+        // 토픽이 아직 없으면 UNKNOWN_TOPIC 경고를 내며 대기하다 생성되는 즉시 붙는다.
+        config[ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG] = false
+
         return DefaultKafkaConsumerFactory(
             config,
             LongDeserializer(),
