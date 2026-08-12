@@ -35,6 +35,7 @@ include("platform:adapter:web:reactive")
 
 // Platform Infra
 include("platform:infra:persistence:jpa")
+include("platform:infra:persistence:mongo:common")
 include("platform:infra:persistence:mongo:reactive")
 include("platform:infra:persistence:mongo:servlet")
 

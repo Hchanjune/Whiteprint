@@ -13,9 +13,10 @@ private fun escapeLike(value: String): String =
         .replace("%", "$LIKE_ESCAPE_CHAR%")
         .replace("_", "${LIKE_ESCAPE_CHAR}_")
 
+/** [field]는 엔티티 속성명이며 `"author.nickname"` 같은 점 표기로 연관 경로를 가리킬 수 있다([resolvePath]). */
 fun <T: Any> SearchKeyword.toSpecification(field: String): Specification<T> =
     Specification { root, _, cb ->
-        val path = root.get<String>(field)
+        val path = root.resolvePath<String>(field)
         when (mode) {
             MatchMode.EQUALS -> cb.equal(path, value)
             MatchMode.CONTAINS -> cb.like(path, "%${escapeLike(value)}%", LIKE_ESCAPE_CHAR)

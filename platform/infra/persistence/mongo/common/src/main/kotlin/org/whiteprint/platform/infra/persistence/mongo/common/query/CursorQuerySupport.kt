@@ -1,4 +1,4 @@
-package org.whiteprint.platform.infra.persistence.mongo.reactive.query
+package org.whiteprint.platform.infra.persistence.mongo.common.query
 
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -25,14 +25,29 @@ fun CursorQueryParams.toMongoQuery(): Query {
     return query
 }
 
-/** 정렬 필드 + `_id` ASC tie-breaker. Query.with()와 Aggregation.sort() 양쪽에 그대로 쓸 수 있다. */
-fun CursorQueryParams.toSpringSort(): SpringSort =
-    SpringSort
+/**
+ * 정렬 필드 + `_id` tie-breaker. Query.with()와 Aggregation.sort() 양쪽에 그대로 쓸 수 있다.
+ *
+ * **논리 순서는 언제나 `(sortBy sortDirection, _id ASC)`이고, BACKWARD일 때만 그 역순으로 조회한다.**
+ * 역순으로 조회해야 커서 "직전" size개를 얻을 수 있기 때문이다 — 논리 순서 그대로 자르면 이전 행 집합의
+ * 앞에서 size개를 가져와 직전 페이지가 아니라 첫 페이지로 점프한다.
+ * 되뒤집기는 [toCursorPagedData]가 하므로 호출부는 이 짝을 반드시 함께 써야 한다.
+ */
+fun CursorQueryParams.toSpringSort(): SpringSort {
+    val backward = direction == CursorDirection.BACKWARD
+    val primaryAscending = (sortDirection == SortDirection.ASC) != backward
+    return SpringSort
         .by(
-            if (sortDirection == SortDirection.ASC) SpringSort.Direction.ASC else SpringSort.Direction.DESC,
+            if (primaryAscending) SpringSort.Direction.ASC else SpringSort.Direction.DESC,
             sortBy.field,
         )
-        .and(SpringSort.by(SpringSort.Direction.ASC, "_id"))
+        .and(
+            SpringSort.by(
+                if (backward) SpringSort.Direction.DESC else SpringSort.Direction.ASC,
+                "_id",
+            ),
+        )
+}
 
 /** 커서가 없으면(첫 페이지) null. 경계값은 sortBy.valueType으로 파싱해 BSON 타입을 맞춘다. */
 fun CursorQueryParams.cursorBoundaryCriteria(): Criteria? {
@@ -45,7 +60,8 @@ fun CursorQueryParams.cursorBoundaryCriteria(): Criteria? {
         if (movingToGreater) Criteria.where(sortBy.field).gt(boundaryValue)
         else Criteria.where(sortBy.field).lt(boundaryValue)
 
-    // tie-break 비교는 primary 방향이 아니라 탐색 방향을 따른다 — _id 정렬이 항상 ASC 고정이기 때문.
+    // 경계는 **논리 순서**(tie-breaker가 항상 _id ASC) 기준으로 조립한다 — 조회 정렬이 뒤집히는 것과 무관하다.
+    // 그래서 tie-break 비교는 primary 방향이 아니라 탐색 방향을 따른다.
     // (primary DESC + FORWARD에서 _id를 lt로 걸면 동점 그룹에서 중복/누락이 생긴다 — 실측으로 확인된 버그)
     val tieBreaker =
         if (direction == CursorDirection.FORWARD) Criteria.where("_id").gt(decoded.id)

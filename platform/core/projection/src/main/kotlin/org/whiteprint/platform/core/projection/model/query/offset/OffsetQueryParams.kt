@@ -19,6 +19,9 @@ interface OffsetQueryParams {
     val sortBy: SortableField
     val sortDirection: SortDirection
 
+    /** 저장소에 넘길 0-based 시작 인덱스. [page]가 1-based이므로 여기서 한 번만 변환한다. */
+    val offset: Long get() = (page - 1).toLong() * size
+
     /** 응답(PagedData.meta)에 실어도 안전한 스냅샷으로 변환한다. 내부 필드명 대신 wire name(kebab)을 에코한다. */
     fun toMeta() = OffsetPageMeta(page, size, sortBy.paramName, sortDirection)
 }

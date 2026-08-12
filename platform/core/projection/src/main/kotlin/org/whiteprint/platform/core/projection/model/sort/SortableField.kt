@@ -20,7 +20,14 @@ interface SortableField {
     /** enum 상수명. 클라이언트가 보내는 파라미터 값이자 응답 meta에 에코되는 값. (enum이면 자동 제공) */
     val name: String
 
-    /** 실제 문서/컬럼 필드명. aggregation 계산 필드명도 허용 — 매핑은 enum 선언이 책임진다. */
+    /**
+     * 저장소가 이해하는 정렬 대상의 이름. **의미가 저장소마다 다르므로 enum 하나는 저장소 하나에 귀속된다.**
+     *
+     * - mongo: raw 저장 필드명(snake_case). `$lookup`으로 만든 aggregation 계산 필드명도 허용.
+     * - JPA: **엔티티 속성명**(컬럼명 아님). 연관 경로는 `"author.nickname"` 점 표기.
+     *
+     * 같은 enum을 두 저장소에 재사용하면 한쪽이 조용히 0건이 되거나(mongo에 속성명) 예외가 난다(JPA에 컬럼명).
+     */
     val field: String
 
     /** 커서 경계값의 타입. */

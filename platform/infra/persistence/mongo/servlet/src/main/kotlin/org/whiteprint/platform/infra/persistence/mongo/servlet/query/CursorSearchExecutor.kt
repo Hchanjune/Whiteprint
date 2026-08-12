@@ -1,11 +1,8 @@
-package org.whiteprint.platform.infra.persistence.mongo.reactive.query
+package org.whiteprint.platform.infra.persistence.mongo.servlet.query
 
 import java.util.Date
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.reactor.awaitSingle
 import org.bson.Document
-import org.springframework.data.mongodb.core.ReactiveMongoOperations
+import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Criteria
@@ -17,7 +14,7 @@ import org.whiteprint.platform.infra.persistence.mongo.common.query.cursorBounda
 import org.whiteprint.platform.infra.persistence.mongo.common.query.toSpringSort
 
 /**
- * 커서 검색 실행기 — 파이프라인 조립/커서 경계/정렬/limit(size+1)/totalCount 병렬 count/커서 인코딩을
+ * 커서 검색 실행기 — 파이프라인 조립/커서 경계/정렬/limit(size+1)/totalCount count/커서 인코딩을
  * 전부 처리한다. 호출부에 남는 것은 필터 [Criteria], (필요 시) `$lookup` 등의 [preSortStages], mapper 뿐.
  *
  * 파이프라인: `match(filter) -> preSortStages -> match(커서 경계) -> sort -> limit(size+1)`
@@ -27,20 +24,22 @@ import org.whiteprint.platform.infra.persistence.mongo.common.query.toSpringSort
  *   프로퍼티명은 매핑되지 않고 그대로 몽고에 전달되어 조용히 무시된다.
  * - totalCount는 filter만 적용해 count한다(커서 경계 제외 — 페이지 이동에도 값 유지).
  *   filter가 preSortStages의 계산 필드에 의존하게 되면 이 count는 틀리게 되므로 그땐 pipeline count로 확장할 것.
+ * - **reactive 판과 달리 count와 page 조회가 순차 실행된다.** 라이브러리가 임의의 스레드풀을 만들어
+ *   병렬화하면 트랜잭션 동기화/보안 컨텍스트/MDC 같은 ThreadLocal이 조용히 끊기고, 풀 크기도 소비자가
+ *   제어할 수 없다. 그래서 순차를 택했다 — CONTAINS 검색처럼 두 쿼리 모두 컬렉션 스캔이면
+ *   지연이 합산되므로, 그 경우엔 인덱스로 풀거나 reactive 스택을 쓸 것.
  * - 결과는 raw [Document]로 수신한다 — preSortStages의 계산 필드가 커서 경계값 인코딩에 필요하기 때문.
  *   타입 매핑까지 원하면 entityClass를 받는 오버로드를 쓴다.
  */
-suspend fun <T> ReactiveMongoOperations.cursorSearch(
+fun <T> MongoOperations.cursorSearch(
     params: CursorQueryParams,
     collectionName: String,
     filter: Criteria? = null,
     preSortStages: List<AggregationOperation> = emptyList(),
     mapper: (Document) -> T,
-): CursorPagedData<T> = coroutineScope {
-    val totalCountDeferred = async {
-        val countQuery = Query().apply { filter?.let(::addCriteria) }
-        count(countQuery, collectionName).awaitSingle()
-    }
+): CursorPagedData<T> {
+    val countQuery = Query().apply { filter?.let(::addCriteria) }
+    val totalCount = count(countQuery, collectionName)
 
     val stages = mutableListOf<AggregationOperation>()
     filter?.let { stages += Aggregation.match(it) }
@@ -49,13 +48,11 @@ suspend fun <T> ReactiveMongoOperations.cursorSearch(
     stages += Aggregation.sort(params.toSpringSort())
     stages += Aggregation.limit((params.size + 1).toLong())
 
-    val fetched = aggregate(Aggregation.newAggregation(stages), collectionName, Document::class.java)
-        .collectList()
-        .awaitSingle()
+    val fetched = aggregate(Aggregation.newAggregation(stages), collectionName, Document::class.java).mappedResults
 
-    fetched.toCursorPagedData(
+    return fetched.toCursorPagedData(
         params = params,
-        totalCount = totalCountDeferred.await(),
+        totalCount = totalCount,
         idOf = { it.get("_id").toString() },
         sortValueOf = { it.cursorSortValue(params.sortBy.field) },
         mapper = mapper,
@@ -66,7 +63,7 @@ suspend fun <T> ReactiveMongoOperations.cursorSearch(
  * 타입 매핑 버전 — 컬렉션명은 [entityClass]에서 얻고, 결과 Document를 converter로 [entityClass]에 매핑해
  * mapper에 넘긴다. (내부 커서 인코딩은 매핑 전 raw Document에서 뽑으므로 계산 필드도 안전)
  */
-suspend fun <D : Any, T> ReactiveMongoOperations.cursorSearch(
+fun <D : Any, T> MongoOperations.cursorSearch(
     params: CursorQueryParams,
     entityClass: Class<D>,
     filter: Criteria? = null,

@@ -1,4 +1,4 @@
-package org.whiteprint.platform.infra.persistence.mongo.reactive.query
+package org.whiteprint.platform.infra.persistence.mongo.common.query
 
 import org.springframework.data.mongodb.core.query.Criteria
 import org.whiteprint.platform.core.projection.model.search.MatchMode
