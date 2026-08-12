@@ -94,14 +94,3 @@ private fun String.parseIdWith(idParser: (String) -> Comparable<*>): Comparable<
     throw QueryException(QueryPolicy.INVALID_CURSOR, mapOf("key" to "id", "value" to this), cause = e)
 }
 
-/**
- * `cb.greaterThan`은 `Y : Comparable<in Y>`를 요구하는데, 커서 경계값은 `SortValueType.parse`가 돌려준 `Any`이고
- * 경로도 [resolvePath]가 돌려준 미지의 타입이다. 실제 비교는 Hibernate가 컬럼 타입으로 수행하므로
- * `Comparable<Any?>`로 눕혀서 형변환 소음을 이 두 함수에만 가둔다.
- * (`Any?`가 모든 타입의 상위라 `Comparable<Any?>`는 그 자체로 바운드를 만족한다)
- */
-@Suppress("UNCHECKED_CAST")
-private fun Path<*>.comparable(): Path<Comparable<Any?>> = this as Path<Comparable<Any?>>
-
-@Suppress("UNCHECKED_CAST")
-private fun Any.comparable(): Comparable<Any?> = this as Comparable<Any?>

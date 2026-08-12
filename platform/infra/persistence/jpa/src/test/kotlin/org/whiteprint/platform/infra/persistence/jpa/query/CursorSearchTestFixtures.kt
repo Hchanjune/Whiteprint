@@ -3,6 +3,7 @@ package org.whiteprint.platform.infra.persistence.jpa.query
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -12,13 +13,14 @@ import org.whiteprint.platform.core.projection.model.query.offset.OffsetQueryPar
 import org.whiteprint.platform.core.projection.model.sort.SortDirection
 import org.whiteprint.platform.core.projection.model.sort.SortValueType
 import org.whiteprint.platform.core.projection.model.sort.SortableField
-import org.whiteprint.platform.infra.persistence.jpa.entity.BaseEntity
+import org.whiteprint.platform.infra.persistence.jpa.entity.RootEntity
 
 @SpringBootApplication
 class JpaCursorTestApplication
 
 /**
- * [BaseEntity]를 그대로 상속한다 — 식별자 매핑(`@Id private var _id`)이 검증 대상이므로 여기서 재정의하면 안 된다.
+ * [RootEntity]를 상속한다 — 식별자 매핑(`@Id private var _id`)과 소프트 삭제 속성(`isDeleted`)이
+ * 둘 다 검증 대상이라 여기서 재정의하면 안 된다.
  * [score]는 **의도적으로 동점이 많이 나오도록** 채워서 tie-breaker를 시험한다.
  */
 @Entity
@@ -29,7 +31,11 @@ class CursorTestItem(
 
     @Column(name = "label")
     var label: String = "",
-) : BaseEntity<Long>()
+) : RootEntity<Long>() {
+
+    @get:Transient
+    override val useSoftDelete: Boolean get() = true
+}
 
 interface CursorTestItemRepository :
     JpaRepository<CursorTestItem, Long>,
