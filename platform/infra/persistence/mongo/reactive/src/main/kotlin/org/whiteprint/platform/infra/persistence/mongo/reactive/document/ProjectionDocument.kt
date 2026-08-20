@@ -11,6 +11,10 @@ abstract class ProjectionDocument : Projection {
     @get:Id
     abstract override val id: String
 
+    // 감사 필드 표준 순서: version, insertedAt, updatedAt, isDeleted, deletedAt (Projection 계약과 동일)
+    @get:Field("version")
+    abstract override val version: Long
+
     @get:Field("inserted_at")
     abstract override val insertedAt: Instant
 

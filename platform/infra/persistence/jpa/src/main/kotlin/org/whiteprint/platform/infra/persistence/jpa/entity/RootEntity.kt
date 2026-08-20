@@ -12,6 +12,11 @@ import java.time.Instant
 @MappedSuperclass
 abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, LockableEntity {
 
+    // 감사 필드 표준 순서: version, insertedAt, updatedAt, isDeleted, deletedAt (Auditable 계약과 동일)
+    @Version
+    @Column(name = "version", nullable = false)
+    override var version: Long = 0
+        protected set
     @Column(name = "inserted_at", nullable = false)
     override var insertedAt: Instant = Instant.now()
         protected set
@@ -23,10 +28,6 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, 
         protected set
     @Column(name = "deleted_at", nullable = true)
     override var deletedAt: Instant? = null
-        protected set
-    @Version
-    @Column(name = "version", nullable = false)
-    override var version: Long = 0
         protected set
 
     @Column(name = "last_fencing_token", nullable = true)

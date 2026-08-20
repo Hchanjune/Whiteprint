@@ -38,3 +38,4 @@ Thumbs.db
 ./infra/redis/data/
 
 .claude/
+suggested-architecture-package-structure.md

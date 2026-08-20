@@ -22,22 +22,6 @@ class UserAggregate private constructor(
     override val deletedAt get() = user.deletedAt
     override val version get() = user.version
 
-    override fun onCreate() {
-        //record(UserCreatedEvent())
-        //record(UserProjectionEvent())
-    }
-
-    override fun onUpdate() {
-        //record(UserUpdatedEvent())
-        //record(UserProjectionEvent())
-    }
-
-    override fun onDelete() {
-        //record(UserDeletedEvent())
-        //record(UserProjectionEvent())
-    }
-
-
     companion object {
 
         fun create(){}
