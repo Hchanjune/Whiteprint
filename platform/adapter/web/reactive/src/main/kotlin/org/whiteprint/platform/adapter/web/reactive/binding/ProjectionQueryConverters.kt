@@ -7,6 +7,8 @@ import org.springframework.core.convert.converter.ConverterFactory
 import org.whiteprint.platform.core.projection.model.query.cursor.CursorDirection
 import org.whiteprint.platform.core.projection.model.sort.SortDirection
 import org.whiteprint.platform.core.projection.model.sort.SortableField
+import org.whiteprint.platform.core.projection.policy.SortPolicy
+import org.whiteprint.platform.core.projection.policy.SortPolicyException
 
 /**
  * SortableField 구현 enum 전용 웹 바인딩. 영숫자만 남기고 lowercase한 canonical form으로 비교하므로
@@ -28,8 +30,13 @@ class SortableFieldConverterFactory : ConverterFactory<String, Enum<*>>, Conditi
             targetType.enumConstants.firstOrNull { constant ->
                 constant is SortableField &&
                     (canonical(constant.paramName) == canonical || canonical(constant.name) == canonical)
-            } ?: throw IllegalArgumentException(
-                "No sortable field '$source' in ${targetType.simpleName}"
+            } ?: throw SortPolicyException(
+                policy = SortPolicy.SORT_FIELD_MAP_FAILED,
+                attributes = mapOf(
+                    "keys" to targetType.enumConstants
+                        .filterIsInstance<SortableField>()
+                        .joinToString(", ") { it.paramName }
+                )
             )
         }
 
