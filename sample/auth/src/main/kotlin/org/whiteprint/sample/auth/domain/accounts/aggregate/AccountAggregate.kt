@@ -30,7 +30,6 @@ class AccountAggregate (
         return pulled
     }
 
-    override val schemaVersion get() = "ALPHA"
     override val id get() = account.id
     override val root get() = account
 

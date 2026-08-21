@@ -22,7 +22,6 @@ abstract class Aggregate<ROOT: Any>:
     Identifiable<Serializable>,
     Auditable {
     abstract val root: ROOT
-    abstract val schemaVersion: String
     abstract override val id: Serializable
     val aggregateType: String by lazy { root::class.simpleName ?: "UNKNOWN" }
 

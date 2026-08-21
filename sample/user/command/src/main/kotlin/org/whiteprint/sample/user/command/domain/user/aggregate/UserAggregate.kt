@@ -9,8 +9,6 @@ class UserAggregate private constructor(
     private val user: User,
     private val profile: UserProfile,
 ): Aggregate<User>() {
-
-    override val schemaVersion = "ALPHA"
     override val id: Serializable = user.id.toString()
     val idL get() = user.id
     override val root = user
