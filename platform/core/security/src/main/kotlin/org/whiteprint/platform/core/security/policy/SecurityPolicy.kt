@@ -79,5 +79,11 @@ enum class SecurityPolicy(
         403,
         "PERMISSION_DENIED",
         "You do not have the required permission to perform this action."
-    )
+    ),
+
+    IMPROPER_AUDIENCE(
+        status = 403,
+        code = "IMPROPER_AUDIENCE",
+        message = "Invalid audience value. The token's audience does not match the expected value."
+    ),
 }

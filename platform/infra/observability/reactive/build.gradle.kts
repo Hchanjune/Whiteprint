@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api("com.github.Hchanjune.operation-manager-kit:reactive:0.10.1")
+    api("com.github.Hchanjune.operation-manager-kit:reactive:0.10.2")
 }

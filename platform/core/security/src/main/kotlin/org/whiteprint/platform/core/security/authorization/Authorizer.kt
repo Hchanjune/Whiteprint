@@ -18,4 +18,8 @@ interface Authorizer {
 
     fun requireHigherPermissionThan(permission: AuthorizedPermission): Boolean
 
+    fun requireAudience(audience: String): Boolean
+
+    fun requireAnyAudience(vararg audiences: String): Boolean
+
 }

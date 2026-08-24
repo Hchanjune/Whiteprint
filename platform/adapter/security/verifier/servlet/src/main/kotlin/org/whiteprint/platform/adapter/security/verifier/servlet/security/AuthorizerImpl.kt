@@ -25,6 +25,16 @@ class AuthorizerImpl: Authorizer {
         return names.all { it in held }
     }
 
+    override fun requireAudience(audience: String): Boolean {
+        val held = SecurityContextSupport.getCurrentClaims().audience
+        return audience in held
+    }
+
+    override fun requireAnyAudience(vararg audiences: String): Boolean {
+        val held = SecurityContextSupport.getCurrentClaims().audience
+        return audiences.any { it in held }
+    }
+
     override fun requireHigherPermissionThan(permission: AuthorizedPermission): Boolean {
         val held = SecurityContextSupport.getCurrentClaims().permissions
         val siblings = permission.javaClass.enumConstants?.toList() ?: emptyList()

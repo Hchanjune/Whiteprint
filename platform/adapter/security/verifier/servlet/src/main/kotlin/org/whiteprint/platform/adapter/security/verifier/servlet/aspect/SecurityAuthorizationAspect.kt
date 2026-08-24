@@ -5,7 +5,9 @@ import org.aspectj.lang.annotation.Before
 import org.whiteprint.platform.core.security.authorization.Authorizer
 import org.whiteprint.platform.core.security.authorization.annotation.ForbidPermission
 import org.whiteprint.platform.core.security.authorization.annotation.RequireAllPermissions
+import org.whiteprint.platform.core.security.authorization.annotation.RequireAnyAudience
 import org.whiteprint.platform.core.security.authorization.annotation.RequireAnyPermission
+import org.whiteprint.platform.core.security.authorization.annotation.RequireAudience
 import org.whiteprint.platform.core.security.authorization.annotation.RequireHigherPermissionThan
 import org.whiteprint.platform.core.security.authorization.annotation.RequirePermission
 import org.whiteprint.platform.core.security.policy.SecurityException
@@ -41,6 +43,20 @@ class SecurityAuthorizationAspect(
     fun requireAllPermissions(annotation: RequireAllPermissions) {
         if (!authorizer.requireAllPermissions(*annotation.permissions)) {
             throw SecurityException(SecurityPolicy.PERMISSION_DENIED)
+        }
+    }
+
+    @Before("@annotation(annotation)")
+    fun requireAudience(annotation: RequireAudience) {
+        if (!authorizer.requireAudience(annotation.audience)) {
+            throw SecurityException(SecurityPolicy.IMPROPER_AUDIENCE)
+        }
+    }
+
+    @Before("@annotation(annotation)")
+    fun requireAnyAudience(annotation: RequireAnyAudience) {
+        if (!authorizer.requireAnyAudience(*annotation.audiences)) {
+            throw SecurityException(SecurityPolicy.IMPROPER_AUDIENCE)
         }
     }
 
