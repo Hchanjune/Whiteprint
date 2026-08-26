@@ -23,7 +23,7 @@ class IdempotentAspect(
             joinPoint = joinPoint,
             cacheProvider = cacheProvider,
             keyAnnotationClass = IdempotentKey::class.java,
-            keyOrderOf = { it.order },
+            keyNameOf = { it.name },
             prefix = idempotent.prefix,
             ttl = idempotent.ttl,
             timeUnit = idempotent.timeUnit,

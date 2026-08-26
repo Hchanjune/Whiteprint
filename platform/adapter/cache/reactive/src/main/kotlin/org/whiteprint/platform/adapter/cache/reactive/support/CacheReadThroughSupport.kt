@@ -18,12 +18,12 @@ internal object CacheReadThroughSupport {
         joinPoint: ProceedingJoinPoint,
         cacheProvider: ReactiveCacheProvider,
         keyAnnotationClass: Class<K>,
-        keyOrderOf: (K) -> Int,
+        keyNameOf: (K) -> String,
         prefix: String,
         ttl: Long,
         timeUnit: TimeUnit,
     ): Mono<Any> {
-        val key = buildKey(joinPoint, keyAnnotationClass, keyOrderOf, prefix)
+        val key = buildKey(joinPoint, keyAnnotationClass, keyNameOf, prefix)
         val ttlDuration = Duration.ofMillis(timeUnit.toMillis(ttl))
 
         // mono { }는 block이 null을 반환하면 empty Mono가 되므로, "캐시 없음"이 자연스럽게 switchIfEmpty로 넘어간다.
@@ -40,10 +40,10 @@ internal object CacheReadThroughSupport {
     fun <K : Annotation> buildKey(
         joinPoint: ProceedingJoinPoint,
         keyAnnotationClass: Class<K>,
-        keyOrderOf: (K) -> Int,
+        keyNameOf: (K) -> String,
         prefix: String,
     ): CacheKey {
-        val entries = CacheKeyResolver.resolve(joinPoint, keyAnnotationClass, keyOrderOf)
+        val entries = CacheKeyResolver.resolve(joinPoint, keyAnnotationClass, keyNameOf)
         if (entries.isEmpty()) {
             val method = (joinPoint.signature as MethodSignature).method
             throw CacheException(CachePolicy.NO_CACHE_KEY_DEFINED, mapOf("key" to method.name))

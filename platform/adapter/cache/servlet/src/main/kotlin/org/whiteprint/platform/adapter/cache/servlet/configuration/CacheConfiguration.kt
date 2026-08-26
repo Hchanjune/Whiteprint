@@ -11,6 +11,7 @@ import org.whiteprint.platform.core.cache.operation.SetOperations
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.core.cache.provider.CacheProvider
 import org.whiteprint.platform.adapter.cache.servlet.aspect.CacheEvictAspect
+import org.whiteprint.platform.adapter.cache.servlet.support.CacheKeyContractValidator
 import org.whiteprint.platform.adapter.cache.servlet.aspect.CachedAspect
 import org.whiteprint.platform.adapter.cache.servlet.aspect.DeduplicatedAspect
 import org.whiteprint.platform.adapter.cache.servlet.aspect.IdempotentAspect
@@ -22,6 +23,7 @@ import org.whiteprint.platform.infra.cache.redis.operation.RedisSetOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisValueOperations
 import org.whiteprint.platform.infra.cache.redis.provider.RedisCacheProvider
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -33,6 +35,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializer
+import org.whiteprint.platform.infra.cache.redis.serializer.JacksonRedisSerializers
 import java.time.Duration
 
 @Configuration
@@ -109,8 +112,8 @@ class CacheConfiguration(
             this.connectionFactory = connectionFactory
             this.keySerializer = RedisSerializer.string()
             this.hashKeySerializer = RedisSerializer.string()
-            this.valueSerializer = RedisSerializer.json()
-            this.hashValueSerializer = RedisSerializer.json()
+            this.valueSerializer = JacksonRedisSerializers.json()
+            this.hashValueSerializer = JacksonRedisSerializers.json()
             this.afterPropertiesSet()
         }
     }
@@ -174,5 +177,13 @@ class CacheConfiguration(
 
     @Bean
     fun cacheEvictAspect(cacheProvider: CacheProvider) = CacheEvictAspect(cacheProvider)
+
+    /**
+     * `@Cached` 와 `@CacheEvict` 의 키 구성이 어긋나면 기동을 실패시킨다.
+     * 불일치는 예외 없이 "무효화만 안 걸리는" 형태로 나타나서 운영에서야 드러난다.
+     */
+    @Bean
+    fun cacheKeyContractValidator(applicationContext: ApplicationContext) =
+        CacheKeyContractValidator(applicationContext)
 
 }

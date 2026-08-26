@@ -21,7 +21,7 @@ class DeduplicatedAspect(
         val key = CacheReadThroughSupport.buildKey(
             joinPoint = joinPoint,
             keyAnnotationClass = DeduplicatedKey::class.java,
-            keyOrderOf = { it.order },
+            keyNameOf = { it.name },
             prefix = deduplicated.prefix,
         )
         val ttl = Duration.ofMillis(deduplicated.timeUnit.toMillis(deduplicated.ttl))

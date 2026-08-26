@@ -16,12 +16,12 @@ internal object CacheReadThroughSupport {
         joinPoint: ProceedingJoinPoint,
         cacheProvider: CacheProvider,
         keyAnnotationClass: Class<K>,
-        keyOrderOf: (K) -> Int,
+        keyNameOf: (K) -> String,
         prefix: String,
         ttl: Long,
         timeUnit: TimeUnit,
     ): Any? {
-        val key = buildKey(joinPoint, keyAnnotationClass, keyOrderOf, prefix)
+        val key = buildKey(joinPoint, keyAnnotationClass, keyNameOf, prefix)
 
         cacheProvider.value.raw(key)?.let { return it }
 
@@ -35,10 +35,10 @@ internal object CacheReadThroughSupport {
     fun <K : Annotation> buildKey(
         joinPoint: ProceedingJoinPoint,
         keyAnnotationClass: Class<K>,
-        keyOrderOf: (K) -> Int,
+        keyNameOf: (K) -> String,
         prefix: String,
     ): CacheKey {
-        val entries = CacheKeyResolver.resolve(joinPoint, keyAnnotationClass, keyOrderOf)
+        val entries = CacheKeyResolver.resolve(joinPoint, keyAnnotationClass, keyNameOf)
         if (entries.isEmpty()) {
             val method = (joinPoint.signature as MethodSignature).method
             throw CacheException(CachePolicy.NO_CACHE_KEY_DEFINED, mapOf("key" to method.name))

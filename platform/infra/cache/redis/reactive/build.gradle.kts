@@ -14,6 +14,7 @@ repositories {
 dependencies {
     api(project(":platform:core:kernel"))
     api(project(":platform:core:cache"))
+    api(project(":platform:infra:serializer:jackson"))
     api(project(":platform:core:observability"))
 
     implementation("org.apache.commons:commons-pool2")

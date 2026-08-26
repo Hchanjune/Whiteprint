@@ -72,6 +72,22 @@ enum class CachePolicy(
     NO_CACHE_KEY_DEFINED(500, "CACHE_NO_KEY_DEFINED", "No key annotation found on method or its parameters. method:[[key]]"),
 
     /**
+     * 같은 prefix 를 쓰는 `@Cached` 와 `@CacheEvict` 의 키 이름 구성이 다르다.
+     * 그대로 두면 **무효화가 영영 걸리지 않는다** — 예외도 안 나고 낡은 값만 남는다.
+     * 그래서 기동 시점에 실패시킨다.
+     *
+     * RequiredAttributes
+     * - [prefix]
+     * - [cached]
+     * - [evicted]
+     */
+    CACHE_KEY_CONTRACT_MISMATCH(
+        500,
+        "CACHE_KEY_CONTRACT_MISMATCH",
+        "Cache key mismatch for prefix:[[prefix]]\n  @Cached     -> [[cached]]\n  @CacheEvict -> [[evicted]]",
+    ),
+
+    /**
      * RequiredAttributes
      * - [key]
      */

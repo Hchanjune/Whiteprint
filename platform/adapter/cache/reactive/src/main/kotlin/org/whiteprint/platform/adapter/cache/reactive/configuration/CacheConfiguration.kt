@@ -5,6 +5,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -17,6 +18,7 @@ import org.springframework.data.redis.connection.lettuce.LettucePoolingClientCon
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.RedisSerializer
+import org.whiteprint.platform.infra.cache.redis.reactive.serializer.JacksonRedisSerializers
 import org.whiteprint.platform.core.cache.operation.ReactiveAtomicOperations
 import org.whiteprint.platform.core.cache.operation.ReactiveBatchOperations
 import org.whiteprint.platform.core.cache.operation.ReactiveListOperations
@@ -24,6 +26,7 @@ import org.whiteprint.platform.core.cache.operation.ReactiveSetOperations
 import org.whiteprint.platform.core.cache.operation.ReactiveValueOperations
 import org.whiteprint.platform.core.cache.provider.ReactiveCacheProvider
 import org.whiteprint.platform.adapter.cache.reactive.aspect.CacheEvictAspect
+import org.whiteprint.platform.adapter.cache.reactive.support.CacheKeyContractValidator
 import org.whiteprint.platform.adapter.cache.reactive.aspect.CachedAspect
 import org.whiteprint.platform.adapter.cache.reactive.aspect.DeduplicatedAspect
 import org.whiteprint.platform.adapter.cache.reactive.aspect.IdempotentAspect
@@ -98,8 +101,8 @@ class CacheConfiguration(
     @Bean
     fun reactiveRedisTemplate(connectionFactory: ReactiveRedisConnectionFactory): ReactiveRedisTemplate<String, Any> {
         val context = RedisSerializationContext.newSerializationContext<String, Any>(RedisSerializer.string())
-            .value(RedisSerializer.json())
-            .hashValue(RedisSerializer.json())
+            .value(JacksonRedisSerializers.json())
+            .hashValue(JacksonRedisSerializers.json())
             .build()
         return ReactiveRedisTemplate(connectionFactory, context)
     }
@@ -153,5 +156,13 @@ class CacheConfiguration(
 
     @Bean
     fun cacheEvictAspect(cacheProvider: ReactiveCacheProvider) = CacheEvictAspect(cacheProvider)
+
+    /**
+     * `@Cached` 와 `@CacheEvict` 의 키 구성이 어긋나면 기동을 실패시킨다.
+     * 불일치는 예외 없이 "무효화만 안 걸리는" 형태로 나타나서 운영에서야 드러난다.
+     */
+    @Bean
+    fun cacheKeyContractValidator(applicationContext: ApplicationContext) =
+        CacheKeyContractValidator(applicationContext)
 
 }

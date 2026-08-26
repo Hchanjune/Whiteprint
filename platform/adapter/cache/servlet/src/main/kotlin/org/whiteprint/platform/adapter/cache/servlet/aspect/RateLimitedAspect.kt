@@ -21,7 +21,7 @@ class RateLimitedAspect(
         val key = CacheReadThroughSupport.buildKey(
             joinPoint = joinPoint,
             keyAnnotationClass = RateLimitedKey::class.java,
-            keyOrderOf = { it.order },
+            keyNameOf = { it.name },
             prefix = rateLimited.prefix,
         )
         val ttl = Duration.ofMillis(rateLimited.timeUnit.toMillis(rateLimited.ttl))

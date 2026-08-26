@@ -18,7 +18,7 @@ class CacheEvictAspect(
         val key = CacheReadThroughSupport.buildKey(
             joinPoint = joinPoint,
             keyAnnotationClass = CacheEvictKey::class.java,
-            keyOrderOf = { it.order },
+            keyNameOf = { it.name },
             prefix = cacheEvict.prefix,
         )
 

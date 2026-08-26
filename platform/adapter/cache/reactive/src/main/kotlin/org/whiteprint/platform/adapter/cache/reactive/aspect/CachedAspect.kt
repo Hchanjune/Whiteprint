@@ -19,7 +19,7 @@ class CachedAspect(
             joinPoint = joinPoint,
             cacheProvider = cacheProvider,
             keyAnnotationClass = CachedKey::class.java,
-            keyOrderOf = { it.order },
+            keyNameOf = { it.name },
             prefix = cached.prefix,
             ttl = cached.ttl,
             timeUnit = cached.timeUnit,
