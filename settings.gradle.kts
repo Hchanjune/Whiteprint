@@ -20,6 +20,7 @@ include("platform:adapter:event:inbox")
 include("platform:adapter:event:publisher")
 include("platform:adapter:event:subscriber")
 
+include("platform:adapter:cache:common")
 include("platform:adapter:cache:servlet")
 include("platform:adapter:cache:reactive")
 

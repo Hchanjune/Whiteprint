@@ -1,5 +1,6 @@
 package org.whiteprint.platform.adapter.cache.reactive.configuration
 
+import io.github.hchanjune.omk.core.provider.SpanIdProvider
 import io.lettuce.core.api.StatefulConnection
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.slf4j.LoggerFactory
@@ -18,7 +19,7 @@ import org.springframework.data.redis.connection.lettuce.LettucePoolingClientCon
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.RedisSerializer
-import org.whiteprint.platform.infra.cache.redis.reactive.serializer.JacksonRedisSerializers
+import org.whiteprint.platform.infra.serializer.jackson.JacksonRedisSerializers
 import org.whiteprint.platform.core.cache.operation.ReactiveAtomicOperations
 import org.whiteprint.platform.core.cache.operation.ReactiveBatchOperations
 import org.whiteprint.platform.core.cache.operation.ReactiveListOperations
@@ -26,7 +27,7 @@ import org.whiteprint.platform.core.cache.operation.ReactiveSetOperations
 import org.whiteprint.platform.core.cache.operation.ReactiveValueOperations
 import org.whiteprint.platform.core.cache.provider.ReactiveCacheProvider
 import org.whiteprint.platform.adapter.cache.reactive.aspect.CacheEvictAspect
-import org.whiteprint.platform.adapter.cache.reactive.support.CacheKeyContractValidator
+import org.whiteprint.platform.adapter.cache.common.support.CacheKeyContractValidator
 import org.whiteprint.platform.adapter.cache.reactive.aspect.CachedAspect
 import org.whiteprint.platform.adapter.cache.reactive.aspect.DeduplicatedAspect
 import org.whiteprint.platform.adapter.cache.reactive.aspect.IdempotentAspect
@@ -143,19 +144,19 @@ class CacheConfiguration(
     )
 
     @Bean
-    fun cachedAspect(cacheProvider: ReactiveCacheProvider) = CachedAspect(cacheProvider)
+    fun cachedAspect(cacheProvider: ReactiveCacheProvider, spanIdProvider: SpanIdProvider) = CachedAspect(cacheProvider, spanIdProvider)
 
     @Bean
-    fun idempotentAspect(cacheProvider: ReactiveCacheProvider) = IdempotentAspect(cacheProvider)
+    fun idempotentAspect(cacheProvider: ReactiveCacheProvider, spanIdProvider: SpanIdProvider) = IdempotentAspect(cacheProvider, spanIdProvider)
 
     @Bean
-    fun deduplicatedAspect(cacheProvider: ReactiveCacheProvider) = DeduplicatedAspect(cacheProvider)
+    fun deduplicatedAspect(cacheProvider: ReactiveCacheProvider, spanIdProvider: SpanIdProvider) = DeduplicatedAspect(cacheProvider, spanIdProvider)
 
     @Bean
-    fun rateLimitedAspect(cacheProvider: ReactiveCacheProvider) = RateLimitedAspect(cacheProvider)
+    fun rateLimitedAspect(cacheProvider: ReactiveCacheProvider, spanIdProvider: SpanIdProvider) = RateLimitedAspect(cacheProvider, spanIdProvider)
 
     @Bean
-    fun cacheEvictAspect(cacheProvider: ReactiveCacheProvider) = CacheEvictAspect(cacheProvider)
+    fun cacheEvictAspect(cacheProvider: ReactiveCacheProvider, spanIdProvider: SpanIdProvider) = CacheEvictAspect(cacheProvider, spanIdProvider)
 
     /**
      * `@Cached` 와 `@CacheEvict` 의 키 구성이 어긋나면 기동을 실패시킨다.

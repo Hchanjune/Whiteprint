@@ -1,4 +1,4 @@
-package org.whiteprint.platform.infra.cache.redis.serializer
+package org.whiteprint.platform.infra.serializer.jackson
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf

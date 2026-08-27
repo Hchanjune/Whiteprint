@@ -1,18 +1,23 @@
-package org.whiteprint.platform.infra.cache.redis.reactive.serializer
+package org.whiteprint.platform.infra.serializer.jackson
 
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializer
 import tools.jackson.module.kotlin.KotlinModule
 
 /**
- * 캐시 값 직렬화기(reactive). servlet 쪽 `JacksonRedisSerializers` 와 **같은 형식을 만들어야 한다** —
- * 두 스택이 같은 Redis 를 보는 배포에서 형식이 갈리면 서로의 캐시를 못 읽는다.
+ * Redis 값 직렬화기. `RedisSerializer.json()` 대신 이걸 쓴다.
+ *
+ * 캐시 어댑터와 보안 verifier 가 **각자 RedisTemplate 을 조립**하는데 형식이 갈리면 안 되므로
+ * 여기 한 곳에서 소유한다. spring-data-redis 는 `compileOnly` 다 — 이 모듈 자체는 Redis 를 쓰지 않고,
+ * 이 클래스를 부르는 쪽은 이미 spring-data-redis 를 갖고 있다.
  *
  * ## 왜 직접 만드나
  * `RedisSerializer.json()` 이 조립하는 ObjectMapper 에는 **KotlinModule 이 명시적으로 붙어 있지 않다.**
  * 지금은 Jackson 3 의 모듈 자동 발견 덕에 클래스패스에 `jackson-module-kotlin` 이 있으면 우연히 동작하지만,
  * 그 의존이 빠지는 순간 **주 생성자만 있는 Kotlin data class 를 캐시에서 꺼낼 때** 터진다.
  * 게다가 그 실패는 **넣을 때가 아니라 두 번째 조회부터** 나타나서 원인을 찾기 어렵다.
+ *
+ * 여기서 명시적으로 붙여 암묵적 동작을 계약으로 바꾼다.
  *
  * ## 기본값은 그대로 유지한다
  * `RedisSerializer.json()` 은 `enableSpringCacheNullValueSupport()` + `enableUnsafeDefaultTyping()` 을 켠다.

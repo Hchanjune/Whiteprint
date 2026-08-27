@@ -14,7 +14,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializer
-import org.whiteprint.platform.infra.cache.redis.serializer.JacksonRedisSerializers
+import org.whiteprint.platform.infra.serializer.jackson.JacksonRedisSerializers
 import org.whiteprint.platform.core.cache.operation.ValueOperations
 import org.whiteprint.platform.infra.cache.redis.operation.RedisValueOperations
 import java.time.Duration

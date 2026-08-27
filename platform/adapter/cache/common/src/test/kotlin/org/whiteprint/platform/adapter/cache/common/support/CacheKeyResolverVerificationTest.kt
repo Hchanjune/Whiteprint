@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.cache.servlet.support
+package org.whiteprint.platform.adapter.cache.common.support
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

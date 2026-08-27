@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.cache.servlet.support
+package org.whiteprint.platform.adapter.cache.common.support
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.SmartInitializingSingleton

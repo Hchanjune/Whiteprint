@@ -1,4 +1,4 @@
-package org.whiteprint.platform.adapter.cache.servlet.support
+package org.whiteprint.platform.adapter.cache.common.support
 
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.reflect.MethodSignature
@@ -16,7 +16,7 @@ import java.lang.reflect.Method
  * 값 하나짜리도 `이름=값` 형식을 그대로 쓴다 — 조각이 하나에서 둘로 늘어날 때
  * 기존 조각의 표현이 바뀌지 않아야 하기 때문이다.
  */
-internal object CacheKeyResolver {
+object CacheKeyResolver {
 
     /**
      * 키 조각을 이름과 함께 뽑는다. 이름이 비어 있으면 파라미터/필드 이름을 쓴다.
