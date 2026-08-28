@@ -150,6 +150,9 @@ class SecurityVerifierConfiguration(
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
             .logout { it.disable() }
+            // WebFlux 는 익명 인증이 기본 비활성이라 이 줄은 동작을 바꾸지 않는다.
+            // 서블릿 체인과 나란히 읽히도록, 그리고 나중에 기본값이 바뀌어도 흔들리지 않도록 못 박는다.
+            .anonymous { it.disable() }
             .authorizeExchange { exchanges ->
                 exchanges.matchers(ServerWebExchangeMatchers.pathMatchers(HttpMethod.OPTIONS, "/**")).permitAll()
                 permittedPathProvider.entries().forEach { (method, pattern) ->

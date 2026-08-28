@@ -153,6 +153,12 @@ class SecurityVerifierConfiguration(
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
             .logout { it.disable() }
+            // stateless JWT 체인에는 익명 주체가 쓸 데가 없다. 켜두면 비인증 요청에서
+            // authentication 이 null 이 아니라 AnonymousAuthenticationToken 이 되고,
+            // 그 name 이 "anonymousUser" 라는 비어 있지 않은 문자열이라
+            // 인증 여부를 name 으로 판정하는 코드가 조용히 틀린다.
+            // (SecurityContextSupport 는 이 설정과 무관하게 익명을 걸러내지만, 근원을 막아둔다.)
+            .anonymous { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS Preflight
