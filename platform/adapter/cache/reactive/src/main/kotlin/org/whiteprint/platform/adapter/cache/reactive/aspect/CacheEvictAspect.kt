@@ -9,7 +9,7 @@ import org.aspectj.lang.annotation.Aspect
 import org.springframework.core.annotation.Order
 import org.whiteprint.platform.adapter.cache.reactive.support.CacheReadThroughSupport
 import org.whiteprint.platform.adapter.cache.reactive.support.CacheSpanSupport
-import org.whiteprint.platform.adapter.cache.reactive.support.asMono
+import org.whiteprint.platform.adapter.cache.reactive.support.proceedCold
 import org.whiteprint.platform.core.cache.annotation.CacheEvict
 import org.whiteprint.platform.core.cache.annotation.CacheEvictKey
 import org.whiteprint.platform.core.cache.provider.ReactiveCacheProvider
@@ -33,10 +33,13 @@ class CacheEvictAspect(
             prefix = cacheEvict.prefix,
         )
 
+        // proceed() 는 flatMap 안이 아니라 여기서 불러야 한다 — 이유는 proceedCold 참조.
+        val target = proceedCold(joinPoint)
+
         return if (cacheEvict.beforeInvocation) {
-            mono { cacheProvider.value.delete(key) }.flatMap { asMono(joinPoint.proceed()) }
+            mono { cacheProvider.value.delete(key) }.flatMap { target }
         } else {
-            asMono(joinPoint.proceed()).flatMap { result ->
+            target.flatMap { result ->
                 mono { cacheProvider.value.delete(key) }.thenReturn(result)
             }
         }

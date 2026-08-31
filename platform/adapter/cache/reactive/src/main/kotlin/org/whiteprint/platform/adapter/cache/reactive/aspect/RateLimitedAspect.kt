@@ -9,7 +9,7 @@ import org.aspectj.lang.annotation.Aspect
 import org.springframework.core.annotation.Order
 import org.whiteprint.platform.adapter.cache.reactive.support.CacheReadThroughSupport
 import org.whiteprint.platform.adapter.cache.reactive.support.CacheSpanSupport
-import org.whiteprint.platform.adapter.cache.reactive.support.asMono
+import org.whiteprint.platform.adapter.cache.reactive.support.proceedCold
 import org.whiteprint.platform.core.cache.annotation.RateLimited
 import org.whiteprint.platform.core.cache.annotation.RateLimitedKey
 import org.whiteprint.platform.core.cache.policy.CacheException
@@ -37,6 +37,9 @@ class RateLimitedAspect(
         )
         val ttl = Duration.ofMillis(rateLimited.timeUnit.toMillis(rateLimited.ttl))
 
+        // proceed() 는 flatMap 안이 아니라 여기서 불러야 한다 — 이유는 proceedCold 참조.
+        val target = proceedCold(joinPoint)
+
         return mono {
             cacheProvider.atomic.incrementWithLimitAndExpireOrThrow(
                 key = key,
@@ -54,7 +57,7 @@ class RateLimitedAspect(
             } else {
                 e
             }
-        }.flatMap { asMono(joinPoint.proceed()) }
+        }.flatMap { target }
     }
 
 }

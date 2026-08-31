@@ -31,6 +31,10 @@ internal object CacheReadThroughSupport {
         val key = buildKey(joinPoint, keyAnnotationClass, keyNameOf, prefix)
         val ttlDuration = Duration.ofMillis(timeUnit.toMillis(ttl))
 
+        // proceed() 는 switchIfEmpty 안이 아니라 여기서 불러야 한다 — 이유는 proceedCold 참조.
+        // 콜드 Mono 라 캐시 히트면 구독하지 않고 그대로 버린다.
+        val target = proceedCold(joinPoint)
+
         // 히트 여부를 남길 [CAC] 스팬은 CacheSpanSupport 가 바깥에서 이미 열어뒀다.
         // servlet 과 달리 ThreadLocal 이 아니라 Reactor 컨텍스트에 있으므로 구독 시점에 꺼내야 한다.
         return Mono.deferContextual { reactorContext ->
@@ -46,7 +50,7 @@ internal object CacheReadThroughSupport {
                 .switchIfEmpty(
                     Mono.defer {
                         span?.markCacheHit(false)
-                        asMono(joinPoint.proceed()).flatMap { value ->
+                        target.flatMap { value ->
                             mono { cacheProvider.value.setWithTtl(key, store(value), ttlDuration) }.thenReturn(value)
                         }
                     }

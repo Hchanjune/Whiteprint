@@ -102,6 +102,18 @@ class SecurityAuthorizationAspect {
         return when {
             // Declared publisher: proceeding inside the operator keeps the body — including
             // anything the method does eagerly before returning the publisher — behind the check.
+            //
+            // WARNING: this is the one place that deliberately calls proceed() from inside an
+            // operator, i.e. after this advice has returned and on another thread. Spring passes
+            // @annotation/@within arguments through the ExposeInvocationInterceptor ThreadLocal,
+            // which is already unwound by then, so any INNER advice that binds a pointcut argument
+            // dies with "Required to bind 2 arguments, but only bound 1 (JoinPointMatch was NOT
+            // bound in invocation)". Kept anyway: denying a call must not let its side effects run,
+            // and nothing binding sits inside these branches today (the @Require* annotations are
+            // only used on controller methods, and those are suspend — the branch below, which
+            // proceeds eagerly). If an inner aspect ever appears here, this is the reason it broke.
+            // The reactive cache aspects hit exactly this and were fixed by hoisting proceed()
+            // out (see proceedCold in the cache/reactive module).
             Mono::class.java.isAssignableFrom(method.returnType) ->
                 authCheck.flatMap<Any> { jp.proceed() as Mono<Any> }
 

@@ -9,7 +9,7 @@ import org.aspectj.lang.annotation.Aspect
 import org.springframework.core.annotation.Order
 import org.whiteprint.platform.adapter.cache.reactive.support.CacheReadThroughSupport
 import org.whiteprint.platform.adapter.cache.reactive.support.CacheSpanSupport
-import org.whiteprint.platform.adapter.cache.reactive.support.asMono
+import org.whiteprint.platform.adapter.cache.reactive.support.proceedCold
 import org.whiteprint.platform.core.cache.annotation.Deduplicated
 import org.whiteprint.platform.core.cache.annotation.DeduplicatedKey
 import org.whiteprint.platform.core.cache.policy.CacheException
@@ -38,10 +38,13 @@ class DeduplicatedAspect(
         )
         val ttl = Duration.ofMillis(deduplicated.timeUnit.toMillis(deduplicated.ttl))
 
+        // proceed() 는 flatMap 안이 아니라 여기서 불러야 한다 — 이유는 proceedCold 참조.
+        val target = proceedCold(joinPoint)
+
         return mono { cacheProvider.value.setIfAbsentWithTtl(key, true, ttl) }
             .flatMap { firstSeen ->
                 if (firstSeen) {
-                    asMono(joinPoint.proceed())
+                    target
                 } else {
                     Mono.error(CacheException(CachePolicy.DUPLICATE_REQUEST, mapOf("key" to key.value)))
                 }
