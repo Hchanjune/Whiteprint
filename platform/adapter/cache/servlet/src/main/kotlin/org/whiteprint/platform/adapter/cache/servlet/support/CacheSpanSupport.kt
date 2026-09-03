@@ -17,6 +17,11 @@ import org.aspectj.lang.ProceedingJoinPoint
  * - 히트: `[CAC]` 하나
  * - 미스: `[CAC]` 안에 `[DB ]` 가 중첩 (캐시가 바깥이므로 자연히 그렇게 된다)
  *
+ * ## ⚠ [around] 는 `@Cached` 계열 전용이다
+ * 대상 메서드를 통째로 감싸므로 "캐시가 그 구간을 대체했다"가 참일 때만 정확하다.
+ * `@CacheEvict` 는 본문을 대체하지 않고 삭제만 곁들이므로 [aroundCacheCall] 로 **삭제 호출만** 감싼다 —
+ * 통째로 감싸면 본문 시간이 전부 캐시로 귀속돼 트레이스가 거꾸로 읽힌다.
+ *
  * ## 컨텍스트가 없으면 그냥 통과시킨다
  * 진입점 밖(테스트, 초기화 등)에서 불릴 수 있고, 그때 스팬을 억지로 만들면
  * 부모 없는 고아 스팬이 생긴다.
@@ -45,6 +50,35 @@ internal object CacheSpanSupport {
         val methodName = joinPoint.signature.name.substringBefore('-')
 
         val span = SpanSupport.pushCacheSpan(context, className, methodName, spanIdProvider)
+
+        return try {
+            val result = block()
+            span.end()
+            context.pop()
+            result
+        } catch (exception: Throwable) {
+            span.end(exception)
+            context.pop()
+            throw exception
+        }
+    }
+
+    /**
+     * 캐시 **호출 하나**만 감싸는 leaf 스팬. `@CacheEvict` 처럼 대상 메서드를 대체하지 않는 경우에 쓴다.
+     * [operation] 은 캐시 동작 이름(`evict` 등)이다 — 메서드명을 쓰면 본문을 잰 것처럼 보인다.
+     */
+    fun <T> aroundCacheCall(
+        joinPoint: ProceedingJoinPoint,
+        spanIdProvider: SpanIdProvider,
+        operation: String,
+        block: () -> T,
+    ): T {
+        if (!Operations.hasContext) return block()
+
+        val context = Operations.context
+        val className = joinPoint.signature.declaringType.simpleName
+
+        val span = SpanSupport.pushCacheSpan(context, className, operation, spanIdProvider)
 
         return try {
             val result = block()

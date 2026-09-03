@@ -5,6 +5,7 @@ import io.github.hchanjune.omk.core.metric.SpanSupport
 import io.github.hchanjune.omk.core.provider.SpanIdProvider
 import io.github.hchanjune.omk.reactive.ReactiveOperations
 import org.aspectj.lang.ProceedingJoinPoint
+import reactor.core.publisher.Mono
 
 /**
  * 캐시 애스펙트가 여는 `[CAC]` 스팬(reactive). servlet 쪽 `CacheSpanSupport` 와 같은 의도다.
@@ -12,6 +13,10 @@ import org.aspectj.lang.ProceedingJoinPoint
  * ## 왜 필요한가
  * 애스펙트가 `ManagedRepositoryAspect` 보다 **바깥**이라 캐시 히트면 `[DB ]` 스팬이 안 생긴다.
  * 그 자리를 캐시 자신의 레이어로 채운다 — 히트는 `[CAC]` 하나, 미스는 `[CAC]` 안에 `[DB ]`.
+ *
+ * ## ⚠ [aroundMono] 는 `@Cached` 계열 전용이다
+ * 대상 메서드를 통째로 감싸므로 "캐시가 그 구간을 대체했다"가 참일 때만 정확하다.
+ * `@CacheEvict` 는 본문을 대체하지 않고 삭제만 곁들이므로 [aroundCacheCallMono] 로 **삭제 호출만** 감싼다.
  *
  * ## servlet 과 다른 점
  * 컨텍스트가 ThreadLocal 이 아니라 **Reactor 컨텍스트**에 있고, 구독 시점에야 읽을 수 있다.
@@ -48,6 +53,32 @@ internal object CacheSpanSupport {
             val span = SpanSupport.pushCacheSpan(context, className, methodName, spanIdProvider)
 
             source
+                .doOnSuccess { span.end(); context.pop() }
+                .doOnError { exception -> span.end(exception); context.pop() }
+        }
+    }
+
+    /**
+     * 캐시 **호출 하나**만 감싸는 leaf 스팬(reactive). `@CacheEvict` 처럼 대상 메서드를 대체하지 않는 경우에 쓴다.
+     * [aroundMono] 와 같은 이유로 조립이 아니라 **구독 시점**에 스팬을 연다.
+     */
+    fun <T : Any> aroundCacheCallMono(
+        joinPoint: ProceedingJoinPoint,
+        spanIdProvider: SpanIdProvider,
+        operation: String,
+        source: Mono<T>,
+    ): Mono<T> {
+        val className = joinPoint.signature.declaringType.simpleName
+
+        return source.transformDeferredContextual { mono, reactorContext ->
+            val context = reactorContext
+                .getOrEmpty<ManagedContext>(ReactiveOperations.CONTEXT_KEY)
+                .orElse(null)
+                ?: return@transformDeferredContextual mono
+
+            val span = SpanSupport.pushCacheSpan(context, className, operation, spanIdProvider)
+
+            mono
                 .doOnSuccess { span.end(); context.pop() }
                 .doOnError { exception -> span.end(exception); context.pop() }
         }
