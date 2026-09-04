@@ -84,6 +84,28 @@ class OptimizedJpaRepository<T: Any, ID: Serializable>(
         findById(id).ifPresent { this.restore(it) }
     }
 
+    /**
+     * 프로젝션(다른 서비스 소유 형상의 복제본)을 반영한다. mongo 의
+     * `ProjectionRepositorySupport.upsert()` 에 대응하는 JPA 쪽 짝이다.
+     *
+     * **stale 가드가 SQL 안에 있다** — 저장된 `version` 보다 큰 이벤트만 반영되고,
+     * 늦게 도착한 옛 이벤트는 조용히 무시된다(그게 정상 동작이다).
+     * 한 문장이라 원자적이므로 SERIAL·PARTITION_ORDERED·PARALLEL 어느 처리 모드에서도 안전하다.
+     *
+     * @return 반영했으면 true, stale 가드에 걸려 무시했으면 false.
+     *
+     * ⚠ 네이티브 SQL 이라 영속성 컨텍스트를 우회한다. 같은 트랜잭션에서 이 엔티티를 이미
+     *   읽어 두었다면 그 인스턴스는 갱신되지 않는다 — 프로젝터는 읽지 않고 쓰기만 하므로 문제가 없다.
+     */
+    fun upsertProjection(entity: T): Boolean {
+        val prepared = ProjectionUpsertStatement.of(entity!!::class.java)
+        val query = entityManager.createNativeQuery(prepared.sql)
+        prepared.binders.forEachIndexed { index, field ->
+            query.setParameter(index + 1, field.get(entity))
+        }
+        return query.executeUpdate() > 0
+    }
+
     /** soft delete 를 적용했으면 true, 물리 삭제 대상이라 손대지 않았으면 false. flush 는 호출부가 한다. */
     private fun softDelete(entity: T): Boolean {
         if (entity is DeletableEntity && entity.useSoftDelete) {

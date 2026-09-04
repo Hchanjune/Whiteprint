@@ -14,6 +14,10 @@ repositories {
 
 dependencies {
     api(project(":platform:core:kernel"))
+    // 식별자 노드 번호 배선. 이 어댑터가 이미 TsidGenerator 로 응답 id 를 만들고,
+    // 모든 서비스가 web 을 쓰므로 여기 달아두면 소비처가 따로 추가하지 않아도 된다.
+    // (web 없는 앱은 adapter:identifier 를 직접 추가해야 노드 번호가 배선된다)
+    api(project(":platform:adapter:identifier"))
     api(project(":platform:core:projection"))
     api(project(":platform:infra:observability:reactive"))
 

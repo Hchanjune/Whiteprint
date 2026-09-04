@@ -10,6 +10,7 @@ include("sample:user:query")
 include("platform:bom")
 
 // Platform Adapter
+include("platform:adapter:identifier")
 include("platform:adapter:serializer")
 
 include("platform:adapter:persistence:servlet")

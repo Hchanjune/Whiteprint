@@ -17,6 +17,7 @@ dependencies {
         api("com.github.Hchanjune.Whiteprint:core-projection:${project.version}")
 
         // adapter
+        api("com.github.Hchanjune.Whiteprint:adapter-identifier:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-serializer:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-persistence-servlet:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-persistence-reactive:${project.version}")
