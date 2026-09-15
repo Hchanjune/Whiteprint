@@ -12,6 +12,8 @@ dependencies {
     api(project(":platform:core:kernel"))
     api(project(":platform:core:domain"))
     api(project(":platform:core:projection"))
+    // @FencingGuarded 엔티티 갱신 검사(LockContext 토큰 비교). 거절 예외(LockException)가 소비처로 올라가므로 api.
+    api(project(":platform:core:lock"))
 
     api("org.springframework.boot:spring-boot-starter-data-jpa")
 

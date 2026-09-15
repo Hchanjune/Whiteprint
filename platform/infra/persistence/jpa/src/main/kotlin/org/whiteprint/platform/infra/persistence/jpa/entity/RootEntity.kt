@@ -3,9 +3,11 @@ package org.whiteprint.platform.infra.persistence.jpa.entity
 import org.whiteprint.platform.infra.persistence.jpa.entity.contract.AuditableEntity
 import jakarta.persistence.Column
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Version
 import org.whiteprint.platform.infra.persistence.jpa.entity.contract.LockableEntity
+import org.whiteprint.platform.infra.persistence.jpa.entity.fencing.FencingTokenGuard
 import java.io.Serializable
 import java.time.Instant
 
@@ -30,8 +32,10 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, 
     override var deletedAt: Instant? = null
         protected set
 
+    /** `@FencingGuarded` 엔티티를 락 구간 안에서 마지막으로 쓴 락의 펜싱 토큰. 검사·기록은 [FencingTokenGuard]. */
     @Column(name = "last_fencing_token", nullable = true)
     override var lastFencingToken: Long = 0
+        internal set
 
     fun touch() {
         updatedAt = Instant.now()
@@ -40,6 +44,12 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, 
     @PreUpdate
     override fun preUpdate() {
         updatedAt = Instant.now()
+        FencingTokenGuard.checkAndStamp(this)
+    }
+
+    @PrePersist
+    protected fun prePersistFencingToken() {
+        FencingTokenGuard.stampOnInsert(this)
     }
 
     override fun delete() {

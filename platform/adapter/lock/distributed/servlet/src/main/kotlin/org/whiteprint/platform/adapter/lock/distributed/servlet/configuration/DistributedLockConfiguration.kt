@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializer
 import io.github.hchanjune.omk.core.provider.SpanIdProvider
 import org.whiteprint.platform.adapter.lock.distributed.servlet.aspect.DistributedLockAspect
+import org.whiteprint.platform.adapter.lock.distributed.servlet.watchdog.DistributedLockWatchdog
 import org.whiteprint.platform.core.lock.operation.DistributedLockOperations
 import org.whiteprint.platform.core.lock.provider.DistributedLockOwnerProvider
 import org.whiteprint.platform.infra.cache.redis.operation.RedisDistributedLockOperations
@@ -83,13 +84,23 @@ class DistributedLockConfiguration(
         lockRedisTemplate: RedisTemplate<String, Any>,
         distributedLockOwnerProvider: DistributedLockOwnerProvider,
     ): DistributedLockOperations =
-        RedisDistributedLockOperations(lockRedisTemplate, distributedLockOwnerProvider.provideOwner())
+        RedisDistributedLockOperations(
+            redisTemplate = lockRedisTemplate,
+            instanceOwner = distributedLockOwnerProvider.provideOwner(),
+        )
+
+    @Bean
+    fun distributedLockWatchdog(
+        lockOperations: DistributedLockOperations,
+    ): DistributedLockWatchdog =
+        DistributedLockWatchdog(lockOperations)
 
     @Bean
     fun distributedLockAspect(
         lockOperations: DistributedLockOperations,
         spanIdProvider: SpanIdProvider,
+        watchdog: DistributedLockWatchdog,
     ): DistributedLockAspect =
-        DistributedLockAspect(lockOperations, spanIdProvider)
+        DistributedLockAspect(lockOperations, spanIdProvider, watchdog)
 
 }
