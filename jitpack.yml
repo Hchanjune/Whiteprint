@@ -1,2 +1,10 @@
 jdk:
   - openjdk21
+before_install:
+  # JitPack 컨테이너는 메모리가 작아, 기본 설정(병렬 워커 + 별도 Kotlin 데몬)으로는 kapt 스텁 생성 중 OOM 이 난다(0.8.3 빌드 실패).
+  # 로컬 빌드에는 영향을 주지 않도록 JitPack 에서만 gradle.properties 를 만든다.
+  # - Kotlin 컴파일을 Gradle 데몬 안에서 돌려 JVM 을 하나로 줄이고, 그 힙을 명시한다.
+  # - 동시에 컴파일하는 모듈 수를 2개로 제한한다.
+  - echo "org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=768m" >> gradle.properties
+  - echo "org.gradle.workers.max=2" >> gradle.properties
+  - echo "kotlin.compiler.execution.strategy=in-process" >> gradle.properties
