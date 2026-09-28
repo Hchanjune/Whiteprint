@@ -33,7 +33,7 @@ abstract class RootEntity<ID: Serializable>: BaseEntity<ID>(), AuditableEntity, 
         protected set
 
     /** `@FencingGuarded` 엔티티를 락 구간 안에서 마지막으로 쓴 락의 펜싱 토큰. 검사·기록은 [FencingTokenGuard]. */
-    @Column(name = "last_fencing_token", nullable = true)
+    @Column(name = "last_fencing_token", nullable = false)
     override var lastFencingToken: Long = 0
         internal set
 
