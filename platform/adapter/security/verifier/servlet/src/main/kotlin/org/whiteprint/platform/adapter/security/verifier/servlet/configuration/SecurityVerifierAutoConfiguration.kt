@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Import
 
 @AutoConfiguration(before = [SecurityAutoConfiguration::class, ServletWebSecurityAutoConfiguration::class, UserDetailsServiceAutoConfiguration::class])
 @Import(
-    SecurityVerifierKmsConfiguration::class,
     SecurityCacheConfiguration::class,
     SecurityVerifierConfiguration::class,
     SecurityExceptionHandler::class,
@@ -19,6 +18,5 @@ import org.springframework.context.annotation.Import
 @EnableConfigurationProperties(
     SecurityCacheConfiguration::class,
     SecurityVerifierConfigurationProperties::class,
-    SecurityVerifierKmsConfigurationProperties::class,
 )
 class SecurityVerifierAutoConfiguration

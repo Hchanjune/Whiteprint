@@ -28,6 +28,7 @@ dependencies {
         api("com.github.Hchanjune.Whiteprint:adapter-cache-servlet:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-cache-reactive:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-lock-distributed-servlet:${project.version}")
+        api("com.github.Hchanjune.Whiteprint:adapter-security-kms:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-security-provider-servlet:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-security-provider-reactive:${project.version}")
         api("com.github.Hchanjune.Whiteprint:adapter-security-verifier-servlet:${project.version}")

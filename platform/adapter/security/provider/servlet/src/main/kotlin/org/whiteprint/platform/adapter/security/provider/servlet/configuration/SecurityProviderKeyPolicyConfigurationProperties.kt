@@ -3,19 +3,14 @@ package org.whiteprint.platform.adapter.security.provider.servlet.configuration
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.whiteprint.platform.core.kms.model.KeyType
 
-@ConfigurationProperties(prefix = "adapter.security.provider.kms")
-data class SecurityProviderKmsConfigurationProperties(
-    var datasource: DataSourceProperties = DataSourceProperties(),
-    var accessTokenKeyPolicy: AccessTokenKeyPolicy = AccessTokenKeyPolicy(),
-    var refreshTokenKeyPolicy: RefreshTokenKeyPolicy = RefreshTokenKeyPolicy()
+/**
+ * 토큰 서명 키의 정책(별칭·로테이션·알고리즘). Vault 연결 자체는 `adapter.security.kms` 가 가진다.
+ */
+@ConfigurationProperties(prefix = "adapter.security.provider.key-policy")
+data class SecurityProviderKeyPolicyConfigurationProperties(
+    var accessToken: AccessTokenKeyPolicy = AccessTokenKeyPolicy(),
+    var refreshToken: RefreshTokenKeyPolicy = RefreshTokenKeyPolicy(),
 ) {
-
-    data class DataSourceProperties(
-        var host: String = "",
-        var port: Int = 8200,
-        var password: String = "",
-        var transitPath: String = "transit"
-    )
 
     data class AccessTokenKeyPolicy(
         var keyAlias: String = "access-token-sig",

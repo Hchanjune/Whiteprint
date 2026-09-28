@@ -17,18 +17,14 @@ adapter:
           issuer: Sample
           expiration-seconds: 3600
           cookie-header: refresh
-      kms:
-        datasource:
-          host: localhost
-          port: 8200
-          password: root
-          transit-path: transit
-        access-token-key-policy:
+      # 서명 키 정책. KMS(Vault) 연결은 adapter.security.kms 에 둔다 — ../kms/configuration.md
+      key-policy:
+        access-token:
           key-alias: access-token-sig
           rotation-interval-seconds: 2592000
           overlap-seconds: 86400
           algorithm: RSA_2048
-        refresh-token-key-policy:
+        refresh-token:
           key-alias: refresh-token-sig
           rotation-interval-seconds: 2592000
           overlap-seconds: 86400

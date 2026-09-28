@@ -21,7 +21,6 @@ import org.whiteprint.platform.infra.security.jwt.verifier.JwtRefreshTokenVerifi
 @Configuration
 class SecurityProviderConfiguration(
     private val properties: SecurityProviderConfigurationProperties,
-    private val kmsProperties: SecurityProviderKmsConfigurationProperties
 ) {
 
     @Bean
@@ -56,7 +55,7 @@ class SecurityProviderConfiguration(
 
     @Bean("providerRefreshTokenVerificationKeyResolver")
     fun refreshTokenVerificationKeyResolver(
-        @Qualifier("providerKeyMaterialProvider")  keyMaterialProvider: KeyMaterialProvider
+        keyMaterialProvider: KeyMaterialProvider
     ): RefreshTokenVerificationKeyResolver =
         RefreshTokenVerificationKeyResolverImpl(
             keyMaterialProvider = keyMaterialProvider,

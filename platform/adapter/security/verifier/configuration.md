@@ -26,16 +26,7 @@ adapter:
         - path: /api/v1/permit
           method: POST
 
-      # 3. KMS Config (Recommended Implement: infra:kms:vault)
-      kms:
-        datasource:
-          host: localhost
-          port: 8200
-          password: ~
-          transit-path: transit
-        cache:
-          expires-after-write-minutes: 60
-          maximum-size: 1000
+      # 3. KMS(Vault) 연결은 adapter.security.kms 에 둔다 — ../kms/configuration.md
 
       # 4. Cache For Revocation (Recommended Implement: infra:cache:redis)
       cache:

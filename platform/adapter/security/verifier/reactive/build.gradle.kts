@@ -14,8 +14,8 @@ dependencies {
     api(project(":platform:core:security"))
     api(project(":platform:infra:security:jwt"))
 
-    api(project(":platform:core:kms"))
-    api(project(":platform:infra:kms:vault"))
+    // Vault 연결·KMS 빈은 security:kms 가 한 번만 등록한다
+    api(project(":platform:adapter:security:kms"))
 
     api(project(":platform:infra:cache:redis:servlet"))
 

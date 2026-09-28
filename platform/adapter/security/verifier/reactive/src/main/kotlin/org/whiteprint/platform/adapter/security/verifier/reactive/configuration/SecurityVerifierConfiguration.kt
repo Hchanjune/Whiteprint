@@ -95,7 +95,7 @@ class SecurityVerifierConfiguration(
 
     @Bean
     fun accessTokenKeyResolver(
-        @Qualifier("verifierKeyMaterialService") keyMaterialProvider: KeyMaterialProvider
+        keyMaterialProvider: KeyMaterialProvider
     ): AccessTokenVerificationKeyResolver = AccessTokenVerificationKeyResolverImpl(keyMaterialProvider)
 
     @Bean

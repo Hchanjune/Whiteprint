@@ -57,6 +57,7 @@ Whiteprint는 **Hexagonal Architecture** 위에서, 단순한 컨벤션이 아�
 | `adapter:event:subscriber` | 이벤트 구독 연결 — `@EnableScheduling` 자동 적용; 사용 서비스에서 별도 선언 불필요 |
 | `adapter:cache:servlet` / `:reactive` | 스택별 캐시 연결 |
 | `adapter:lock:distributed:servlet` | 분산 락 AOP 연결 (서블릿 스택) |
+| `adapter:security:kms` | Vault 연결 하나와 KMS 빈(`KeyOperations`, `KeyMaterialProvider`, `KeyAdminOperations`)을 등록 — 토큰 발급·검증과 서비스 자체 암호화가 함께 사용; 설정은 `adapter.security.kms` |
 | `adapter:security:provider:servlet` / `:reactive` | 토큰 발급(로그인/리프레시) 연결 |
 | `adapter:security:verifier:servlet` | 토큰 검증 및 필터 체인 연결 (서블릿) — `@Before` AOP, `SecurityContextSupport.getCurrentClaims()`, `Authorizer` 빈 |
 | `adapter:security:verifier:reactive` | 토큰 검증 및 필터 체인 연결 (리액티브) — `@Around` AOP로 `Mono`/`Flux` 래핑; `SecurityContextSupport.currentClaims(): Mono<AccessTokenClaims>` (Mono 체인용) / `awaitCurrentClaims(): AccessTokenClaims` (suspend fun용, 코루틴 suspend이므로 Netty 이벤트 루프 블로킹 없음) |

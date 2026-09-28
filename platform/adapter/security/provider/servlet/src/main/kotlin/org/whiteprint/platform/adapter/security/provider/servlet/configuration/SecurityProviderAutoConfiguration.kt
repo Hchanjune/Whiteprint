@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Import
 @AutoConfiguration
 @Import(
     SecurityProviderConfiguration::class,
-    SecurityProviderKmsConfiguration::class,
+    SecurityProviderSignerConfiguration::class,
 )
 @EnableConfigurationProperties(
     SecurityProviderConfigurationProperties::class,
-    SecurityProviderKmsConfigurationProperties::class,
+    SecurityProviderKeyPolicyConfigurationProperties::class,
 )
 class SecurityProviderAutoConfiguration

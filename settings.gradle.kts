@@ -27,6 +27,7 @@ include("platform:adapter:cache:reactive")
 
 include("platform:adapter:lock:distributed:servlet")
 
+include("platform:adapter:security:kms")
 include("platform:adapter:security:provider:servlet")
 include("platform:adapter:security:provider:reactive")
 include("platform:adapter:security:verifier:servlet")

@@ -57,6 +57,7 @@ Because services depend on `core` abstractions — never on Kafka or Redis direc
 | `adapter:event:subscriber` | Event subscription wiring — `@EnableScheduling` auto-applied; not needed in consuming services |
 | `adapter:cache:servlet` / `:reactive` | Cache wiring per stack |
 | `adapter:lock:distributed:servlet` | Distributed-lock AOP wiring (servlet stack) |
+| `adapter:security:kms` | Single Vault connection and KMS beans (`KeyOperations`, `KeyMaterialProvider`, `KeyAdminOperations`) shared by token issuance, token verification, and service-level encryption — configured under `adapter.security.kms` |
 | `adapter:security:provider:servlet` / `:reactive` | Token issuance (login/refresh) wiring |
 | `adapter:security:verifier:servlet` | Token verification & filter-chain wiring (servlet) — `@Before` AOP, `SecurityContextSupport.getCurrentClaims()`, `Authorizer` bean |
 | `adapter:security:verifier:reactive` | Token verification & filter-chain wiring (reactive) — `@Around` AOP wrapping `Mono`/`Flux`, `SecurityContextSupport.currentClaims(): Mono<AccessTokenClaims>` |
