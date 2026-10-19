@@ -33,6 +33,7 @@ adapter:
         datasource:
           host: localhost
           port: 6379
+          username: ~   # Redis 6+ ACL 사용자. 비우면 default 사용자(requirepass)
           password: ~
           database: 0
         pooling:

@@ -12,6 +12,8 @@ data class SecurityCacheConfigurationProperties(
     data class DataSourceProperties(
         var host: String = "",
         var port: Int = 6379,
+        // Redis 6+ ACL 사용자. 비우면 default 사용자(requirepass)로 인증한다.
+        var username: String? = null,
         var password: String? = null,
         var database: Int = 0
     )

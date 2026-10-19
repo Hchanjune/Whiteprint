@@ -53,6 +53,8 @@ class CacheConfiguration(
         val pooling = properties.pooling
 
         val serverConfig = RedisStandaloneConfiguration(datasource.host, datasource.port).apply {
+            // 빈 문자열도 null 로 — `${ENV:}` 로 비워둔 값이 AUTH "" 로 나가면 인증이 실패한다.
+            username = datasource.username?.takeIf { it.isNotBlank() }
             password = RedisPassword.of(datasource.password)
             database = datasource.database
         }
