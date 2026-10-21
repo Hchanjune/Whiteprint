@@ -18,21 +18,22 @@ class VaultKeyAdminOperations(
     override fun createKey(alias: String, type: KeyType): KeyBundle {
         val path = "$transitPath/keys/$alias"
 
+        // 내보내기는 키 종류가 허용하는 만큼만(비대칭 개인키는 안 됨), 삭제는 막는다 — 지우면 그 키로 만든 서명·암호문이 전부 죽는다.
         val request = mutableMapOf<String, Any>(
             "type" to type.toVaultType(),
-            "exportable" to true,
-            "deletion_allowed" to true
+            "exportable" to type.isExportable,
+            "deletion_allowed" to false
         )
 
         vaultOperations.write(path, request)
 
-        return getBundle(alias)
+        return latestBundle(alias)
     }
 
     override fun rotateKey(alias: String): KeyBundle {
         val ops = vaultOperations.opsForTransit(transitPath)
         ops.rotate(alias)
-        return getBundle(alias)
+        return latestBundle(alias)
     }
 
     override fun updateStatus(keyId: KeyId, status: KeyStatus) {
@@ -64,6 +65,20 @@ class VaultKeyAdminOperations(
     override fun findLatestKeyId(alias: String): KeyId? {
         val key = vaultOperations.opsForTransit(transitPath).getKey(alias)
         return key?.let { KeyId(alias, it.latestVersion.toString()) }
+    }
+
+    override fun findMetadata(alias: String): KeyMetadata? =
+        vaultOperations.opsForTransit(transitPath).getKey(alias)
+            ?.toKeyMetadata(KeyId(alias, null))
+
+    /** 공개키가 있는 키는 공개키까지, 대칭키는 메타데이터만 — [getBundle] 은 공개키가 없으면 실패한다. */
+    private fun latestBundle(alias: String): KeyBundle {
+        val metadata = findMetadata(alias)
+            ?: throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to alias))
+        if (!metadata.type.isAsymmetric) {
+            return KeyBundle(material = null, metadata = metadata)
+        }
+        return keyMaterialProvider.getKeyBundle(metadata.keyId, KeySide.PUBLIC)
     }
 
     override fun findAllVersions(alias: String): List<KeyId> {

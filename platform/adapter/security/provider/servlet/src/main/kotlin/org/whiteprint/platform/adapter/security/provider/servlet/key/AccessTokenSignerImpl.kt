@@ -1,6 +1,7 @@
 package org.whiteprint.platform.adapter.security.provider.servlet.key
 
 import org.whiteprint.platform.adapter.security.provider.servlet.configuration.SecurityProviderKeyPolicyConfigurationProperties
+import org.whiteprint.platform.core.kms.model.KeyId
 import org.whiteprint.platform.core.kms.model.toJwtAlgorithm
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
@@ -38,8 +39,8 @@ class AccessTokenSignerImpl(
         )
     }
 
-    override fun sign(rawText: String): AccessTokenSigningResult {
-        val signedResult = keyOperations.sign(accessTokenPolicy.keyAlias, rawText)
+    override fun sign(signingKey: AccessTokenSigningKeyMetadata, rawText: String): AccessTokenSigningResult {
+        val signedResult = keyOperations.sign(KeyId(signingKey.keyAlias, signingKey.keyVersion), rawText)
 
         return AccessTokenSigningResult(
             keyAlias = signedResult.keyId.alias,

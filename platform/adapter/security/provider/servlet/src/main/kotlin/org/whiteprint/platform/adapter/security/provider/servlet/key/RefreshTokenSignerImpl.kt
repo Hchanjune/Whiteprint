@@ -1,6 +1,7 @@
 package org.whiteprint.platform.adapter.security.provider.servlet.key
 
 import org.whiteprint.platform.adapter.security.provider.servlet.configuration.SecurityProviderKeyPolicyConfigurationProperties
+import org.whiteprint.platform.core.kms.model.KeyId
 import org.whiteprint.platform.core.kms.model.toJwtAlgorithm
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
@@ -37,8 +38,8 @@ class RefreshTokenSignerImpl(
         )
     }
 
-    override fun sign(text: String): RefreshTokenSigningResult {
-        val signingResult = keyOperations.sign(refreshTokenPolicy.keyAlias, text)
+    override fun sign(signingKey: RefreshTokenSigningKeyMetadata, text: String): RefreshTokenSigningResult {
+        val signingResult = keyOperations.sign(KeyId(signingKey.keyAlias, signingKey.keyVersion), text)
         return RefreshTokenSigningResult(
             keyAlias = signingResult.keyId.alias,
             keyVersion = signingResult.keyId.version,

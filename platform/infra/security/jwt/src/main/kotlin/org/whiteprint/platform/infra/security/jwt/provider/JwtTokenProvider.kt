@@ -57,7 +57,7 @@ class JwtTokenProvider(
         val base64Header = encoder.encodeToString(headerBytes)
         val base64Payload = encoder.encodeToString(payloadBytes)
         val base64SigningInput = "$base64Header.$base64Payload"
-        val signingResult = accessTokenSigner.sign(base64SigningInput)
+        val signingResult = accessTokenSigner.sign(accessTokenSigningKey, base64SigningInput)
         val base64Signature = AccessTokenSignature(encoder.encodeToString(signingResult.signature))
 
         return AccessToken("$base64SigningInput.${base64Signature.signature}")
@@ -90,7 +90,7 @@ class JwtTokenProvider(
         val base64Header = encoder.encodeToString(headerBytes)
         val base64Payload = encoder.encodeToString(payloadBytes)
         val base64SigningInput = "$base64Header.$base64Payload"
-        val signingResult = refreshTokenSigner.sign(base64SigningInput)
+        val signingResult = refreshTokenSigner.sign(refreshTokenSigningKey, base64SigningInput)
         val base64Signature = RefreshTokenSignature(encoder.encodeToString(signingResult.signature))
 
         return RefreshToken("$base64SigningInput.${base64Signature.signature}")

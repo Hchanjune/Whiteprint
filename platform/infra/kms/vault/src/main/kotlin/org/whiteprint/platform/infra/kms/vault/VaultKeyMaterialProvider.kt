@@ -5,16 +5,12 @@ import org.springframework.vault.support.VaultTransitKey
 import org.whiteprint.platform.core.kms.model.KeyBundle
 import org.whiteprint.platform.core.kms.model.KeyId
 import org.whiteprint.platform.core.kms.model.KeyMaterial
-import org.whiteprint.platform.core.kms.model.KeyMetadata
 import org.whiteprint.platform.core.kms.model.KeySide
-import org.whiteprint.platform.core.kms.model.KeyStatus
 import org.whiteprint.platform.core.kms.model.toKeyType
 import org.whiteprint.platform.core.kms.policy.KmsException
 import org.whiteprint.platform.core.kms.policy.KmsPolicy
 import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
-import java.time.Instant
-import java.time.OffsetDateTime
 import java.util.Base64
 
 class VaultKeyMaterialProvider(
@@ -42,7 +38,7 @@ class VaultKeyMaterialProvider(
                 )
             )
 
-        val metadata = mapToMetadata(keyId, response)
+        val metadata = response.toKeyMetadata(keyId)
 
         val material = when (side) {
             KeySide.PUBLIC -> extractPublicKey(keyId, response)
@@ -56,51 +52,6 @@ class VaultKeyMaterialProvider(
         }
 
         return KeyBundle(material, metadata)
-    }
-
-    private fun mapToMetadata(keyId: KeyId, response: VaultTransitKey): KeyMetadata {
-        val latestVersion = response.latestVersion.toString()
-        val targetVersion = keyId.version ?: latestVersion
-
-        val versionInfo = response.keys[targetVersion] as? Map<String, Any> ?: emptyMap()
-
-        val createdAt = (versionInfo["creation_time"] as? String)?.let {
-            OffsetDateTime.parse(it).toInstant()
-        } ?: Instant.EPOCH
-
-        return KeyMetadata(
-            keyId = KeyId(keyId.alias, targetVersion),
-            type = response.type.toKeyType(),
-            status = resolveStatus(response),
-
-            createdAt = createdAt,
-            updatedAt = createdAt,
-
-            latestVersion = latestVersion,
-            minAvailableVersion = response.minDecryptionVersion.toString(),
-
-                        isExportable = response.isExportable,
-            isDeletable = response.isDeletionAllowed,
-
-            expiresAt = null,
-            tags = emptyMap()
-        )
-    }
-
-    private fun resolveStatus(response: VaultTransitKey): KeyStatus {
-        if (response.isDeletionAllowed) {
-            return KeyStatus.PENDING_DELETION
-        }
-
-        if (response.minEncryptionVersion > response.latestVersion) {
-            return KeyStatus.DISABLED
-        }
-
-        if (response.minDecryptionVersion > response.latestVersion) {
-            return KeyStatus.EXPIRED
-        }
-
-        return KeyStatus.ENABLED
     }
 
     private fun extractPublicKey(keyId: KeyId, response: VaultTransitKey): KeyMaterial {

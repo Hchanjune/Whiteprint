@@ -1,6 +1,7 @@
 package org.whiteprint.platform.adapter.security.kms.configuration
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.whiteprint.platform.adapter.security.kms.provision.ManagedKey
 
 /**
  * KMS(Vault) 연결 하나. JWT 서명·검증(provider/verifier)과 서비스 자체 암호화가 이 연결을 같이 쓴다.
@@ -9,6 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class KmsConfigurationProperties(
     var datasource: DataSourceProperties = DataSourceProperties(),
     var cache: CacheOptions = CacheOptions(),
+    /** 기동 시 없으면 만들 키. 모듈이 직접 올리는 키(provider 의 토큰 서명 키 등)는 여기 적지 않아도 된다. */
+    var keys: List<ManagedKey> = emptyList(),
 ) {
 
     data class DataSourceProperties(

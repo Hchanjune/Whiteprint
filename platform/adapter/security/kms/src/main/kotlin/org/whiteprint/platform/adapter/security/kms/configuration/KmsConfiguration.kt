@@ -1,6 +1,7 @@
 package org.whiteprint.platform.adapter.security.kms.configuration
 
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
@@ -9,6 +10,8 @@ import org.springframework.vault.authentication.TokenAuthentication
 import org.springframework.vault.client.VaultEndpoint
 import org.springframework.vault.core.VaultOperations
 import org.springframework.vault.core.VaultTemplate
+import org.whiteprint.platform.adapter.security.kms.provision.ManagedKeyContributor
+import org.whiteprint.platform.adapter.security.kms.provision.ManagedKeyProvisioner
 import org.whiteprint.platform.core.kms.service.KeyAdminOperations
 import org.whiteprint.platform.core.kms.service.KeyCache
 import org.whiteprint.platform.core.kms.service.KeyMaterialProvider
@@ -93,4 +96,21 @@ class KmsConfiguration(
             keyMaterialProvider = keyMaterialProvider,
             transitPath = properties.datasource.transitPath,
         )
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun kmsManagedKeyProvisioner(adminOperations: KeyAdminOperations): ManagedKeyProvisioner =
+        ManagedKeyProvisioner(adminOperations)
+
+    /**
+     * 선언된 키를 기동 중(요청을 받기 전)에 맞춘다. 연결 검사([kmsVaultConnectionValidator]) 다음에 돈다 —
+     * 같은 [SmartInitializingSingleton] 이라 빈 등록 순서를 따른다.
+     */
+    @Bean
+    fun kmsManagedKeyInitializer(
+        provisioner: ManagedKeyProvisioner,
+        contributors: ObjectProvider<ManagedKeyContributor>,
+    ) = SmartInitializingSingleton {
+        provisioner.provision(properties.keys + contributors.orderedStream().toList().flatMap { it.managedKeys() })
+    }
 }

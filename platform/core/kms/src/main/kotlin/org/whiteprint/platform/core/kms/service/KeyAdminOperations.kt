@@ -13,4 +13,7 @@ interface KeyAdminOperations {
     fun getBundle(alias: String): KeyBundle
     fun findLatestKeyId(alias: String): KeyId?
     fun findAllVersions(alias: String): List<KeyId>
+
+    /** 최신 버전 기준 메타데이터. 키가 없으면 null — 키 종류와 상관없이(공개키가 없는 대칭키도) 쓸 수 있다. */
+    fun findMetadata(alias: String): KeyMetadata?
 }

@@ -22,6 +22,10 @@ adapter:
       cache:
         expires-after-write-minutes: 60
         maximum-size: 1000
+      # 3. 기동 시 없으면 만들 키 (provider 의 토큰 서명 키는 provider 가 직접 올리므로 적지 않는다)
+      keys:
+        - alias: payment-billing-key-enc
+          type: AES_256_GCM
 ```
 
 ### build.gradle.kts
@@ -38,3 +42,6 @@ implementation(project(":platform:adapter:security:kms"))
 - 기동 시 `sys/health` 로 연결을 검사하고, 실패하면 기동을 멈춘다.
 - 이전 버전의 `adapter.security.verifier.kms` · `adapter.security.provider.kms.datasource` 는 더 이상 읽지 않는다.
   옮기지 않으면 host 가 비어 기동 시 연결 검사에서 실패한다.
+- **managed key**: `keys` 와 `ManagedKeyContributor` 빈이 올린 키를 기동 중(요청 받기 전)에 맞춘다 — 없으면 만들고,
+  있는데 종류가 다르면 기동을 멈춘다. 지우거나 덮어쓰지 않는다. 같은 이름을 다른 종류로 두 번 선언해도 기동 실패.
+  새로 만드는 키는 `deletion_allowed=false`, 내보내기는 `KeyType.isExportable` 대로(비대칭 개인키는 불가).

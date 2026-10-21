@@ -20,20 +20,32 @@ class VaultKeyOperations(
 ) : KeyOperations {
 
     /**
-     * RS256 (pkcs1v15)
+     * RS256 (pkcs1v15) — 최신 버전으로 서명한다.
      */
-    override fun sign(keyAlias: String, rawText: String): SigningResult {
+    override fun sign(keyAlias: String, rawText: String): SigningResult =
+        signPkcs1v15(keyAlias, null, rawText)
+
+    /**
+     * RS256 (pkcs1v15) — [keyId] 의 버전으로 서명한다.
+     */
+    override fun sign(keyId: KeyId, rawText: String): SigningResult {
+        val version = keyId.version
+            ?: throw KmsException(KmsPolicy.INVALID_KEY_ID_FORMAT, mapOf("input" to keyId.toString()))
+        return signPkcs1v15(keyId.alias, version, rawText)
+    }
+
+    private fun signPkcs1v15(keyAlias: String, version: String?, rawText: String): SigningResult {
         val base64Input = Base64.getEncoder()
             .encodeToString(rawText.toByteArray(Charsets.UTF_8))
 
+        val request = mutableMapOf<String, Any>(
+            "input" to base64Input,
+            "signature_algorithm" to "pkcs1v15",
+        )
+        version?.let { request["key_version"] = it.toInt() }
+
         val response = try {
-            vaultOperations.write(
-                "$transitPath/sign/$keyAlias",
-                mapOf(
-                    "input" to base64Input,
-                    "signature_algorithm" to "pkcs1v15",
-                )
-            )
+            vaultOperations.write("$transitPath/sign/$keyAlias", request)
         } catch (exception: HttpClientErrorException.NotFound) {
             throw KmsException(KmsPolicy.KEY_NOT_FOUND, mapOf("keyId" to keyAlias), exception)
         } catch (exception: HttpServerErrorException) {
@@ -44,11 +56,11 @@ class VaultKeyOperations(
             ?: throw KmsException(KmsPolicy.KMS_INTERNAL_ERROR, emptyMap())
 
         val parts = vaultSig.split(":")
-        val version = parts[1].removePrefix("v")
+        val signedVersion = parts[1].removePrefix("v")
         val signatureBytes = Base64.getDecoder().decode(parts[2].trim())
 
         return SigningResult(
-            keyId = KeyId(keyAlias, version),
+            keyId = KeyId(keyAlias, signedVersion),
             signature = signatureBytes
         )
     }

@@ -20,8 +20,14 @@ dependencies {
 
     api("org.springframework.boot:spring-boot-starter-web")
     api("org.springframework.boot:spring-boot-starter-security")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
