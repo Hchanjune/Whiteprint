@@ -14,13 +14,13 @@ Whiteprint is built on **Hexagonal Architecture**, with a strict three-layer sep
 
 ```
 ┌────────────────────────────────────┐
-│            Your Service             │   business logic only
+│            Your Service            ├─>   business logic only
 ├────────────────────────────────────┤
-│           platform / core           │   framework-agnostic contracts (ports)
+│           platform / core          ├─>   framework-agnostic contracts (ports)
 ├────────────────────────────────────┤
-│          platform / adapter         │   Spring Boot wiring
+│          platform / adapter        ├─>   Spring Boot wiring
 ├────────────────────────────────────┤
-│           platform / infra          │   Kafka · Redis · JPA · Vault · …
+│           platform / infra         ├─>   Kafka · Redis · JPA · Vault · …
 └────────────────────────────────────┘
 ```
 
@@ -135,7 +135,7 @@ The `core / adapter / infra` split isn't a naming convention — it's a dependen
 
 ## Tech Stack
 
-Kotlin 2.3.20 · Spring Boot 4.0.6 · Java 21 · Apache Kafka · Redis · PostgreSQL/JPA · HashiCorp Vault · OpenTelemetry
+Kotlin 2.3.20 · Spring Boot 4.1.1 · Java 21 · Apache Kafka · Redis · PostgreSQL/JPA · HashiCorp Vault · OpenTelemetry
 
 ## Getting Started
 

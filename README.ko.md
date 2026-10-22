@@ -14,13 +14,13 @@ Whiteprint는 **Hexagonal Architecture** 위에서, 단순한 컨벤션이 아�
 
 ```
 ┌────────────────────────────────────┐
-│             서비스 (Service)          │   비즈니스 로직만
+│           서비스 (Service)          ├─>   비즈니스 로직만
 ├────────────────────────────────────┤
-│           platform / core           │   프레임워크 독립적 계약(포트)
+│           platform / core          ├─>   프레임워크 독립적 계약(포트)
 ├────────────────────────────────────┤
-│          platform / adapter         │   Spring Boot 연결
+│          platform / adapter        ├─>   Spring Boot 연결
 ├────────────────────────────────────┤
-│           platform / infra          │   Kafka · Redis · JPA · Vault · …
+│           platform / infra         ├─>   Kafka · Redis · JPA · Vault · …
 └────────────────────────────────────┘
 ```
 
@@ -135,7 +135,7 @@ JWT 서명은 비대칭 키(RSA) 기반으로 동작합니다 — 서명에 쓰�
 
 ## 기술 스택
 
-Kotlin 2.3.20 · Spring Boot 4.0.6 · Java 21 · Apache Kafka · Redis · PostgreSQL/JPA · HashiCorp Vault · OpenTelemetry
+Kotlin 2.3.20 · Spring Boot 4.1.1 · Java 21 · Apache Kafka · Redis · PostgreSQL/JPA · HashiCorp Vault · OpenTelemetry
 
 ## 시작하기
 
