@@ -38,6 +38,11 @@ import org.whiteprint.platform.infra.security.jwt.verifier.JwtAccessTokenVerifie
 import org.whiteprint.platform.infra.serializer.jackson.JacksonSerializer
 import java.time.Duration
 
+// 토큰 없이 통과시키는 actuator 경로
+// - /actuator/health/** : /actuator/health 와 그 하위(liveness·readiness) 그룹 — `/**` 는 0개 세그먼트도 맞으므로 /actuator/health 자체도 포함
+// - /actuator/prometheus : 클러스터 내부 Prometheus 수집용
+private val ACTUATOR_PATH_PATTERNS = arrayOf("/actuator/health/**", "/actuator/prometheus")
+
 @Configuration
 @EnableWebFluxSecurity
 class SecurityVerifierConfiguration(
@@ -155,6 +160,10 @@ class SecurityVerifierConfiguration(
             .anonymous { it.disable() }
             .authorizeExchange { exchanges ->
                 exchanges.matchers(ServerWebExchangeMatchers.pathMatchers(HttpMethod.OPTIONS, "/**")).permitAll()
+                // k8s probe·Prometheus 는 토큰 없이 호출한다. 막으면 401 로 probe 가 실패해 Pod 가 재시작을 반복한다.
+                // health 는 기본 show-details=never 라 상태(UP/DOWN)만 나간다. 다른 actuator 엔드포인트는 열지 않는다.
+                // 외부 노출은 입구(gateway)에서 막는다 — 서비스는 ClusterIP 라 클러스터 밖에서 직접 닿지 않는다.
+                exchanges.matchers(ServerWebExchangeMatchers.pathMatchers(HttpMethod.GET, *ACTUATOR_PATH_PATTERNS)).permitAll()
                 permittedPathProvider.entries().forEach { (method, pattern) ->
                     exchanges.matchers(ServerWebExchangeMatchers.pathMatchers(method, pattern)).permitAll()
                 }
