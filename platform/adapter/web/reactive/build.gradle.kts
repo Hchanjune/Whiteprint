@@ -35,6 +35,7 @@ dependencies {
     api("io.opentelemetry:opentelemetry-exporter-otlp")
 
     testImplementation(kotlin("test"))
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 kotlin {

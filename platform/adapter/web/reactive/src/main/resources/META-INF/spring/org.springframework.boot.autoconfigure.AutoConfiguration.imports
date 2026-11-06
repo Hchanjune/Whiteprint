@@ -1,1 +1,2 @@
 org.whiteprint.platform.adapter.web.reactive.configurations.AutoConfiguration
+org.whiteprint.platform.adapter.web.reactive.configurations.FallbackSecurityAutoConfiguration

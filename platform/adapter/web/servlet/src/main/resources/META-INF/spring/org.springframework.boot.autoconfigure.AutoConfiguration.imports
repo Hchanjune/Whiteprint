@@ -1,1 +1,2 @@
 org.whiteprint.platform.adapter.web.servlet.configurations.AutoConfiguration
+org.whiteprint.platform.adapter.web.servlet.configurations.FallbackSecurityAutoConfiguration

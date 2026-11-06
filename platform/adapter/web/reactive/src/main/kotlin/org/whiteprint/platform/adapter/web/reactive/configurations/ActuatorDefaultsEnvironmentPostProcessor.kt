@@ -13,7 +13,7 @@ import org.springframework.core.env.ConfigurableEnvironment
  *   로컬에서도 같은 경로로 확인할 수 있게 한다.
  *
  * **기본값(defaultProperties)으로 넣는다** — 우선순위가 가장 낮아서 서비스 yaml·환경변수에 적은 값이 항상 이긴다.
- * 토큰 없이 통과시키는 것은 security verifier 쪽 설정이고, 외부 노출은 입구(gateway)에서 막는다.
+ * 토큰 없이 통과시키는 것은 security verifier 쪽 설정이고(verifier 가 없으면 FallbackSecurityAutoConfiguration), 외부 노출은 입구(gateway)에서 막는다.
  */
 class ActuatorDefaultsEnvironmentPostProcessor : EnvironmentPostProcessor {
 
