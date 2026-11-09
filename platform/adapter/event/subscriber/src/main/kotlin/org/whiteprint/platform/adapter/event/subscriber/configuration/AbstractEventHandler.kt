@@ -1,6 +1,8 @@
 package org.whiteprint.platform.adapter.event.subscriber.configuration
 
 import io.github.hchanjune.omk.core.annotations.ManagedSchedule
+import io.github.hchanjune.omk.core.event.EventMetadata
+import io.github.hchanjune.omk.core.event.EventMetadataExtractor
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.getBean
@@ -48,7 +50,8 @@ import java.util.concurrent.TimeUnit
  *
  * Observability context (traceId, causationId, etc.) is handled by the
  * [@ManagedEventHandler][io.github.hchanjune.omk.core.annotations.ManagedEventHandler]
- * AOP aspect — annotate [handle] and declare the relevant fields on your event class.
+ * AOP aspect — annotate [handle]. The traceId and causationId come from the inbox record
+ * ([processOne]), so the event class needs no such fields.
  */
 abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationContextAware, DisposableBean {
 
@@ -273,13 +276,28 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
         inFlightEventIds.add(record.eventId)
         try {
             val event = eventSerializer.deserialize(record.payload, eventClass.java)
-            applicationContext.getBean(this@AbstractEventHandler::class.java).handle(event)
+            handleContinuingTrace(record, event)
             inboxStore.markCompleted(record.eventId)
         } catch (exception: Exception) {
             handleFailure(record, exception)
         } finally {
             inFlightEventIds.remove(record.eventId)
         }
+    }
+
+    /**
+     * 레코드의 traceId 를 이어서 핸들러를 부른다. trace 정보는 이벤트 안이 아니라 인박스 레코드에 있으므로,
+     * 넘기지 않으면 `@ManagedEventHandler` 가 새 trace 를 시작해 발행 쪽 요청과 끊긴다.
+     * traceId 가 비어 있는 레코드는 지정하지 않는다 — 이벤트 필드에서 찾거나 새로 만드는 기본 동작을 따른다.
+     */
+    private fun handleContinuingTrace(record: EventInbox, event: E) {
+        val handler = applicationContext.getBean(this@AbstractEventHandler::class.java)
+        if (record.traceId.isBlank()) return handler.handle(event)
+        val metadata = EventMetadata(
+            traceId = record.traceId,
+            causationId = record.causationId?.takeIf { it.isNotBlank() },
+        )
+        EventMetadataExtractor.withMetadata(metadata) { handler.handle(event) }
     }
 
     private fun handleFailure(record: EventInbox, exception: Exception) {

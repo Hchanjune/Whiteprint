@@ -14,8 +14,15 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
+
+    testImplementation(kotlin("test"))
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
