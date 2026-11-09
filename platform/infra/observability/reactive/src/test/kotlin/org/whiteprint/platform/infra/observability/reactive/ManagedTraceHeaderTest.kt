@@ -24,6 +24,8 @@ import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.mock.http.client.MockClientHttpResponse
 import org.whiteprint.platform.infra.observability.otel.OtelTracingAutoConfiguration
 import java.net.URI
+import org.whiteprint.platform.infra.observability.servlet.ManagedTraceHeaderAutoConfiguration as ServletManagedTraceHeaderAutoConfiguration
+import org.whiteprint.platform.infra.observability.servlet.ManagedTraceHeaderInterceptor as ServletManagedTraceHeaderInterceptor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -55,6 +57,17 @@ class ManagedTraceHeaderTest {
         runner.run { context ->
             assertTrue(context.getBeansOfType(SpanBridge::class.java).isEmpty())
             assertTrue(context.getBeansOfType(ManagedTraceHeaderInterceptor::class.java).isNotEmpty())
+        }
+    }
+
+    @Test
+    fun `servlet 모듈이 classpath 에 같이 있어도 리액티브 인터셉터만 등록된다`() {
+        runner.withConfiguration(
+            AutoConfigurations.of(ServletManagedTraceHeaderAutoConfiguration::class.java)
+        ).run { context ->
+            assertNull(context.startupFailure, "기동 실패: ${context.startupFailure}")
+            assertEquals(1, context.getBeansOfType(ManagedTraceHeaderInterceptor::class.java).size)
+            assertTrue(context.getBeansOfType(ServletManagedTraceHeaderInterceptor::class.java).isEmpty())
         }
     }
 

@@ -24,6 +24,8 @@ dependencies {
     testImplementation("io.opentelemetry:opentelemetry-sdk")
     // OMK 자동설정의 MetricsConfiguration 이 MeterRegistry 를 참조한다
     testImplementation("io.micrometer:micrometer-core")
+    // adapter-event-inbox 가 servlet 모듈을 api 로 물어서 리액티브 서비스에도 함께 들어온다 — 같은 구성으로 검증
+    testImplementation(project(":platform:infra:observability:servlet"))
 }
 
 kotlin {
