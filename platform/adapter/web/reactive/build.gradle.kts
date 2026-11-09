@@ -30,9 +30,6 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     api("io.micrometer:micrometer-registry-prometheus")
-    api("io.micrometer:micrometer-tracing-bridge-otel")
-    api("io.opentelemetry:opentelemetry-api")
-    api("io.opentelemetry:opentelemetry-exporter-otlp")
 
     testImplementation(kotlin("test"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")

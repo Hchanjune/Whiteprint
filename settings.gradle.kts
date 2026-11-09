@@ -47,6 +47,7 @@ include("platform:infra:cache:redis:reactive")
 
 include("platform:infra:messaging:kafka")
 
+include("platform:infra:observability:otel")
 include("platform:infra:observability:servlet")
 include("platform:infra:observability:reactive")
 

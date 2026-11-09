@@ -84,6 +84,7 @@ run {
     val internalOnly = setOf(
         "adapter-cache-common",
         "infra-persistence-mongo-common",
+        "infra-observability-otel",
     )
 
     // buildFile 존재 여부로 "실제 모듈"만 고른다 — `include("a:b:c")` 는 중간 경로에
