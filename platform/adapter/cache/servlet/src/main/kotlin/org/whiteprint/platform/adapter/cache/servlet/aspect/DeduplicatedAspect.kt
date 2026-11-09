@@ -10,6 +10,7 @@ import org.whiteprint.platform.adapter.cache.servlet.support.CacheReadThroughSup
 import org.whiteprint.platform.adapter.cache.servlet.support.CacheSpanSupport
 import org.whiteprint.platform.core.cache.annotation.Deduplicated
 import org.whiteprint.platform.core.cache.annotation.DeduplicatedKey
+import org.whiteprint.platform.core.cache.annotation.DuplicateAction
 import org.whiteprint.platform.core.cache.policy.CacheException
 import org.whiteprint.platform.core.cache.policy.CachePolicy
 import org.whiteprint.platform.core.cache.provider.CacheProvider
@@ -37,7 +38,10 @@ class DeduplicatedAspect(
 
         val firstSeen = cacheProvider.value.setIfAbsentWithTtl(key, true, ttl)
         if (!firstSeen) {
-            throw CacheException(CachePolicy.DUPLICATE_REQUEST, mapOf("key" to key.value))
+            return when (deduplicated.onDuplicate) {
+                DuplicateAction.THROW -> throw CacheException(CachePolicy.DUPLICATE_REQUEST, mapOf("key" to key.value))
+                DuplicateAction.SKIP -> null
+            }
         }
 
         return joinPoint.proceed()

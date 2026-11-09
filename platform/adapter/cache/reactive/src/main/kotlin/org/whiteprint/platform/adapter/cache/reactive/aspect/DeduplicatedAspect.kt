@@ -12,6 +12,7 @@ import org.whiteprint.platform.adapter.cache.reactive.support.CacheSpanSupport
 import org.whiteprint.platform.adapter.cache.reactive.support.proceedCold
 import org.whiteprint.platform.core.cache.annotation.Deduplicated
 import org.whiteprint.platform.core.cache.annotation.DeduplicatedKey
+import org.whiteprint.platform.core.cache.annotation.DuplicateAction
 import org.whiteprint.platform.core.cache.policy.CacheException
 import org.whiteprint.platform.core.cache.policy.CachePolicy
 import org.whiteprint.platform.core.cache.provider.ReactiveCacheProvider
@@ -46,7 +47,10 @@ class DeduplicatedAspect(
                 if (firstSeen) {
                     target
                 } else {
-                    Mono.error(CacheException(CachePolicy.DUPLICATE_REQUEST, mapOf("key" to key.value)))
+                    when (deduplicated.onDuplicate) {
+                        DuplicateAction.THROW -> Mono.error(CacheException(CachePolicy.DUPLICATE_REQUEST, mapOf("key" to key.value)))
+                        DuplicateAction.SKIP -> Mono.empty()
+                    }
                 }
             }
     }

@@ -8,7 +8,7 @@ plugins {
 group = "org.whiteprint.platform.infra.observability"
 
 dependencies {
-    api("com.github.Hchanjune.operation-manager-kit:servlet:0.11.3-fix4")
+    api("com.github.Hchanjune.operation-manager-kit:servlet:0.11.4")
     // infra.observability.tracing.endpoint 가 있으면 OMK span 을 OTLP 로 내보낸다
     api(project(":platform:infra:observability:otel"))
 

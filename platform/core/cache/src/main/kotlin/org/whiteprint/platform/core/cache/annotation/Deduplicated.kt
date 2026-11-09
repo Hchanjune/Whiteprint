@@ -17,11 +17,27 @@ import java.util.concurrent.TimeUnit
  * ⚠ `@Cached` 와 `@CacheEvict` 는 **prefix 가 정확히 같아야 한다**(버전 포함).
  * 다르면 무효화가 걸리지 않는데, 그건 기동 시점 검사가 잡지 못한다 — 검사는 키 **이름 구성**만 대조하고
  * prefix 가 다르면 애초에 같은 캐시로 취급하지 않기 때문이다.
+ *
+ * ## 중복일 때: [onDuplicate]
+ * 기본은 예외([DuplicateAction.THROW])다. 중복이 **정상 흐름**이면 [DuplicateAction.SKIP] 을 쓴다 — 예외가
+ * 지나가는 관측 span 이 모두 실패로 끝나기 때문에, 호출부에서 잡아도 에러율과 trace 에는 실패로 남는다.
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Deduplicated(
     val prefix: String = "",
     val ttl: Long = 5000L,
-    val timeUnit: TimeUnit = TimeUnit.MILLISECONDS
+    val timeUnit: TimeUnit = TimeUnit.MILLISECONDS,
+    val onDuplicate: DuplicateAction = DuplicateAction.THROW,
 )
+
+enum class DuplicateAction {
+    /** `CacheException(DUPLICATE_REQUEST)` 를 던진다. 중복을 호출자에게 알려야 할 때(예: 409 응답). */
+    THROW,
+
+    /**
+     * 대상 메서드를 실행하지 않고 끝낸다. 반환값이 없으므로 대상은 `Unit` 또는 nullable 을 반환해야 한다
+     * (primitive 를 반환하면 AOP 가 null 을 돌려줄 수 없어 실패한다).
+     */
+    SKIP,
+}
