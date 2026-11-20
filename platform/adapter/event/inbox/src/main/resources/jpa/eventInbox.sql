@@ -26,3 +26,6 @@ CREATE TABLE event_inbox (
 -- 키 게이트(NOT EXISTS partition_key+status) 및 frontier 조회를 지탱한다.
 CREATE INDEX idx_event_inbox_partition_key_status ON event_inbox(partition_key, status);
 CREATE INDEX idx_event_inbox_event_type_status ON event_inbox(event_type, status);
+
+-- 정리(purge) 스케줄러 — COMPLETED 중 processed_at 이 retention 을 지난 행을 배치로 지운다(adapter.event.inbox.purge).
+CREATE INDEX idx_event_inbox_status_processed_at ON event_inbox(status, processed_at);

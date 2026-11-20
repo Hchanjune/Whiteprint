@@ -32,11 +32,12 @@ import java.util.concurrent.TimeUnit
  * duplicate processing, and delegates to [handle] with the deserialized payload.
  * Subclasses only need to implement [handle].
  *
- * 처리 모드([processingMode], 기본 SERIAL=현행 동작):
- * - SERIAL: 폴 스레드에서 배치 직렬 인라인 처리(하위호환).
- * - PARALLEL: event 단위 claim + 워커풀 병렬(순서 무보장 — 멱등 핸들러 전용).
- * - PARTITION_ORDERED: partition_key 게이트 claim — 같은 키는 전체 인스턴스를 통틀어
- *   한 번에 1건씩 시간순, 다른 키는 병렬. FAILED/DEAD 는 해당 키를 블로킹한다.
+ * 처리 모드([processingMode], 기본 SERIAL — 하위호환):
+ * - SERIAL: 폴 스레드에서 배치 인라인 처리. **인스턴스 안에서만 1건씩**이다 — 복제본이 여럿이면 인스턴스끼리 병렬이고
+ *   순서·전체 직렬을 보장하지 않는다. 사실상 PARALLEL + workerPoolSize=1 이라 정합성 수단이 아니다.
+ * - PARALLEL: event 단위 claim + 워커풀 병렬(순서 무보장 — 멱등 핸들러 전용). 동시성은 [workerPoolSize] 로 조절.
+ * - PARTITION_ORDERED: partition_key 게이트 claim — 같은 키는 전체 인스턴스를 통틀어 한 번에 1건, 다른 키는 병렬.
+ *   순서(event_id)는 **같은 이벤트 타입 안에서만** 보장되고, FAILED/DEAD 의 키 블로킹은 **타입과 무관**하다.
  *
  * 실패 정책: 예외 발생 시 FAILED(재시도 대기) → backoff(30s→60s) 후 자동 재시도 →
  * 총 [maxAttempts]회 실행 소진 시 DEAD(종결·키 블로킹 유지) + [onEventDead] 알림.
@@ -58,7 +59,7 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
     companion object {
         private val log = LoggerFactory.getLogger(AbstractEventHandler::class.java)
 
-        /** SERIAL 모드 폴 배치 크기(현행 유지). */
+        /** SERIAL 모드 폴 배치 크기. */
         private const val SERIAL_BATCH_LIMIT = 100
 
         /** 병렬 모드 조회 배수 — 빈 슬롯 × 3. 멀티 인스턴스 claim 경쟁 패배 흡수용. */
@@ -79,7 +80,10 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
     /** 서비스 전역 DEAD 알림 — [DeadEventNotifier] 빈이 등록돼 있으면 모든 핸들러에 공통 적용. */
     private var deadEventNotifier: DeadEventNotifier? = null
 
-    /** 처리 모드 — 기본 SERIAL(현행 동작 그대로). 핸들러가 override 로 opt-in. */
+    /**
+     * 처리 모드 — 기본 SERIAL(하위호환). 핸들러가 override 로 opt-in.
+     * 멀티 인스턴스에서는 SERIAL 이 정합성을 지켜주지 않는다 — [ProcessingMode] 참고.
+     */
     protected open val processingMode: ProcessingMode = ProcessingMode.SERIAL
 
     /**
@@ -160,7 +164,10 @@ abstract class AbstractEventHandler<E: Event>: EventHandler<E>, ApplicationConte
         }
     }
 
-    /** 현행 동작 그대로 — 폴 스레드에서 직렬 인라인 처리. */
+    /**
+     * 폴 스레드에서 인라인 처리 — 이 인스턴스 안에서만 1건씩이다.
+     * 다른 인스턴스도 같은 레코드를 가져가 claim(CAS)을 시도하므로 인스턴스끼리는 병렬이고 순서를 보장하지 않는다.
+     */
     private fun pollSerial() {
         val records = inboxStore.findAllByEventTypeAndStatus(
             eventType = this.eventType,

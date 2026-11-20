@@ -196,4 +196,13 @@ open class MongoEventInboxStore(
         }
     }
 
+    override fun purgeCompleted(olderThan: Instant, limit: Int): Int {
+        val ids = mongoTemplate.find(
+            Query(Criteria.where("status").`is`(EventInboxStatus.COMPLETED).and("processed_at").lt(olderThan)).limit(limit),
+            EventInboxDocument::class.java,
+        ).map { it.eventId }
+        if (ids.isEmpty()) return 0
+        return mongoTemplate.remove(Query(Criteria.where("_id").`in`(ids)), EventInboxDocument::class.java).deletedCount.toInt()
+    }
+
 }

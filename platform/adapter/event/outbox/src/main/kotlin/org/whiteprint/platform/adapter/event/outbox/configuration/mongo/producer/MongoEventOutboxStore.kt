@@ -68,4 +68,13 @@ open class MongoEventOutboxStore(
         )
     }
 
+    override fun purgePublished(olderThan: Instant, limit: Int): Int {
+        val ids = mongoTemplate.find(
+            Query(Criteria.where("status").`is`(EventOutboxStatus.PUBLISHED).and("occurred_at").lt(olderThan)).limit(limit),
+            EventOutboxDocument::class.java,
+        ).map { it.eventId }
+        if (ids.isEmpty()) return 0
+        return mongoTemplate.remove(Query(Criteria.where("_id").`in`(ids)), EventOutboxDocument::class.java).deletedCount.toInt()
+    }
+
 }

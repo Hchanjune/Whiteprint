@@ -65,4 +65,15 @@ open class ReactiveMongoEventOutboxStore(
             EventOutboxDocument::class.java,
         ).block()
     }
+
+    override fun purgePublished(olderThan: Instant, limit: Int): Int {
+        val ids = reactiveMongoTemplate.find(
+            Query(Criteria.where("status").`is`(EventOutboxStatus.PUBLISHED).and("occurred_at").lt(olderThan)).limit(limit),
+            EventOutboxDocument::class.java,
+        ).map { it.eventId }.collectList().block()
+        if (ids.isNullOrEmpty()) return 0
+        val result = reactiveMongoTemplate.remove(Query(Criteria.where("_id").`in`(ids)), EventOutboxDocument::class.java).block()
+        return result?.deletedCount?.toInt() ?: 0
+    }
+
 }

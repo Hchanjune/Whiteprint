@@ -46,4 +46,16 @@ interface EventInboxStore {
      * FAILED 가 게이트에 포함되므로 실패 이벤트는 해당 키를 블로킹한다(순서 보장).
      */
     fun tryAcquireOrdered(eventId: Long, partitionKey: Long): Boolean
+
+    /**
+     * 정리(purge) — COMPLETED 이고 processed_at 이 [olderThan] 보다 이른 행을 최대 [limit] 건 지운다. 지운 건수를 돌려준다.
+     * RECEIVED·PROCESSING·FAILED·DEAD 는 건드리지 않는다(DEAD 는 수동 복구 대상).
+     *
+     * ⚠ 인박스 행은 eventId 중복 수신 차단에도 쓰인다 — 보관 기간이 브로커 보관 기간(Kafka retention)보다 짧으면
+     * 브로커가 재전달한 옛 이벤트를 새 이벤트로 받아 다시 처리한다. retention 을 브로커 보관보다 길게 둘 것.
+     *
+     * 기본 구현은 미지원 예외 — 플랫폼 스토어(JPA·Mongo·Reactive Mongo)는 모두 구현한다.
+     */
+    fun purgeCompleted(olderThan: java.time.Instant, limit: Int): Int =
+        throw UnsupportedOperationException("${this::class.simpleName} does not support inbox purge.")
 }

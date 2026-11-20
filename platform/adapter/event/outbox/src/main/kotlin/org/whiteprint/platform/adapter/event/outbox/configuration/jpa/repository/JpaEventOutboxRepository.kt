@@ -64,4 +64,22 @@ interface JpaEventOutboxRepository: JpaRepository<EventOutboxEntity, Long> {
         @Param("olderThan") olderThan: Instant,
     ): Int
 
+    /** 정리 — PUBLISHED 중 오래된 행을 최대 limit 건. 인덱스 (status, occurred_at) 를 탄다. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+        value = """
+        DELETE FROM event_outbox
+        WHERE event_id IN (
+            SELECT event_id FROM event_outbox
+            WHERE status = 'PUBLISHED' AND occurred_at < :olderThan
+            LIMIT :limit
+        )
+    """,
+        nativeQuery = true
+    )
+    fun deletePublishedBefore(
+        @Param("olderThan") olderThan: Instant,
+        @Param("limit") limit: Int,
+    ): Int
+
 }

@@ -12,6 +12,8 @@ import java.time.Instant
 
 @Document(collection = "event_inbox")
 @CompoundIndex(def = "{'event_type': 1, 'status': 1}")
+// 정리(purge) — COMPLETED 중 오래된 문서 조회. ⚠ 이름을 바꾸지 말 것 — 운영 DB 에 같은 이름으로 선적용돼 있다(이름이 다르면 auto-index 가 충돌).
+@CompoundIndex(name = "idx_event_inbox_status_processed_at", def = "{'status': 1, 'processed_at': 1}")
 data class EventInboxDocument(
     @Id
     @Field("_id")

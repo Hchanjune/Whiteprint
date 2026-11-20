@@ -1,5 +1,8 @@
 # Inbox PARTITION_ORDERED 설계 (2026-07-23 확정)
 
+> 설계 당시 기록이다. **현재 동작·모드 선택 기준은 [partition-ordered-usage.md](./partition-ordered-usage.md)** 를 따른다
+> (특히 SERIAL 은 멀티 인스턴스에서 순서·직렬을 보장하지 않고, PARTITION_ORDERED 의 순서는 같은 이벤트 타입 안에서만이다).
+
 멀티 인스턴스 환경에서 **파티션 키(partition_key) 단위 순서 보장 + 키 간 병렬 처리**를 제공하는
 인박스 처리 모드의 설계 문서. 구현 전 확정된 결정과 단계 계획을 기록한다.
 

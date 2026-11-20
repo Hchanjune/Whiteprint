@@ -184,4 +184,23 @@ interface JpaEventInboxRepository: JpaRepository<EventInboxEntity, Long> {
         newStatus: EventInboxStatus,
     ): Int
 
+
+    /** 정리 — COMPLETED 중 오래된 행을 최대 limit 건. 인덱스 (status, processed_at) 를 탄다. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+        value = """
+        DELETE FROM event_inbox
+        WHERE event_id IN (
+            SELECT event_id FROM event_inbox
+            WHERE status = 'COMPLETED' AND processed_at < :olderThan
+            LIMIT :limit
+        )
+    """,
+        nativeQuery = true
+    )
+    fun deleteCompletedBefore(
+        @org.springframework.data.repository.query.Param("olderThan") olderThan: Instant,
+        @org.springframework.data.repository.query.Param("limit") limit: Int,
+    ): Int
+
 }

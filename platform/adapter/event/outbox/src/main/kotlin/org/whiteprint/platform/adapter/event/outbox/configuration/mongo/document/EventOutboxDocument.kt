@@ -1,6 +1,7 @@
 package org.whiteprint.platform.adapter.event.outbox.configuration.mongo.document
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -10,6 +11,8 @@ import org.whiteprint.platform.core.messaging.outbox.EventOutboxStatus
 import java.time.Instant
 
 @Document(collection = "event_outbox")
+// 정리(purge) — PUBLISHED 중 오래된 문서 조회. 이름은 JPA 인덱스와 같게 둔다.
+@CompoundIndex(name = "idx_event_outbox_status_occurred_at", def = "{'status': 1, 'occurred_at': 1}")
 data class EventOutboxDocument(
     @Id
     @Field("_id")

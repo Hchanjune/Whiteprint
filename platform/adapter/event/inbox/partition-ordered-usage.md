@@ -6,9 +6,13 @@
 
 | 모드 | 보장 | 언제 쓰나 |
 |---|---|---|
-| `SERIAL` (기본) | 인스턴스 내 직렬. 순서 무보장 | 저볼륨, 기존 동작 유지 |
-| `PARALLEL` | 경쟁 소비 병렬. 순서 무보장 | 순서 무관 + 멱등 핸들러 (카운터, 알림 등) |
-| `PARTITION_ORDERED` | **같은 partition_key 는 전 인스턴스 통틀어 1건씩 시간순, 다른 키는 병렬** | 순서가 중요한 핸들러 (프로젝션, 상태머신, 긴 처리) |
+| `SERIAL` (기본) | **인스턴스 안에서만** 1건씩. 복제본이 여럿이면 인스턴스끼리 병렬 — 순서·전체 직렬 무보장 | 하위호환 기본값일 뿐. 새로 쓰지 말 것(= PARALLEL + `workerPoolSize=1`) |
+| `PARALLEL` | 경쟁 소비 병렬(인스턴스당 `workerPoolSize` 건). 순서 무보장 | 순서 무관 + 멱등 핸들러 (버전 조건 upsert 프로젝션, 다시 계산하는 집계, 유니크로 막히는 생성, 알림 등) |
+| `PARTITION_ORDERED` | **같은 partition_key 는 전 인스턴스 통틀어 1건씩, 다른 키는 병렬.** 순서(event_id)는 **같은 이벤트 타입 안에서만**, FAILED/DEAD 의 키 블로킹은 **타입 무관** | 같은 키를 하나씩 처리하고 앞선 실패 시 뒤를 멈춰야 하는 인과 사슬 (부모→자식 의존 프로젝션, 상태머신, 긴 처리) |
+
+**멀티 인스턴스(k8s 무상태 복제본) 기준 선택**: 순서 무관·멱등이면 `PARALLEL`, 아니면 `PARTITION_ORDERED`.
+`SERIAL` 은 복제본이 1대이고 실패가 없을 때만 대략 순서대로 보일 뿐이라 정합성 수단이 아니다.
+`PARTITION_ORDERED` 를 쓸 핸들러는 **먼저 멱등으로** 만든다 — 재처리 실패로 DEAD 가 나면 그 키가 영구 정지한다.
 
 ## 2. 빠른 시작 (PARTITION_ORDERED)
 
@@ -166,6 +170,42 @@ WHERE event_id = :eventId;   -- 0.5초 내 폴러가 픽업, 그 키의 순서 �
 - → **처리 시간이 아무리 길어도 살아있는 처리는 회수되지 않고**, 인스턴스 사망 시
   약 2.5~3분 내 다른 인스턴스가 이어받는다(재처리 안전성은 핸들러 멱등성 담당).
 
+## 6-1. 정리(purge) — outbox · inbox
+
+완료된 행은 자동으로 지워지지 않는다(브로커는 retention 이 있지만 DB 테이블은 영구 누적). 서비스가 켜면 하루 한 번 배치로 지운다.
+
+```yaml
+adapter:
+  event:
+    outbox:
+      infrastructure-implementation: jpa
+      purge:
+        enabled: true            # 기본 false(하위호환)
+        retention: 7d            # PUBLISHED 중 occurred_at 이 이만큼 지난 행
+        cron: "0 0 4 * * *"
+        zone: Asia/Seoul         # 기본 UTC
+        batch-size: 1000         # 한 번에 지우는 최대 행 — 꽉 차면 빌 때까지 반복
+        max-batches-per-run: 100 # 한 실행의 반복 상한, 남은 건 다음 실행
+    inbox:
+      infrastructure-implementation: jpa
+      purge:
+        enabled: true
+        retention: 14d           # COMPLETED 중 processed_at 이 이만큼 지난 행
+        cron: "0 10 4 * * *"
+        zone: Asia/Seoul
+```
+
+| 대상 | 지우는 것 | 남기는 것 |
+|---|---|---|
+| outbox | `PUBLISHED` | `PENDING` · `PROCESSING` · `FAILED`(발행 실패 조사 근거) |
+| inbox | `COMPLETED` | `RECEIVED` · `PROCESSING` · `FAILED` · `DEAD`(수동 복구 대상) |
+
+- ⚠ **inbox retention 은 브로커 보관 기간(Kafka retention)보다 길게.** 인박스 행은 eventId 중복 수신 차단에도 쓰인다 — 먼저 지우면 브로커가 재전달한 옛 이벤트를 새 것으로 받아 다시 처리한다. 기본 14일 = Kafka 기본 7일의 2배.
+- retention 최소 1일, batch-size·max-batches-per-run 양수 — 어기면 기동 실패.
+- 배치마다 트랜잭션이 따로라 큰 락·WAL 을 만들지 않는다. 여러 인스턴스가 동시에 돌아도 삭제라 결과가 같다(분산 락 불필요).
+- 인덱스: JPA outbox `(status, occurred_at)`(기본 템플릿에 있음), JPA inbox `(status, processed_at)` = `idx_event_inbox_status_processed_at`(템플릿 `jpa/eventInbox.sql`). Mongo 는 문서 클래스에 같은 이름으로 선언돼 auto-index 로 생성 — **이름을 바꾸지 말 것**(운영 DB 에 선적용한 인덱스와 이름이 다르면 auto-index 가 충돌한다).
+- 처음 켜면 그동안 쌓인 행을 한꺼번에 지우게 된다 — 배치 반복이 흡수하지만, 아주 크면 몇 번의 실행에 걸쳐 나뉜다.
+
 ## 7. 함정 모음
 
 | 함정 | 증상 | 예방 |
@@ -173,6 +213,7 @@ WHERE event_id = :eventId;   -- 0.5초 내 폴러가 픽업, 그 키의 순서 �
 | `PartitionedEvent` 미구현 | 전 이벤트 key=0 → 전역 직렬화(병렬성 소멸) | opt-in 전 partitionKey 확인 |
 | 인덱스 미적용 | frontier/게이트 쿼리 풀스캔 | IObox.sql 인덱스 2개 실행 |
 | 커넥션 풀 = 워커풀 | 커넥션 기근으로 처리 지연 | Hikari ≥ workerPoolSize + 여유 |
-| SERIAL 인데 순서 기대 | SERIAL 은 순서 보장 안 함(폴 쿼리 무정렬 + 멀티 인스턴스) | 순서 필요하면 PARTITION_ORDERED |
+| SERIAL 인데 순서 기대 | SERIAL 은 순서 보장 안 함 — 복제본이 여럿이면 인스턴스끼리 병렬, 실패 건은 backoff 뒤 재시도라 단일 인스턴스에서도 뒤집힘 | 순서 필요하면 PARTITION_ORDERED |
+| PARTITION_ORDERED 로 타입 간 순서 기대 | 같은 키라도 **다른 eventType 끼리는 순서 무보장**(동시에만 안 돎) | 타입 간 순서가 필요하면 이벤트에 시각·버전을 실어 처리 쪽에서 비교 |
 | DEAD 복구 시 attempt_count 미리셋 | 복구 후 첫 실패에 즉시 재-DEAD | 복구 SQL 에 `attempt_count = 0` 포함 |
 | 게이트는 키 전역 | 같은 key 면 **다른 eventType 이라도** 동시 처리 안 됨 | 의도된 동작(fail-safe) — 인과체인이면 영향 없음 |

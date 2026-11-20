@@ -188,4 +188,15 @@ open class ReactiveMongoEventInboxStore(
             ).block()
         }
     }
+
+    override fun purgeCompleted(olderThan: Instant, limit: Int): Int {
+        val ids = reactiveMongoTemplate.find(
+            Query(Criteria.where("status").`is`(EventInboxStatus.COMPLETED).and("processed_at").lt(olderThan)).limit(limit),
+            EventInboxDocument::class.java,
+        ).map { it.eventId }.collectList().block()
+        if (ids.isNullOrEmpty()) return 0
+        val result = reactiveMongoTemplate.remove(Query(Criteria.where("_id").`in`(ids)), EventInboxDocument::class.java).block()
+        return result?.deletedCount?.toInt() ?: 0
+    }
+
 }

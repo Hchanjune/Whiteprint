@@ -82,6 +82,10 @@ open class JpaEventInboxStore(
     }
 
     @Transactional
+    override fun purgeCompleted(olderThan: Instant, limit: Int): Int =
+        repository.deleteCompletedBefore(olderThan, limit)
+
+    @Transactional
     override fun resetStaleProcessing(eventType: String, olderThan: Instant): Int {
         return repository.resetStaleProcessing(
             eventType = eventType,

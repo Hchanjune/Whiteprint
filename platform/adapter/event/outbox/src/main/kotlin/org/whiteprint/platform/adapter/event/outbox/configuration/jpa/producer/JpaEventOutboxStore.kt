@@ -52,4 +52,8 @@ open class JpaEventOutboxStore(
         )
     }
 
+    @Transactional
+    override fun purgePublished(olderThan: Instant, limit: Int): Int =
+        repository.deletePublishedBefore(olderThan, limit)
+
 }
