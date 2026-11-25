@@ -13,6 +13,7 @@ import org.whiteprint.platform.core.security.model.AccessToken
 import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
+import org.whiteprint.platform.core.security.verifier.isInterruption
 
 class StatelessSecurityFilter(
     private val securityContextRepository: SecurityContextRepository,
@@ -53,6 +54,12 @@ class StatelessSecurityFilter(
                 request.setAttribute(SECURITY_EXCEPTION_KEY, exception)
             }
         } catch (exception: Exception) {
+            // 인터럽트는 검증 실패가 아니다(요청 스레드 중단·종료) — 내부 오류(TOKEN_VERIFICATION_INTERNAL_ERROR)로
+            // 분류하지 않는다. 삼킨 인터럽트 플래그를 복원하고 원래 예외를 그대로 올려 서버 오류로 처리한다.
+            if (exception.isInterruption()) {
+                Thread.currentThread().interrupt()
+                throw exception
+            }
             if (!isPermitted) {
                 request.setAttribute(SECURITY_EXCEPTION_KEY, SecurityException(
                     policy = SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR,

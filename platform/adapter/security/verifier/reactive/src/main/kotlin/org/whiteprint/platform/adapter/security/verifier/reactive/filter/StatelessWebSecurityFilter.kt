@@ -13,6 +13,7 @@ import org.whiteprint.platform.core.security.model.AccessTokenClaims
 import org.whiteprint.platform.core.security.policy.SecurityException
 import org.whiteprint.platform.core.security.policy.SecurityPolicy
 import org.whiteprint.platform.core.security.verifier.AccessTokenVerifier
+import org.whiteprint.platform.core.security.verifier.isInterruption
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
@@ -53,6 +54,9 @@ class StatelessWebSecurityFilter(
                         }
                         chain.filter(exchange)
                     }
+                    // 구독이 이미 취소됐다면(대부분) 이 값은 여기까지 오지 않는다 — subscribeOn 이 조용히 버린다.
+                    // 취소 없이 인터럽트된 경우(종료 중 등)만 온다: 인증 실패가 아니므로 원래 예외로 서버 오류 처리한다.
+                    is VerificationResult.Interrupted -> Mono.error(result.cause)
                 }
             }
     }
@@ -66,7 +70,14 @@ class StatelessWebSecurityFilter(
         } catch (e: SecurityException) {
             VerificationResult.Failed(e)
         } catch (e: Exception) {
-            VerificationResult.Failed(SecurityException(SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR, cause = e))
+            // 인터럽트는 검증 실패가 아니다(요청 취소·종료) — 내부 오류로 분류하지 않고, 삼킨 인터럽트 플래그는 복원한다.
+            // 값으로 돌려준다: 구독이 취소된 상태면 subscribeOn 이 값을 조용히 버린다(2026-11-25 Reactor 3.8.7 실측).
+            if (e.isInterruption()) {
+                Thread.currentThread().interrupt()
+                VerificationResult.Interrupted(e)
+            } else {
+                VerificationResult.Failed(SecurityException(SecurityPolicy.TOKEN_VERIFICATION_INTERNAL_ERROR, cause = e))
+            }
         }
     }
 
@@ -82,5 +93,6 @@ class StatelessWebSecurityFilter(
     sealed class VerificationResult {
         data class Authenticated(val claims: AccessTokenClaims) : VerificationResult()
         data class Failed(val exception: SecurityException) : VerificationResult()
+        data class Interrupted(val cause: Exception) : VerificationResult()
     }
 }

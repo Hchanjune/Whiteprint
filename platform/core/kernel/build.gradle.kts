@@ -14,6 +14,10 @@ dependencies {
     api("com.google.protobuf:protobuf-java:4.28.2")
     api("com.google.protobuf:protobuf-java-util:4.28.2")
 
+    // OMK core(core:observability 경유) — StandardException 이 FaultAttributable 을 구현해 스팬 귀책(4xx=클라이언트)을 알린다.
+    // OMK core 는 slf4j-api 만 의존하는 순수 라이브러리라 커널을 스프링에 묶지 않는다.
+    api(project(":platform:core:observability"))
+
     // 식별자 생성기 실측 검증용(스프링 컨텍스트는 쓰지 않는다 — 커널은 순수 모듈로 남는다)
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
